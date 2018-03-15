@@ -64,10 +64,10 @@ object List {
 
   def reserve[A](as: List[A]): List[A] = foldLeft(as, List[A]())((x, y) => Cons(y, x))
 
-  def fistElement[A](as: List[A]): Option[A] = as match {
-    case Cons(x, xs) => Option(x)
-    case Nil => None
-  }
+//  def fistElement[A](as: List[A]): Option[A] = as match {
+//    case Cons(x, xs) => Option(x)
+//    case Nil => None
+//  }
 
   def append[A](as: List[A], a: A): List[A] = nFoldRight(as, List(a))((x, y) => Cons(x, y))
 
@@ -89,31 +89,35 @@ object List {
 
   def filterByFlatMap[A](as: List[A])(f: A => Boolean): List[A] = flatMap(as)(x => if (f(x)) List(x) else List())
 
-  def zipWith[A](a: List[A], b: List[A])(f: (A, A) => A): List[A] = flatMap(a)(x => map(b)(y => f(x, y)))
+  def zipWith[A,B,C](a: List[A], b: List[B])(f: (A, B) => C): List[C] = (a,b) match {
+    case (Nil,_) => Nil
+    case (_,Nil) => Nil
+    case (Cons(h1,t1),Cons(h2,t2)) => Cons(f(h1,h2),zipWith(t1,t2)(f))
+  }
 
-  def pl(a:List[Int],b:List[Int]):List[Int] = flatMap(a)(x =>  map(b)(y => y + x))
 
   def main(args: Array[String]): Unit = {
-    //    val ex1:List[Double] = Nil
-    //    val ex2:List[Int] = Cons(1,Nil)
-    //    val ex3:List[Int] = Cons(2,ex2)
-    //    val x = List(1,2,3,4,5) match {
-    //      case Cons(x,Cons(2,Cons(4,_))) => x
-    //      case Nil => 42
-    //      case Cons(x,Cons(y,Cons(3,Cons(4,_)))) => x + y
-    //      case Cons(h,t) => h + sum(t)
-    //      case _ => 101
-    //    }
-    //    def f(a:Int) = a > 2
-    //    println(init(List(1,2,3,4)))
-    //    println(appendList(List(1, 2), List(3, 4)))
-    //    println(ince(List(1, 2, 3)))
-    //    println(ince1(List(1, 2, 3)))
-    //    println(doubleToString(List(0.1, 0.2, 0.3)))
-    //    println(map(filter(List(1, 2, 3))(x => x > 1))(x => x + 1))
-    //    println(map(filterByFlatMap(List(1, 2, 3))(x => x > 1))(x => x + 1))
+//    val ex1: List[Double] = Nil
+//    val ex2: List[Int] = Cons(1, Nil)
+//    val ex3: List[Int] = Cons(2, ex2)
+//    val x = List(1, 2, 3, 4, 5) match {
+//      case Cons(x, Cons(2, Cons(4, _))) => x
+//      case Nil => 42
+//      case Cons(x, Cons(y, Cons(3, Cons(4, _)))) => x + y
+//      case Cons(h, t) => h + sum(t)
+//      case _ => 101
+//    }
+//
+//    def f(a: Int) = a > 2
+//
+//    println(init(List(1, 2, 3, 4)))
+//    println(appendList(List(1, 2), List(3, 4)))
+//    println(ince(List(1, 2, 3)))
+//    println(doubleToString(List(0.1, 0.2, 0.3)))
+//    println(map(filter(List(1, 2, 3))(x => x > 1))(x => x + 1))
+//    println(map(filterByFlatMap(List(1, 2, 3))(x => x > 1))(x => x + 1))
     println(zipWith(List(1, 2), List(4, 5))((x, y) => x + y))
-    println(pl(List(1, 2), List(4, 5)))
+
 
 
   }
