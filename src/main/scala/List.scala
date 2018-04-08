@@ -24,7 +24,7 @@ object List {
 
   def tail[A](list: List[A]): List[A] = list match {
     case Nil => Nil
-    case Cons(x, xs) => xs
+    case Cons(_, xs) => xs
   }
 
   def setHead[A](value: A, list: List[A]): List[A] = list match {
@@ -71,10 +71,10 @@ object List {
 
   def appendList[A](as: List[A], bs: List[A]): List[A] = foldLeft(bs, as)((x, y) => append(x, y))
 
-  def nFoldRight[A, B](as: List[A], z: B)(f: (A, B) => B): B = foldLeft(reserve(as), z)((b, a) => f(a, b))
+  def nFoldRight[A, B](as: List[A], z: B)(f: (A, B) => B): B = foldLeft(foldLeft(as, List[A]())((x, y) => Cons(y, x)), z)((b, a) => f(a, b))
 
   def nFoldLeft[A, B](as: List[A], z: B)(f: (B, A) => B): B = foldRight(reserve(as), z)((b, a) => f(a, b))
-
+  def nFoldLeft1[A, B](as: List[A], z: B)(f: (B, A) => B): B = foldRight(as, (b:B) => b)((a,g) => b => g(f(b,a)))(z)
   def ince(ints: List[Int]): List[Int] = reserve(foldLeft(ints, List[Int]())((x, y) => Cons(y + 1, x)))
 
   def doubleToString(strings: List[Double]): List[String] = foldLeft(reserve(strings), List[String]())((x, y) => Cons(y.toString.concat("s"), x))
@@ -95,29 +95,35 @@ object List {
 
 
   def main(args: Array[String]): Unit = {
-//    val ex1: List[Double] = Nil
-//    val ex2: List[Int] = Cons(1, Nil)
-//    val ex3: List[Int] = Cons(2, ex2)
-//    val x = List(1, 2, 3, 4, 5) match {
-//      case Cons(x, Cons(2, Cons(4, _))) => x
-//      case Nil => 42
-//      case Cons(x, Cons(y, Cons(3, Cons(4, _)))) => x + y
-//      case Cons(h, t) => h + sum(t)
-//      case _ => 101
-//    }
-//
-//    def f(a: Int) = a > 2
-//
-//    println(init(List(1, 2, 3, 4)))
-//    println(appendList(List(1, 2), List(3, 4)))
-//    println(ince(List(1, 2, 3)))
-//    println(doubleToString(List(0.1, 0.2, 0.3)))
-//    println(map(filter(List(1, 2, 3))(x => x > 1))(x => x + 1))
-//    println(map(filterByFlatMap(List(1, 2, 3))(x => x > 1))(x => x + 1))
+    //    val ex1: List[Double] = Nil
+    //    val ex2: List[Int] = Cons(1, Nil)
+    //    val ex3: List[Int] = Cons(2, ex2)
+    //    val x = List(1, 2, 3, 4, 5) match {
+    //      case Cons(x, Cons(2, Cons(4, _))) => x
+    //      case Nil => 42
+    //      case Cons(x, Cons(y, Cons(3, Cons(4, _)))) => x + y
+    //      case Cons(h, t) => h + sum(t)
+    //      case _ => 101
+    //    }
+    //
+    //    def f(a: Int) = a > 2
+    //
+    //    println(init(List(1, 2, 3, 4)))
+    //    println(appendList(List(1, 2), List(3, 4)))
+    //    println(ince(List(1, 2, 3)))
+    //    println(doubleToString(List(0.1, 0.2, 0.3)))
+    //    println(map(filter(List(1, 2, 3))(x => x > 1))(x => x + 1))
+    //    println(map(filterByFlatMap(List(1, 2, 3))(x => x > 1))(x => x + 1))
     println(zipWith(List(1, 2), List(4, 5))((x, y) => x + y))
 
-
-
+    def f(n: Int): Int = {
+      assert(n >= 0)
+      n match {
+        case 0 => 1
+        case x => x * f(n - 1)
+      }
+  }
+    println(f(3))
   }
 
 
