@@ -116,6 +116,9 @@ object List {
 //    println(map(filterByFlatMap(List(1, 2, 3))(x => x > 1))(x => x + 1))
     println(zipWith(List(1, 2), List(4, 5))((x, y) => x + y))
 
+    val a = 1.0
+    println(a)
+
 
 
   }

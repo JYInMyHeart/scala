@@ -18,18 +18,18 @@ sealed trait Either[+E, +A] {
       case e: Exception => Left(e)
     }
 
-  def map[B](f:A => B):Either[E,B] = {
-    try Right(f(this))
-    catch {
-      case e: Exception => Left(new E(e))
-    }
-  }
-  def flatMap[EE >: E,B](f : A => Either[EE,B]) : Either[EE,B] = {
-    try f(this)
-    catch {
-      case e: Exception => Left(new EE(e))
-    }
-  }
+//  def map[B](f:A => B):Either[E,B] = {
+//    try Right(f(this))
+//    catch {
+//      case e: Exception => Left(new E(e))
+//    }
+//  }
+//  def flatMap[EE >: E,B](f : A => Either[EE,B]) : Either[EE,B] = {
+//    try f(this)
+//    catch {
+//      case e: Exception => Left(new EE(e))
+//    }
+//  }
 
 }
 
