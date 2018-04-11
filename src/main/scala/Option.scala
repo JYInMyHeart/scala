@@ -73,13 +73,15 @@ sealed trait Option[+A] {
 
   def sequence[A](a: List[Option[A]]): Option[List[A]] = Try(List.map(List.filter(a)(_ != None))(opTop(_)))
 
-  def parseInts(a: List[String]): Option[List[Int]] = sequence(List.map(a)(i => Try(i.toInt)))
-
-  def traverse[A, B](a: List[A])(f: A => Option[B]): Option[List[B]] = Try(List.map(List.filter(a)(_ != None))(i => opTop(f(i))))
+  //def parseInts(a: List[String]): Option[List[Int]] = sequence(List.map(a)(Try(_)))
 
   def main(args: Array[String]): Unit = {
     println(traverse(List("1", "2", "3"))(Try(_)))
   }
+
+  def traverse[A, B](a: List[A])(f: A => Option[B]): Option[List[B]] = Try(List.map(List.filter(a)(_ != None))(i => opTop(f(i))))
+
+
 
 }
 
