@@ -4,7 +4,7 @@ package tpye
   * @author xck
   */
 object Parser {
-  def read(exp:String) : XckType = readStr(exp)
+  def read(exp:String) : XckType = new Lexer(0)(new Array[String](0)).readStr(exp)
   def eval(exp:XckType): XckType = exp
   def printXck(exp:XckType) = Printer.prStr(exp)
   def repl(exp:String) = printXck(eval(read(exp)))

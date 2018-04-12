@@ -1,5 +1,6 @@
 
-
+import MyList.List
+import MyList.Cons
 sealed trait Option[+A] {
   def map[B](f: A => B): Option[B] = this match {
     case None => None
