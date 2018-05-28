@@ -5,6 +5,6 @@ package tpye
   */
 object Printer {
   def prStr(exp:XckType) = {
-    println(new XckInt(1))
+    println(exp)
   }
 }
