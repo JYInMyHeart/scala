@@ -1,5 +1,7 @@
 package tpye
 
+import tpye.Environment.Environment
+
 /**
   * @author xck
   */
@@ -56,7 +58,7 @@ object Types {
   }
 
   abstract class XckFunc(var ast: XckType, var env: Environment, var params: XckList) extends XckType with ILambda {
-    def getEnvironment(list: XckList): Environment = new Environment(null, null).getEnvironment(env, params, list)
+//    def getEnvironment(list: XckList): Environment = new tpye.Environment.Environment(null,null).environment(env, params, list)
   }
 
 }

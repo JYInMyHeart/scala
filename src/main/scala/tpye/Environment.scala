@@ -9,7 +9,7 @@ object  Environment{
     //    this.parent = parent
     //    this.envs = envs
     //  }
-    def getEnvironment(parent:Environment,binds:XckList,exprs:XckList) = {
+    def environment(parent:Environment,binds:XckList,exprs:XckList) = {
       this.parent = parent
       envs = binds.list zip exprs.list toMap
     }

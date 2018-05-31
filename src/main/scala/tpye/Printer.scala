@@ -1,5 +1,7 @@
 package tpye
 
+import tpye.Types.XckType
+
 /**
   * @author xck
   */
