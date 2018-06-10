@@ -47,5 +47,7 @@ object Person{
 //    println(sortedPeople)
     type Pages = List[String]
     val s:Pages = List("1","2")
+
+
   }
 }
