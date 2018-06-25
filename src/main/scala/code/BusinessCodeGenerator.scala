@@ -17,9 +17,9 @@ object BusinessCodeGenerator {
     configFile(fileName)
   }
 
-  def input = StdIn.readLine()
+  def input: String = StdIn.readLine()
 
-  def actionFile(fileName: String) = {
+  def actionFile(fileName: String): Unit = {
     val file = createActionFile(fileName)
     val writer = new PrintWriter(file)
     writeActionImport(writer)
@@ -30,7 +30,7 @@ object BusinessCodeGenerator {
     closeWriter(writer)
   }
 
-  def reqFile(fileName: String) = {
+  def reqFile(fileName: String): Unit = {
     val file = createReqFile(fileName)
     val writer = new PrintWriter(file)
     writeReqImport(writer)
@@ -38,7 +38,7 @@ object BusinessCodeGenerator {
     closeWriter(writer)
   }
 
-  def serviceImplFile(fileName: String) = {
+  def serviceImplFile(fileName: String): Unit = {
     val file = createServiceImplFile(fileName)
     val writer = new PrintWriter(file)
     writeServiceImplImport(writer, fileName)
@@ -46,7 +46,7 @@ object BusinessCodeGenerator {
     closeWriter(writer)
   }
 
-  def mallFile(fileName: String) = {
+  def mallFile(fileName: String): Unit = {
     val file = createMallFile(fileName)
     val writer = new PrintWriter(file)
     writeMallImport(writer)
@@ -54,7 +54,7 @@ object BusinessCodeGenerator {
     closeWriter(writer)
   }
 
-  def configFile(fileName: String) = {
+  def configFile(fileName: String): Unit = {
     val file = createConfigFile(fileName)
     val writer = new PrintWriter(file)
     writeConfigContent(writer, fileName)
@@ -62,7 +62,7 @@ object BusinessCodeGenerator {
   }
 
 
-  def writeServiceImplImport(writer: PrintWriter, fileName: String) = {
+  def writeServiceImplImport(writer: PrintWriter, fileName: String): Unit = {
     writer.write("package cn.leadeon.thirdparty.service.impl;\n")
     writer.write("import cn.leadeon.thirdparty.base.ResultData;\nimport cn.leadeon.thirdparty.businesscode.BusinessCode;\nimport cn.leadeon.thirdparty.common.conf.WechatProConf;\nimport cn.leadeon.thirdparty.common.http.HttpClient;\nimport cn.leadeon.thirdparty.constant.ComVariable;\nimport cn.leadeon.thirdparty.constant.ThirdPartyServer;\nimport cn.leadeon.thirdparty.constant.ThridPartyResCode;\nimport cn.leadeon.thirdparty.log.Log;\nimport cn.leadeon.thirdparty.resultpojo.WechatMobileMallResultMall;")
     writer.write(s"import cn.leadeon.thirdparty.service.WXBaseThirdPartyService;\nimport cn.leadeon.thirdparty.service.${fileName}Service;\nimport com.alibaba.fastjson.JSON;\nimport com.alibaba.fastjson.JSONArray;\nimport com.alibaba.fastjson.JSONObject;\nimport com.ning.http.client.AsyncHttpClient;")
@@ -70,7 +70,7 @@ object BusinessCodeGenerator {
     writer.write(s"import cn.leadeon.thirdparty.service.${fileName}Service;")
   }
 
-  def writeServiceImplContent(writer: PrintWriter, fileName: String) = {
+  def writeServiceImplContent(writer: PrintWriter, fileName: String): Unit = {
     writer.write(s"""@Service("${getServiceName(fileName)}")""")
     writeNewLine(writer)
     writer.write(s"public class ${fileName}ServiceImpl extends WXBaseThirdPartyService implements ${fileName}Service {")
@@ -95,23 +95,23 @@ object BusinessCodeGenerator {
   }
 
 
-  def writeMallImport(writer: PrintWriter) = {
+  def writeMallImport(writer: PrintWriter): Unit = {
     writer.write("package cn.leadeon.thirdparty.resultpojo;\n")
     writer.write("import lombok.Data;\n\nimport java.io.Serializable;")
   }
 
-  def writeMallContent(writer: PrintWriter, fileName: String) = {
+  def writeMallContent(writer: PrintWriter, fileName: String): Unit = {
     writeContent(writer, fileName)("Mall")
   }
 
-  def writeContent(writer: PrintWriter, fileName: String)(suffix: String) = {
+  def writeContent(writer: PrintWriter, fileName: String)(suffix: String): Unit = {
     writer.write("@Data")
     writeNewLine(writer)
     writer.write(s"public class ${fileName + suffix} implements Serializable{}")
   }
 
 
-  def writeConfigContent(writer: PrintWriter, fileName: String) = {
+  def writeConfigContent(writer: PrintWriter, fileName: String): Unit = {
     val serviceName = getServiceName(fileName)
     writer.write(
       s"""<!-- 微信小程序充值交费订单保存 -->
@@ -123,19 +123,19 @@ object BusinessCodeGenerator {
   }
 
 
-  def writeServiceImport(writer: PrintWriter, fileName: String) = {
+  def writeServiceImport(writer: PrintWriter, fileName: String): Unit = {
     writer.write("package cn.leadeon.thirdparty.service;\n")
     writer.write("import cn.leadeon.thirdparty.base.ResultData;\nimport cn.leadeon.thirdparty.resultpojo.WechatMobileMallResultMall;")
     writer.write(s"import cn.leadeon.thirdparty.resultpojo.${fileName}Mall;import java.util.Map;")
   }
 
-  def writeServiceContent(writer: PrintWriter, fileName: String) = {
+  def writeServiceContent(writer: PrintWriter, fileName: String): Unit = {
     writer.write(s"public interface ${fileName}Service {")
     writeNewLine(writer)
     writer.write(s"    ResultData<WechatMobileMallResultMall<${fileName}Mall>> get$fileName(String trace, Map<String, String> reqMap);\n}")
   }
 
-  def serviceFile(fileName: String) = {
+  def serviceFile(fileName: String): Unit = {
     val file = createServiceFile(fileName)
     val writer = new PrintWriter(file)
     writeServiceImport(writer, fileName)
@@ -143,12 +143,12 @@ object BusinessCodeGenerator {
     closeWriter(writer)
   }
 
-  def writeReqImport(writer: PrintWriter) = {
+  def writeReqImport(writer: PrintWriter): Unit = {
     writer.write("package cn.leadeon.thirdparty.reqbody;\n")
     writer.write("import cn.leadeon.thirdparty.paramcheck.annotion.StrVerify;\nimport lombok.Data;\n\nimport java.io.Serializable;")
   }
 
-  def writeReqContent(writer: PrintWriter, fileName: String) = {
+  def writeReqContent(writer: PrintWriter, fileName: String): Unit = {
     writeContent(writer, fileName)("Req")
   }
 
@@ -161,19 +161,19 @@ object BusinessCodeGenerator {
     file
   }
 
-  def createActionFile(fileName: String) = createFile(fileName)("Action.java")
+  def createActionFile(fileName: String): File = createFile(fileName)("Action.java")
 
-  def createMallFile(fileName: String) = createFile(fileName)("Mall.java")
+  def createMallFile(fileName: String): File = createFile(fileName)("Mall.java")
 
-  def createReqFile(fileName: String) = createFile(fileName)("Req.java")
+  def createReqFile(fileName: String): File = createFile(fileName)("Req.java")
 
-  def createServiceFile(fileName: String) = createFile(fileName)("Service.java")
+  def createServiceFile(fileName: String): File = createFile(fileName)("Service.java")
 
-  def createServiceImplFile(fileName: String) = createFile(fileName)("ServiceImpl.java")
+  def createServiceImplFile(fileName: String): File = createFile(fileName)("ServiceImpl.java")
 
-  def createConfigFile(fileName: String) = createFile(fileName)("config.txt")
+  def createConfigFile(fileName: String): File = createFile(fileName)("config.txt")
 
-  def writeActionImport(writer: PrintWriter) = {
+  def writeActionImport(writer: PrintWriter): Unit = {
     writer.write("package cn.leadeon.thirdparty.action;\n")
     writer.write("import cn.leadeon.thirdparty.base.ReqBody;")
     writer.write("import javax.servlet.http.HttpServletRequest;")
@@ -198,21 +198,23 @@ object BusinessCodeGenerator {
     writer.write("import java.util.HashMap;")
   }
 
-  def writeHead(writer: PrintWriter, fileName: String) = {
-    writer.write("@RestController\n@RequestMapping(value = \"CHWX/reminderWXService\")")
+  def writeHead(writer: PrintWriter, fileName: String): Unit = {
+    writer.write(
+      s"""@RestController
+         |@RequestMapping(value = "CHWX/${fileName}Service")""".stripMargin)
     writer.write(s"public class ${fileName.concat("Action")} {")
   }
 
-  def writeNewLine(writer: PrintWriter) = writer.write(newLine)
+  def writeNewLine(writer: PrintWriter): Unit = writer.write(newLine)
 
-  def writeEnd(writer: PrintWriter) = {
+  def writeEnd(writer: PrintWriter): Unit = {
     writeNewLine(writer)
     writer.write("}")
   }
 
-  def closeWriter(writer: PrintWriter) = writer.close()
+  def closeWriter(writer: PrintWriter): Unit = writer.close()
 
-  def writeActionContent(writer: PrintWriter, fileName: String) = {
+  def writeActionContent(writer: PrintWriter, fileName: String): Unit = {
     writer.write(s"private static final Log logger = new Log(${fileName.concat("Action")}.class);")
     writer.write("private static final String busCode = BusinessCode.RECHARGE_WX_REMINDER;")
     writeNewLine(writer)
@@ -220,36 +222,36 @@ object BusinessCodeGenerator {
     writeNewLine(writer)
     val service = fileName.concat("Service")
     val serviceName = getServiceName(fileName)
-    writer.write(s"private ${service} ${serviceName};")
+    writer.write(s"private $service $serviceName;")
     writeNewLine(writer)
-    writer.write("@PostMapping(value = \"/getWXReminder\")")
-    writer.write(s"public ResBody<${fileName}Mall> get${fileName}(HttpServletRequest request, @RequestBody String reqData) {")
+    writer.write(s"""@PostMapping(value = "/get$fileName")""")
+    writer.write(s"public ResBody<${fileName}Mall> get$fileName(HttpServletRequest request, @RequestBody String reqData) {")
     writeNewLine(writer)
     writeMethod(writer, fileName)
   }
 
-  def getServiceName(fileName: String) = {
+  def getServiceName(fileName: String): String = {
     val service = fileName.concat("Service")
     service.charAt(0).toString.toLowerCase().concat(service.substring(1))
   }
 
-  def writeMethod(writer: PrintWriter, fileName: String) = {
+  def writeMethod(writer: PrintWriter, fileName: String): Unit = {
     val mall = fileName.concat("Mall")
     val serviceName = getServiceName(fileName)
     writer.write(s"// 定义返回结果对象\n        ResBody<$mall> resObj;\n        // 获取流水号，追踪日志使用\n        String trace = request.getHeader(ComVariable.TRACE);\n        // 客户端请求参数打印\n        logger.reqPrint(Log.THIRDPARTY_SIGN, Log.CLIENT_REQUEST, trace, busCode, reqData);\n        long startTime = System.currentTimeMillis();\n        try {\n            // 获取查询数据\n            resObj = getQueryData(trace, reqData);\n        } catch (Exception e) {\n            logger.error(trace, e);\n            resObj = new ResBody<>();\n            resObj.setRetCode(ResponseCode.SERVER_FAILURE);\n            resObj.setRetDesc(ComVariable.EXCEPTION_RESP_DESC);\n        }\n\n        // 响应客户端参数打印\n        logger.respPrint(Log.THIRDPARTY_SIGN, Log.CLIENT_RESPONSE, trace, busCode,\n                System.currentTimeMillis() - startTime, JSON.toJSONString(resObj));\n        return resObj;}")
-    writer.write(s"private ResBody<${mall}> getQueryData(String trace, String reqData) {")
-    writer.write(s"ResBody<${mall}> resObj = new ResBody<>();")
+    writer.write(s"private ResBody<$mall> getQueryData(String trace, String reqData) {")
+    writer.write(s"ResBody<$mall> resObj = new ResBody<>();")
     val req = fileName.concat("Req")
-    writer.write(s"// 请求参数获取\n        ReqBody<${req}> reqObj = null;")
-    writer.write(s"try {\n            reqObj = JSON.parseObject(reqData, new TypeReference<ReqBody<${req}>>() {\n            });\n        } catch (Exception e) {\n            resObj.setRetCode(ResponseCode.REQUEST_ERROR);\n            resObj.setRetDesc(ComVariable.EXCEPTION_RESP_DESC);\n            return resObj;\n        }")
+    writer.write(s"// 请求参数获取\n        ReqBody<$req> reqObj = null;")
+    writer.write(s"try {\n            reqObj = JSON.parseObject(reqData, new TypeReference<ReqBody<$req>>() {\n            });\n        } catch (Exception e) {\n            resObj.setRetCode(ResponseCode.REQUEST_ERROR);\n            resObj.setRetDesc(ComVariable.EXCEPTION_RESP_DESC);\n            return resObj;\n        }")
     writer.write("// 参数校验\n        CodeMappingParam codeMapping = ValidationTool.validationField(reqObj.getReqBody());\n        resObj.setRetCode(codeMapping.getCodeNumber());")
     writer.write("// 根据参数校验结果分别处理\n        if (ResponseCode.REQUEST_SUCCESS.equals(resObj.getRetCode())) {")
     writeNewLine(writer)
     writer.write(s"//             设置调用provider参数\n            Map<String, String> reqMap = get${fileName}Params(reqObj);")
-    writer.write(s"ResultData<WechatMobileMallResultMall<${mall}>> providerResObj = null;\n            // 调用provider获取结果\n            providerResObj = ${serviceName}.get${fileName}(trace, reqMap);")
+    writer.write(s"ResultData<WechatMobileMallResultMall<$mall>> providerResObj = null;\n            // 调用provider获取结果\n            providerResObj = $serviceName.get$fileName(trace, reqMap);")
     writer.write("// 根据provider返回数据，设置响应客户端结果\n            if (providerResObj.getResultCode().equals(ThridPartyResCode._0000)) {\n                resObj.setRetCode(providerResObj.getResultData().getRetCode());\n                resObj.setRetDesc(providerResObj.getResultData().getRetMsg());\n                if (null != transObject(providerResObj)) {\n                    resObj.setRspBody(transObject(providerResObj).getRspBody());\n                }\n            } else {\n                resObj.setRetCode(ResponseCode.SERVER_FAILURE);\n                resObj.setRetDesc(providerResObj.getResultCode().getDesc());\n            }\n        }\n        return resObj;")
     writer.write("}")
-    writer.write(s"private static ResBody<${mall}> transObject(ResultData<WechatMobileMallResultMall<${mall}>> providerResObj) {")
+    writer.write(s"private static ResBody<$mall> transObject(ResultData<WechatMobileMallResultMall<$mall>> providerResObj) {")
     writer.write("return null;")
     writer.write("}")
     writeNewLine(writer)
