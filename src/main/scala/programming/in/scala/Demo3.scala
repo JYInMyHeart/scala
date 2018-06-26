@@ -32,3 +32,17 @@ object Test{
 }
 
 
+object Mocha extends App{
+  class PreferredDrink(val preference:String)
+
+  implicit val pref = new PreferredDrink("mocha")
+
+  def enjoy(name:String)(implicit drink: PreferredDrink) = {
+    print(s"welcome $name")
+    print(". enjoy a ")
+    print(drink.preference)
+    print("!")
+  }
+
+  enjoy("reader")
+}

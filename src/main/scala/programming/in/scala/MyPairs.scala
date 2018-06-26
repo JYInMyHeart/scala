@@ -1,18 +1,18 @@
 package programming.in.scala
 
-class MyPair(val height: Int,
-             val width: Int,
-             val length:Int) {
+class MyPairs(val height: Int,
+              val width: Int,
+              val length:Int) {
 
   override def toString: String = s"[$height,$width,$length]"
 }
 
-object MyPair{
+object MyPairs{
   implicit class PairHelper(l:Int){
-    def build(h:Int)(implicit w:Int) = new MyPair(h,w,l)
+    def build(h:Int)(implicit w:Int) = new MyPairs(h,w,l)
   }
   implicit class PairStringHelper(ls:String){
-    def build(h:String)(implicit w:String) = new MyPair(h.toInt,w.toInt,ls.toInt)
+    def build(h:String)(implicit w:String) = new MyPairs(h.toInt,w.toInt,ls.toInt)
   }
   implicit val l:Int = 10
   implicit val ls:String = "10"
@@ -24,7 +24,7 @@ object MyPair{
     println(maxList(List(1, 3, 2, 4)))
   }
 
-  def maxList[T :Ordering[T]](element: List[T]):T =
+  def maxList[T:Ordering](element: List[T]):T =
     element match {
       case List() => throw new IllegalArgumentException("empty list")
       case List(x) => x
@@ -34,3 +34,4 @@ object MyPair{
         else maxRest
     }
 }
+//implicit def intToRange(i:Int) = 1 to i
