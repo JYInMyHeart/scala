@@ -12,5 +12,10 @@ object Main {
       41 + 1
     })
     println(x)
+
+    def sum(xs:List[Int]):Int = xs.foldRight(0)(_+_)
+
+    println(sum(List(1, 2, 3)))
+
   }
 }

@@ -1,4 +1,5 @@
 package MyList
+
 sealed trait List[+A]
 
 case object Nil extends List[Nothing]
@@ -62,10 +63,10 @@ object List {
 
   def reserve[A](as: List[A]): List[A] = foldLeft(as, List[A]())((x, y) => Cons(y, x))
 
-//  def fistElement[A](as: List[A]): Option[A] = as match {
-//    case Cons(x, xs) => Option(x)
-//    case Nil => None
-//  }
+  //  def fistElement[A](as: List[A]): Option[A] = as match {
+  //    case Cons(x, xs) => Option(x)
+  //    case Nil => None
+  //  }
 
   def append[A](as: List[A], a: A): List[A] = nFoldRight(as, List(a))((x, y) => Cons(x, y))
 
@@ -74,7 +75,9 @@ object List {
   def nFoldRight[A, B](as: List[A], z: B)(f: (A, B) => B): B = foldLeft(foldLeft(as, List[A]())((x, y) => Cons(y, x)), z)((b, a) => f(a, b))
 
   def nFoldLeft[A, B](as: List[A], z: B)(f: (B, A) => B): B = foldRight(reserve(as), z)((b, a) => f(a, b))
-  def nFoldLeft1[A, B](as: List[A], z: B)(f: (B, A) => B): B = foldRight(as, (b:B) => b)((a,g) => b => g(f(b,a)))(z)
+
+  def nFoldLeft1[A, B](as: List[A], z: B)(f: (B, A) => B): B = foldRight(as, (b: B) => b)((a, g) => b => g(f(b, a)))(z)
+
   def ince(ints: List[Int]): List[Int] = reserve(foldLeft(ints, List[Int]())((x, y) => Cons(y + 1, x)))
 
   def doubleToString(strings: List[Double]): List[String] = foldLeft(reserve(strings), List[String]())((x, y) => Cons(y.toString.concat("s"), x))
@@ -87,10 +90,10 @@ object List {
 
   def filterByFlatMap[A](as: List[A])(f: A => Boolean): List[A] = flatMap(as)(x => if (f(x)) List(x) else List())
 
-  def zipWith[A,B,C](a: List[A], b: List[B])(f: (A, B) => C): List[C] = (a,b) match {
-    case (Nil,_) => Nil
-    case (_,Nil) => Nil
-    case (Cons(h1,t1),Cons(h2,t2)) => Cons(f(h1,h2),zipWith(t1,t2)(f))
+  def zipWith[A, B, C](a: List[A], b: List[B])(f: (A, B) => C): List[C] = (a, b) match {
+    case (Nil, _) => Nil
+    case (_, Nil) => Nil
+    case (Cons(h1, t1), Cons(h2, t2)) => Cons(f(h1, h2), zipWith(t1, t2)(f))
   }
 
 
@@ -122,8 +125,10 @@ object List {
         case 0 => 1
         case x => x * f(n - 1)
       }
-  }
+    }
+
     println(f(3))
+
   }
 
 

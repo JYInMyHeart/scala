@@ -1,5 +1,7 @@
 package programming.in.scala
 
+import scala.language.postfixOps
+
 object Queens {
 
   def inCheck(q1: (Int, Int), q2: (Int, Int)) =
@@ -51,6 +53,24 @@ object Queens {
 
     println
 
+    def quickSort(list:List[Int]):List[Int] = list match {
+      case Nil => Nil
+      case x::xs => quickSort (xs filter (_ > x)) ++ List(x) ++ quickSort (xs filter (_ <= x))
+
+    }
+
+    println(quickSort(List(2, 4, 9, 3, 1, 5, 6, 8, 7)))
+
+    def fix[A](a:A)(f:A => A):A = if(a == f(a)) a else fix[A](f(f(a)))(f)
+
+    println(fix[Int](32)(x => x / 2))
+
+    def fix1[A](f:A => A):A = f(fix1(f))
+
+    def f(n:Int):Int =  if(n == 0) 1 else n * f(n - 1)
+    println("------------------>" + f(4))
+
+    val b = List(1,2,3) zipWithIndex
 
 
   }
