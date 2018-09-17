@@ -50,7 +50,7 @@ class MyByteBuffer {
   }
 
   def reset = {
-    if(mark < 0) throw new InvalidEscapeException(1)
+    if(mark < 0) throw new InvalidEscapeException("1",1)
     position = mark
   }
 

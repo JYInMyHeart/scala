@@ -6,7 +6,8 @@ object Test extends App{
   buffer.put(0x02)
   buffer.put(0x03)
   buffer.put(0x04)
-  println(buffer.bn)
+  buffer.bn.foreach(print)
+  println()
   buffer.flip
   println(buffer.get())
   println(buffer.get())
