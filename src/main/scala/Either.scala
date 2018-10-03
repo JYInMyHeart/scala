@@ -1,3 +1,5 @@
+import MyList.{Cons, List}
+
 sealed trait Either[+E, +A] {
   def mean(xs: IndexedSeq[Double]): Either[String, Double] = {
     if (xs.isEmpty)
@@ -12,49 +14,52 @@ sealed trait Either[+E, +A] {
       case e: Exception => Left(e)
     }
 
-  def Try[A](a: => A): Either[Exception, A] =
+  def Try[A](a: => A): Either[E, A] =
     try Right(a)
     catch {
-      case e: Exception => Left(e)
+      case e: E => Left(e)
     }
 
-  def map[B](f:A => B):Either[E,B] = this match {
+  def map[B](f: A => B): Either[E, B] = this match {
     case Right(a) => Right(f(a))
     case Left(a) => Left(a)
   }
-  def flatMap[EE >: E,B](f : A => Either[EE,B]) : Either[EE,B] = this match {
+
+  def flatMap[EE >: E, B](f: A => Either[EE, B]): Either[EE, B] = this match {
     case Right(a) => f(a)
     case Left(a) => Left(a)
   }
 
-//  def orElse[EE >: E,B >: A](b: => Either[EE,B]) : Either[EE,B] = this match {
-//    case Right(a) => Right(a)
-//    case Left(_) => b
-//  }
-//
-//  def map2[EE >: E,B,C](b:Either[EE,B])(f:(A,B) => C):Either[EE,C] = for{
-//    a <- this
-//    bb <- b
-//  } yield f(a,bb)
-//
-//  def sequence[E,A](es:List[Either[E,A]]):Either[E,List[A]] = for {
-//    a <- es
-//  } yield Try(a)
-//
-//  def traverse[E,A,B](as:List[A])(f:A => Either[E,B]):Either[E,List[B]] = as match {
-//    case Cons(x,xs) => (f(x) map2 traverse(xs)(f))(Cons(_,_))
-//    case Nil => Right(Nil)
-//  }
+  def opTop[E, B](either: => Either[E, B]): B = either match {
+    case Right(x) => x
+  }
+
+  def orElse[EE >: E, B >: A](b: => Either[EE, B]): Either[EE, B] = this match {
+    case Right(a) => Right(a)
+    case Left(_) => b
+  }
+
+  def map2[EE >: E, B, C](b: Either[EE, B])(f: (A, B) => C): Either[EE, C] = for {
+    a <- this
+    bb <- b
+  } yield f(a, bb)
 
 
+  def sequence[EE >: E, A](es: List[Either[EE, A]]): Either[EE, List[A]] =
+    Try(List.map(es)(opTop(_)))
+
+  def traverse[EE >: E, A, B](as: List[A])(f: A => Either[EE, B]): Either[EE, List[B]] =
+    Try(List.map(as)(i => opTop( f(i))))
 
 
 }
-object Either{
+
+object Either {
   def main(args: Array[String]): Unit = {
 
   }
 }
+
 case class Left[+E](value: E) extends Either[E, Nothing]
 
 case class Right[+A](value: A) extends Either[Nothing, A]

@@ -1,4 +1,6 @@
 
+import java.util.regex.{Pattern, PatternSyntaxException}
+
 import MyList.List
 import MyList.Cons
 sealed trait Option[+A] {
@@ -67,12 +69,25 @@ sealed trait Option[+A] {
     bb <- b
   } yield f(aa, bb)
 
+  def pattern(str: String):Option[Pattern] =
+    try{
+      Some(Pattern.compile(str))
+    }catch {
+      case e:PatternSyntaxException => None
+    }
+
+  def mkMather(pat:String):Option[String => Boolean] =
+    pattern(pat) map (p => (s:String) => p.matcher(s).matches)
+
+
+
   def getOne[A](a: List[Option[A]]): Option[A] = a match {
     case Cons(Some(x), y) => Some(x)
     case _ => None
   }
 
-  def sequence[A](a: List[Option[A]]): Option[List[A]] = Try(List.map(List.filter(a)(_ != None))(opTop(_)))
+  def sequence[A](a: List[Option[A]]): Option[List[A]] =
+    Try(List.map(List.filter(a)(_ != None))(opTop(_)))
 
   //def parseInts(a: List[String]): Option[List[Int]] = sequence(List.map(a)(Try(_)))
 
@@ -80,7 +95,8 @@ sealed trait Option[+A] {
     println(traverse(List("1", "2", "3"))(Try(_)))
   }
 
-  def traverse[A, B](a: List[A])(f: A => Option[B]): Option[List[B]] = Try(List.map(List.filter(a)(_ != None))(i => opTop(f(i))))
+  def traverse[A, B](a: List[A])(f: A => Option[B]): Option[List[B]] =
+    Try(List.map(List.filter(a)(_ != None))(i => opTop(f(i))))
 
 
 
