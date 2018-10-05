@@ -102,6 +102,10 @@ sealed trait Option[+A] {
 
 }
 
+object Option{
+  def empty[A]:Option[A] = None
+}
+
 
 case class Some[+A](get: A) extends Option[A]
 
