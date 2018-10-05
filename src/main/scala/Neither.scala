@@ -22,15 +22,15 @@ sealed trait NEither[+E, +A] {
       case e: E => NLeft(List(e))
     }
 //
-  def map[B](f: A => B): NEither[E, B] = this match {
-    case NRight(a) => NRight(f(a))
-    case NLeft(a) => NLeft(a)
-  }
+//  def map[B](f: A => B): NEither[E, B] = this match {
+//    case NRight(a) => NRight(f(a))
+//    case NLeft(a) => NLeft(a)
+//  }
 
-  def flatMap[EE >: E, B](f: A => Either[EE, B]): Either[EE, B] = this match {
-    case Right(a) => f(a)
-    case Left(a) => Left(a)
-  }
+//  def flatMap[EE >: E, B](f: A => Either[EE, B]): Either[EE, B] = this match {
+//    case Right(a) => f(a)
+//    case Left(a) => Left(a)
+//  }
 //  def opTop[E, B](either: => NEither[E, B]): B = either match {
 //    case NRight(x) => x
 //  }
@@ -40,10 +40,10 @@ sealed trait NEither[+E, +A] {
 //    case NLeft(_) => b
 //  }
 //
-  def map2[EE >: E, B, C](b: NEither[List[EE], B])(f: (A, B) => C): NEither[List[EE], C] = for {
-    a <- this
-    bb <- b
-  } yield f(a, bb)
+//  def map2[EE >: E, B, C](b: NEither[List[EE], B])(f: (A, B) => C): NEither[List[EE], C] = for {
+//    a <- this
+//    bb <- b
+//  } yield f(a, bb)
 //
 //
 //  def sequence[EE >: E, A](es: List[NEither[EE, A]]): NEither[EE, List[A]] =
