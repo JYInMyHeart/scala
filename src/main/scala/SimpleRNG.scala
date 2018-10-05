@@ -44,7 +44,7 @@ case class SimpleRNG(seed:Long) extends RNG{
     case 0 => b
     case n => foldr(n - 1,function(n,b))(function)
   }
-//  def ints1(count:Int)(rng:RNG):(List[Int],RNG) = (foldr(count,List)(::),rng)
+  def ints1(count:Int)(rng:RNG):(List[Int],RNG) = (foldr(count,List[Int]())(_::_),rng)
 }
 
 object RNG{
