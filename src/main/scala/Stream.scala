@@ -167,6 +167,31 @@ sealed trait Stream[+A] {
       case (h1,h2) => h1 == h2
     }
 
+  def tails:Stream[Stream[A]] =
+    unfold(this){
+      case ConsS(h, t) =>
+        Some((cons[A](h(),t()),t()))
+      case _ => None
+    } append Stream(empty)
+
+  def hasSubsequence[A](s:Stream[A]):Boolean =
+    tails exists (_ startWith s)
+
+  //some wrong implementation
+  def scanRight1[B](z:B)(f:(A, => B) => B):Stream[B] =
+    unfold(this){
+      case ConsS(h, t) =>
+        Some((f(h(),z),t()))
+      case _ => Some((z,empty))
+    }
+
+  def scanRight[B](z: B)(f: (A, => B) => B): Stream[B] =
+    foldr((z, Stream(z)))((a, p0) => {
+      lazy val p1 = p0
+      val b2 = f(a, p1._1)
+      (b2, cons(b2, p1._2))
+    })._2
+
 
 }
 
@@ -213,6 +238,8 @@ object Stream {
     println(Stream(1, 2, 3).zipAll(Stream(4,5,6,7)).toList)
 
     println(Stream(1,2,3,4,5) startWith Stream(1,2,4))
+    println(Stream(1,2,3).tails.map(_.toListFast).toList)
+    println(Stream(1,2,3).scanRight(0)(_+_).toList)
   }
 
 
