@@ -14,6 +14,7 @@ sealed trait Option[+A] {
     case Some(a) => f(a)
   }
 
+
   def getOrElse[B >: A](default: => B): B = this match {
     case Some(a) => a
     case None => default
