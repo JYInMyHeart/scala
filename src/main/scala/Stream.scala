@@ -240,6 +240,8 @@ object Stream {
     println(Stream(1,2,3,4,5) startWith Stream(1,2,4))
     println(Stream(1,2,3).tails.map(_.toListFast).toList)
     println(Stream(1,2,3).scanRight(0)(_+_).toList)
+  
+    println(Stream(1,2,3).scanRight1(0)(_+_).toList)
   }
 
 

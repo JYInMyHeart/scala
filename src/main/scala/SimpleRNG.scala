@@ -124,6 +124,13 @@ case class SimpleRNG(seed: Long) extends RNG {
     }
 
 
+  def map1[A, B](s: Rand[A])(f: A => B): Rand[B] =
+    flatMap(s)(a => unit(f(a)))
+
+  def map21[A, B, C](ra: Rand[A], rb: Rand[B])(f: (A, B) => C): Rand[C] =
+    flatMap(ra)(a => map1(rb) (b => f(a,b)))
+
+
 }
 
 object RNG {
@@ -139,6 +146,8 @@ object RNG {
     println(rng.ints2(5)(rng))
     println(rng.nonNegativeLessThan(900)(rng))
     println(rng.nonNegativeLessThan1(900)(rng))
+    println(rng.map2(rng.int, rng.double)((_, _))(rng))
+    println(rng.map21(rng.int, rng.double)((_, _))(rng))
 
   }
 }
