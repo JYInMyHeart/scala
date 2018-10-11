@@ -139,7 +139,7 @@ case class State[S, +A](run: S => (A, S)) {
 
   import State._
 
-  def map[ B](f: A => B): State[S, B] =
+  def map[B](f: A => B): State[S, B] =
     flatMap(a => unit(f(a)))
 
 
@@ -149,9 +149,8 @@ case class State[S, +A](run: S => (A, S)) {
       g(b).run(state1)
     })
 
-  def map2[ B, C](rb: State[S, B])(f: (A, B) => C): State[S, C] =
+  def map2[B, C](rb: State[S, B])(f: (A, B) => C): State[S, C] =
     flatMap(a => rb.map(b => f(a, b)))
-
 
 
 }
@@ -167,12 +166,15 @@ object State {
   }
 
   def sequence[S, A](sas: List[State[S, A]]): State[S, List[A]] = {
-    def go(s: S, actions: List[State[S,A]], acc: List[A]): (List[A],S) =
+    def go(s: S, actions: List[State[S, A]], acc: List[A]): (List[A], S) =
       actions match {
-        case Nil => (acc.reverse,s)
-        case h :: t => h.run(s) match { case (a,s2) => go(s2, t, a :: acc) }
+        case Nil => (acc.reverse, s)
+        case h :: t => h.run(s) match {
+          case (a, s2) => go(s2, t, a :: acc)
+        }
       }
-    State((s: S) => go(s,sas,List()))
+
+    State((s: S) => go(s, sas, List()))
   }
 
   def modify[S](f: S => S): State[S, Unit] = for {
@@ -188,10 +190,15 @@ object State {
 
 
 sealed trait Input
+
 case object Coin extends Input
+
 case object Turn extends Input
+
 import State._
-case class Machine(locked:Boolean,candies:Int,coins:Int)
+
+case class Machine(locked: Boolean, candies: Int, coins: Int)
+
 object Candy {
   def update: Input => Machine => Machine = (i: Input) => (s: Machine) =>
     (i, s) match {
@@ -229,7 +236,7 @@ object RNG {
     println(rng.rollDie(rng))
     println(rng.rollDie(rng))
 
-    println(Candy.simulateMachine(List(Coin, Turn,Coin,Turn)).run(Machine(true,5,10)))
+    println(Candy.simulateMachine(List(Coin)).run(Machine(true, 5, 10)))
 
   }
 }
