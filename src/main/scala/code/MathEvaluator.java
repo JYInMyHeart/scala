@@ -11,7 +11,7 @@ public class MathEvaluator {
     Stack<Token> vals = new Stack<>();
 
     public static void main(String[] args) {
-        System.out.println(new MathEvaluator().calculate("1231+(-232)"));
+        System.out.println(new MathEvaluator().calculate("1/-2) + 1"));
     }
 
     public double calculate(String expression) {
@@ -20,10 +20,14 @@ public class MathEvaluator {
             pushIn(i);
         }
         while(!ops.empty()){
+            if(vals.size() == 1) return Double.parseDouble(vals.pop().left);
             Op op = ops.pop();
             Token t1 = popleft();
+            if(op.equals(Op.Pra)){
+                vals.push(t1);
+            }
             Token t2 = popleft();
-            eval(op, t2, t1);
+            eval(op, t1, t2);
         }
         return Double.parseDouble(vals.pop().left);
     }
@@ -32,7 +36,8 @@ public class MathEvaluator {
         Plus,
         Mul,
         Sub,
-        Div
+        Div,
+        Pra
     }
 
     public int getPriority(Op op) {
@@ -115,14 +120,18 @@ public class MathEvaluator {
         if ("/".equals(s))
             ops.push(Op.Div);
         if ("(".equals(s))
-            vals.push(new Token(null, s));
-        if ((s.startsWith("-") && s.substring(1).matches("[0-9]*")) || s.matches("[0-9]*"))
+            ops.push(Op.Pra);
+        if ((s.startsWith("-") && s.length() > 1 && s.substring(1).matches("[0-9]*")) || s.matches("[0-9]*"))
             vals.push(new Token(s));
         if (")".equals(s)) {
             Op op = ops.pop();
             Token t1 = popleft();
+            if(op.equals(Op.Pra)){
+                vals.push(t1);
+                return;
+            }
             Token t2 = popleft();
-            eval(op, t2, t1);
+            eval(op, t1, t2);
         }
     }
 
@@ -140,6 +149,10 @@ public class MathEvaluator {
             if(value == '('){
                 i++;
                 res.add("(");
+            }
+            if(value == ')'){
+                i++;
+                res.add(")");
             }
             if(String.valueOf(value).matches("[0-9]")){
                 i = getI(res, chars, i,true);
