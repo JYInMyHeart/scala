@@ -97,10 +97,12 @@ public class Complier {
         private Deque<String> tokens;
         private int pos;
         private String c;
+        private int argOffset;
 
         public Parser(Deque<String> tokens) {
             this.tokens = tokens;
             pos = 0;
+            argOffset = 0;
         }
 
         public void next() {
@@ -166,7 +168,8 @@ public class Complier {
                 next();
                 return r;
             }else if(c.matches("[a-zA-Z]+")){
-                Ast r = new Unop("arg",0);
+                Ast r = new Unop("arg",argOffset);
+                argOffset++;
                 next();
                 return r;
             }else{
@@ -176,8 +179,6 @@ public class Complier {
                 return expr;
             }
         }
-
-
     }
 
 
