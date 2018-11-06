@@ -11,16 +11,17 @@ public class Compiler {
     public static void main(String[] args) {
         Compiler c = new Compiler();
         //IM 7,SW,AR 2,PU
-        Ast ast = c.pass1("[ x y z ] ( 2*3*x + 5*y - 3*z ) / (1  + 2*2 + 3)");
-        System.out.println(Simulator.simulate(new Compiler().compile("[ x y z ] ( 2*3*x + 5*y - 3*z ) / (1  + 2*2 + 3)"),4,0,0));
-        Ast ast1 = c.pass1("[ x y z ] x - y - z + 10 / 5 / 2 - 7 / 1 / 7");
+//        Ast ast = c.pass1("[ x y z ] ( 2*3*x + 5*y - 3*z ) / (1  + 2*2 + 3)");
+//        System.out.println(Simulator.simulate(new Compiler().compile("[ x y z ] ( 2*3*x + 5*y - 3*z ) / (1  + 2*2 + 3)"),4,0,0));
+//        Ast ast1 = c.pass1("[ x y z ] x - y - z + 10 / 5 / 2 - 7 / 1 / 7");
+        Ast ast1 = c.pass1("[] 1+2");
 //        Ast ast1 = c.pass1("[ x ] x + 2*5");
         System.out.println(ast1);
-        Ast ast2 = c.pass2(ast1);
-        System.out.println(ast2);
-        List<String> ast3 = c.pass3(ast2);
-        System.out.println(ast3);
-        System.out.println(Simulator.simulate(ast3,5,4,1));
+//        Ast ast2 = c.pass2(ast1);
+//        System.out.println(ast2);
+//        List<String> ast3 = c.pass3(ast2);
+//        System.out.println(ast3);
+//        System.out.println(Simulator.simulate(ast3,5,4,1));
 
     }
     //[IM 8, PU, AR 2, SW, IM 3, MU, PU, AR 1, SW, IM 5, MU, PU, AR 0, SW, IM 6, MU, SW, PO, AD, SW, PO, SU, SW, PO, DI]

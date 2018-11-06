@@ -1,17 +1,28 @@
 package jawa;
 
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Interpreter2 {
+    private Map<String, Double> map = new HashMap<>();
+
+    public static void main(String[] args) {
+        Interpreter2 in = new Interpreter2();
+        System.out.println(in.input("1 + (x=y=yz=1)"));
+        System.out.println(in.input("x+y"));
+    }
 
     public Double input(String input) {
         Deque<String> tokens = tokenize(input);
-        return null;
+        tokens.add("$");
+        return new Parser(tokens).parse();
+
     }
 
     private static Deque<String> tokenize(String input) {
@@ -25,7 +36,7 @@ public class Interpreter2 {
     }
 
     class Parser {
-        private Map<String,Double> map = new HashMap<>();
+
         private Deque<String> tokens;
         private int pos;
         private String c;
@@ -37,9 +48,16 @@ public class Interpreter2 {
             argOffset = 0;
         }
 
+        double parse(){
+            next();
+            return parseExpression();
+        }
+
         public void next() {
-            c = tokens.pop();
-            pos++;
+
+                c = tokens.pop();
+                pos++;
+
         }
 
         public boolean eat(String token) {
@@ -51,7 +69,7 @@ public class Interpreter2 {
         }
 
 
-        public Ast parseFunc() {
+        public double parseFunc() {
             next();
             eat("[");
             parseArgs();
@@ -65,56 +83,63 @@ public class Interpreter2 {
             }
         }
 
-        Ast parseExpression() {
-            Ast x = parseTerm();
+        double parseExpression() {
+            ;
+            double x = parseTerm();
             while (true) {
                 if (eat("+")) {
-                    Ast rhs = parseTerm();
-                    x = new BinOp("+", x, rhs);
+                    double rhs = parseTerm();
+                    x = x + rhs;
                 } else if (eat("-")) {
-                    Ast rhs = parseTerm();
-                    x = new BinOp("-", x, rhs);
+                    double rhs = parseTerm();
+                    x = x - rhs;
                 } else return x;
             }
         }
 
-        Ast parseTerm() {
-            Ast x = parseFactor();
+        double parseTerm() {
+            double x = parseFactor();
             while (true) {
                 if (eat("*")) {
-                    Ast rhs = parseFactor();
-                    x = new BinOp("*", x, rhs);
+                    double rhs = parseFactor();
+                    x = rhs * x;
                 } else if (eat("/")) {
-                    Ast rhs = parseFactor();
-                    x = new BinOp("/", x, rhs);
+                    double rhs = parseFactor();
+                    x = x / rhs;
                 } else return x;
             }
         }
 
-        Ast parseFactor() {
+        double parseFactor() {
             if (c.matches("\\d+")) {
-                Ast r = new UnOp("imm", Integer.valueOf(c));
+                String v = c;
                 next();
-                return r;
+                return Double.valueOf(v);
             } else if (c.matches("[A-Za-z_][A-Za-z0-9_]*")) {
-                while (true){
-                    if(c.matches("[A-Za-z_][A-Za-z0-9_]*"){
-                        String v1 = c;
+                List<String> params = new ArrayList<>();
+                while (true) {
+                    if (c.matches("[A-Za-z_][A-Za-z0-9_]*") || (c.matches("\\d+"))) {
+                        params.add(c);
                         next();
-                        if(c.equals("=")){
+                        if (c.equals("=")) {
                             next();
-                            map.put(v1, Double.valueOf(c));
                         }
-                    }
+                    } else
+                        break;
                 }
-
-                Ast r = new UnOp("arg", argOffset);
-                argOffset++;
-                next();
-                return r;
+                String temp = params.get(params.size() - 1);
+                double val;
+                if (temp.matches("\\d+"))
+                    val = Double.valueOf(temp);
+                else
+                    val = map.get(temp);
+                for (int i = 0; i < params.size() - 1; i++) {
+                    map.put(params.get(i), val);
+                }
+                return val;
             } else {
                 eat("(");
-                Ast expr = parseExpression();
+                double expr = parseExpression();
                 eat(")");
                 return expr;
             }
