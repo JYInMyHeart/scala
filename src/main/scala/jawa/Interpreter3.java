@@ -9,6 +9,13 @@ public class Interpreter3 {
 
     class Variable {
         Double value=null;
+
+        @Override
+        public String toString() {
+            return "Variable{" +
+                     value +
+                    '}';
+        }
     }
 
     private Map<String, Variable> variables = new HashMap<>();
@@ -28,6 +35,13 @@ public class Interpreter3 {
         public double eval() {
             return value;
         }
+
+        @Override
+        public String toString() {
+            return "LiteralNode{" +
+                     value +
+                    '}';
+        }
     }
 
     class VariableNode implements ASTNode {
@@ -42,6 +56,13 @@ public class Interpreter3 {
             if (variable.value==null)
                 throw new IllegalArgumentException("ERROR: Variable not initialized");
             return variable.value;
+        }
+
+        @Override
+        public String toString() {
+            return "VariableNode{" +
+                     variable +
+                    '}';
         }
     }
 
@@ -60,6 +81,14 @@ public class Interpreter3 {
                 return -subNode.eval();
             else
                 return subNode.eval();
+        }
+
+        @Override
+        public String toString() {
+            return "UnaryNode{" +
+                     subNode +
+                    ", '" + op + '\'' +
+                    '}';
         }
     }
 
@@ -92,6 +121,15 @@ public class Interpreter3 {
             }
             throw new IllegalArgumentException("ERROR: wrong binary operator '" + op + "'");
         }
+
+        @Override
+        public String toString() {
+            return "BinaryNode{" +
+                     left +
+                    ", " + right +
+                    ", '" + op + '\'' +
+                    '}';
+        }
     }
 
     class AssignmentNode implements ASTNode {
@@ -106,6 +144,14 @@ public class Interpreter3 {
         @Override
         public double eval() {
             return left.variable.value = right.eval();
+        }
+
+        @Override
+        public String toString() {
+            return "AssignmentNode{" +
+                     left +
+                    ", " + right +
+                    '}';
         }
     }
 
@@ -196,6 +242,7 @@ public class Interpreter3 {
         Deque<String> tokens = tokenize(input);
         if (tokens.isEmpty()) return null;
         ASTNode node = new Parser(tokens).parseExpression();
+        System.out.println(node);
         if (!tokens.isEmpty())
             throw new IllegalArgumentException("ERROR: Unexpected tokens after expression: "+tokens.stream().collect(Collectors.joining(" ")));
         return node.eval();
@@ -209,5 +256,10 @@ public class Interpreter3 {
             tokens.add(m.group());
         }
         return tokens;
+    }
+
+    public static void main(String[] args) {
+        Interpreter3 in3 = new Interpreter3();
+        System.out.println(in3.input("1+(x=y=3)"));
     }
 }

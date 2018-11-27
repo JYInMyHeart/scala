@@ -33,6 +33,8 @@ object FF extends App {
 
   val sumOf123 = mapReduce(List(1,2,3),Sum)
   val product123 = mapReduce(List(4,5,6),Product)
+  println(sumOf123.value)
+  println(product123)
 }
 
 trait Monoid[M]{
