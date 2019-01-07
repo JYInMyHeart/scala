@@ -2,7 +2,7 @@ package jawa.match;
 
 import static jawa.match.Bind.let;
 import static jawa.match.Patterns.caseOf;
-import static jawa.match.Patterns.otherwise;
+import static jawa.match.Patterns.otherwise; 
 
 public abstract class A {
 
