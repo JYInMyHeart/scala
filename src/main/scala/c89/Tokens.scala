@@ -42,7 +42,13 @@ object TokenType extends Enumeration {
   pow,
   whiteSpace,
   newline,
-  eof = Value
+  eof ,
+
+
+  binaryExpression,
+  numberExpression
+
+  = Value
 }
 
 

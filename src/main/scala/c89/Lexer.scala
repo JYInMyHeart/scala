@@ -5,6 +5,7 @@ import java.io.{ByteArrayInputStream, PushbackInputStream}
 import TokenType._
 
 class Lexer(val pushbackInputStream: PushbackInputStream) {
+  var current:Tokens = _
   var ch: Char = _
   var lineCount: Int = 1
   var columnCount: Int = _
@@ -13,8 +14,6 @@ class Lexer(val pushbackInputStream: PushbackInputStream) {
     val c = pushbackInputStream.read()
     ch = c.toChar
     columnCount += 1
-
-
   }
 
   def unRead(c: Char) = {
@@ -23,7 +22,7 @@ class Lexer(val pushbackInputStream: PushbackInputStream) {
 
   def nextToken(): Tokens = {
     read()
-    ch match {
+    current = ch match {
       case x if x == ' ' =>
         Tokens(whiteSpace, null, lineCount, columnCount)
       case x if x == '\n' | x == '\r' =>
@@ -87,9 +86,10 @@ class Lexer(val pushbackInputStream: PushbackInputStream) {
             Tokens(assign, "=", lineCount, columnCount)
         }
       case '\0' =>
-        Tokens(eof,"EOF",lineCount,columnCount)
+        Tokens(eof, "EOF", lineCount, columnCount)
       case _ => throw new LexerException("unknown token")
     }
+    current
   }
 
 
@@ -122,8 +122,6 @@ class Lexer(val pushbackInputStream: PushbackInputStream) {
     unRead(ch)
     str
   }
-
-
 }
 
 object Lexer {
