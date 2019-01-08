@@ -10,7 +10,7 @@ class Parser(val lexer: Lexer) {
   private[this] var position: Int = _
   var diagnostics: List[String] = lexer.diagnostics
 
-  def init() = {
+  def init(): Unit = {
     var token = lexer.nextToken()
     while (token.tokenType != eof && token.tokenType != wrong) {
       if (
@@ -49,7 +49,7 @@ class Parser(val lexer: Lexer) {
     new ExpressionTree(parseExpression())
   }
 
-  def getBinaryOperatorPrecedence(tokenType: TokenType) = {
+  def getBinaryOperatorPrecedence(tokenType: TokenType): Int = {
     tokenType match {
       case x if x == TokenType.add
         | x == TokenType.sub =>
@@ -64,7 +64,7 @@ class Parser(val lexer: Lexer) {
     }
   }
 
-  def getUnaryOperatorPrecedence(tokenType: TokenType) =
+  def getUnaryOperatorPrecedence(tokenType: TokenType): Int =
     tokenType match {
       case x if x == TokenType.add
         | x == TokenType.sub =>
@@ -106,10 +106,10 @@ class Parser(val lexer: Lexer) {
     new NumberNode(numberNode)
   }
 
-  def colorPrint(colorType: String, text: String) =
+  def colorPrint(colorType: String, text: String): Unit =
     print(s"$colorType$BOLD$text$RESET")
 
-  def colorPrintln(colorType: String, text: String) =
+  def colorPrintln(colorType: String, text: String): Unit =
     colorPrint(colorType, text + "\r\n")
 
 
@@ -124,9 +124,11 @@ class Parser(val lexer: Lexer) {
     colorPrint(BLUE, node.getKind().toString)
 
 
-    if (node.isInstanceOf[Tokens] && node.asInstanceOf[Tokens].value != null) {
-      print(" ")
-      colorPrint(GREEN, node.asInstanceOf[Tokens].value)
+    node match {
+      case tokens: Tokens if tokens.value != null =>
+        print(" ")
+        colorPrint(GREEN, tokens.value)
+      case _ =>
     }
 
     println()
