@@ -3,7 +3,7 @@ package c89
 import c89.TokenType.{TokenType, _}
 import c89.ast._
 
-import scala.io.AnsiColor.{BOLD, RESET, GREEN, BLUE}
+import scala.io.AnsiColor.{BLUE, BOLD, GREEN, RESET}
 
 class Parser(val lexer: Lexer) {
   private[this] var tokensList: List[Tokens] = List()
@@ -82,6 +82,12 @@ class Parser(val lexer: Lexer) {
     new NumberNode(numberNode)
   }
 
+  def colorPrint(colorType: String, text: String) =
+    print(s"$colorType$BOLD$text$RESET")
+
+  def colorPrintln(colorType: String, text: String) =
+    colorPrint(colorType,text + "\r\n")
+
 
   def prettyPrint(node: Expression, indent: String = "", isLast: Boolean = true) {
     var indents = indent
@@ -89,14 +95,14 @@ class Parser(val lexer: Lexer) {
     val marker = if (isLast) "└──" else "├──"
 
 
-    print(s"${BLUE}${BOLD}${indent}${RESET}")
-    print(s"${BLUE}${BOLD}${marker}${RESET}")
-    print(s"${GREEN}${BOLD}${node.getKind()}${RESET}")
+    colorPrint(BLUE, indent)
+    colorPrint(BLUE, marker)
+    colorPrint(BLUE, node.getKind().toString)
 
 
     if (node.isInstanceOf[Tokens] && node.asInstanceOf[Tokens].value != null) {
       print(" ")
-      print(s"${GREEN}${BOLD}${node.asInstanceOf[Tokens].value}${RESET}")
+      colorPrint(GREEN, node.asInstanceOf[Tokens].value)
     }
 
     println()
