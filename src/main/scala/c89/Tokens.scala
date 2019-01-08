@@ -26,7 +26,9 @@ object Tokens {
 
 object TokenType extends Enumeration {
   type TokenType = Value
-  val keyword,
+  val
+    //tokens
+  keyword,
   literalInt,
   func,
   identifier,
@@ -54,8 +56,10 @@ object TokenType extends Enumeration {
   wrong,
 
 
+  //expressions
   binaryExpression,
   numberExpression,
+  unaryExpression,
   expressionTree,
   braceExpression
 

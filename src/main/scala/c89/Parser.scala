@@ -45,38 +45,60 @@ class Parser(val lexer: Lexer) {
     Tokens(tokenType, null, current.line, current.column)
   }
 
-  def parseExpression(): Expression = {
-    new ExpressionTree(parseTerm())
+  def parseTreeExpression(): Expression = {
+    new ExpressionTree(parseExpression())
   }
 
-  def parseTerm(): Expression = {
-    var left = parseFactor()
-    while (current.tokenType == add
-      || current.tokenType == sub) {
-      val operationToken = nextToken
-      val right = parseFactor()
-      left = new BinaryNode(left, operationToken, right)
+  def getBinaryOperatorPrecedence(tokenType: TokenType) = {
+    tokenType match {
+      case x if x == TokenType.add
+        | x == TokenType.sub =>
+        1
+      case x if x == TokenType.div
+        | x == TokenType.mod
+        | x == TokenType.plus
+        | x == TokenType.pow =>
+        2
+      case _ =>
+        0
+    }
+  }
+
+  def getUnaryOperatorPrecedence(tokenType: TokenType) =
+    tokenType match {
+      case x if x == TokenType.add
+        | x == TokenType.sub =>
+        3
+      case _ =>
+        0
+    }
+
+
+  def parseExpression(parentPrecedence: Int = 0): Expression = {
+    var left: Expression = null
+    val unaryOperatorPrecedence = getUnaryOperatorPrecedence(current.tokenType)
+    if (unaryOperatorPrecedence != 0 && unaryOperatorPrecedence >= parentPrecedence) {
+      val operatorToken = nextToken
+      val operand = parseExpression(unaryOperatorPrecedence)
+      return new UnaryNode(operatorToken, operand)
+    } else
+      left = parsePrimaryExpression()
+    while (true) {
+      val precedence = getBinaryOperatorPrecedence(current.tokenType)
+      if (precedence == 0 || precedence <= parentPrecedence)
+        return left
+      val operatorToken = nextToken
+      val right = parseExpression(precedence)
+      left = new BinaryNode(left, operatorToken, right)
     }
     left
   }
 
-  def parseFactor(): Expression = {
-    var left = parsePrimaryExpression()
-    while (current.tokenType == plus
-      || current.tokenType == div
-      || current.tokenType == pow
-      || current.tokenType == mod) {
-      val operationToken = nextToken
-      val right = parsePrimaryExpression()
-      left = new BinaryNode(left, operationToken, right)
-    }
-    left
-  }
 
   def parsePrimaryExpression(): Expression = {
     if (current.tokenType == lb) {
       val left = nextToken
-      val expression = parseExpression()
+      val expression = parseTreeExpression()
       val right = eat(rb)
       return new BraceNode(left, expression, right)
     }
@@ -88,7 +110,7 @@ class Parser(val lexer: Lexer) {
     print(s"$colorType$BOLD$text$RESET")
 
   def colorPrintln(colorType: String, text: String) =
-    colorPrint(colorType,text + "\r\n")
+    colorPrint(colorType, text + "\r\n")
 
 
   def prettyPrint(node: Expression, indent: String = "", isLast: Boolean = true) {

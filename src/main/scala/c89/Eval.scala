@@ -1,5 +1,6 @@
 package c89
 
+import c89.TokenType.TokenType
 import c89.ast._
 class Eval(expression: Expression) {
   def eval():Int = {
@@ -17,9 +18,19 @@ class Eval(expression: Expression) {
           case TokenType.sub => left - right
           case TokenType.plus => left * right
           case TokenType.div => left / right
+          case TokenType.pow => math.pow(left,right).toInt
+          case TokenType.mod => left % right
         }
       case node:BraceNode =>
         new Eval(node.op).eval()
+      case node:UnaryNode =>
+        node.op.asInstanceOf[Tokens].tokenType match {
+          case TokenType.add =>
+             new Eval(node.oprand).eval()
+          case TokenType.sub =>
+             -new Eval(node.oprand).eval()
+        }
+
       case _ => throw new LexerException("unknown node type")
     }
 

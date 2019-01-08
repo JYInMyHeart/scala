@@ -15,7 +15,7 @@ object Main {
   def parse(lexer: Lexer) = {
     val parser = new Parser(lexer)
     parser.init()
-    val tree = parser.parseExpression()
+    val tree = parser.parseTreeExpression()
     parser.prettyPrint(tree)
     if (parser.diagnostics.nonEmpty) {
       for (d <- parser.diagnostics) {

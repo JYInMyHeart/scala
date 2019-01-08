@@ -47,3 +47,10 @@ sealed class BraceNode(val left:Expression,
   override def getChildren(): List[Expression] = List(left,op,right)
 
 }
+
+sealed class UnaryNode(val op:Expression,
+                       val oprand:Expression) extends Expression{
+  override def getKind(): TokenType = unaryExpression
+
+  override def getChildren(): List[Expression] = List[Expression](op,oprand)
+}
