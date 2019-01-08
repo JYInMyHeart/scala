@@ -11,10 +11,10 @@ abstract class Ast {
 
 abstract class Expression extends Ast
 
-sealed class ExpressionTree(expr:Expression,eof:Tokens) extends Expression{
+sealed class ExpressionTree(val expr:Expression) extends Expression{
   override def getKind(): TokenType = expressionTree
 
-  override def getChildren(): List[Expression] = List[Expression](expr,eof)
+  override def getChildren(): List[Expression] = List[Expression](expr)
 
   override def toString: String = s"ExpressionTree:$expr"
 }

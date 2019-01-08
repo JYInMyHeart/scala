@@ -46,7 +46,7 @@ class Parser(val lexer: Lexer) {
   }
 
   def parseExpression(): Expression = {
-    new ExpressionTree(parseTerm(), eat(eof))
+    new ExpressionTree(parseTerm())
   }
 
   def parseTerm(): Expression = {
@@ -63,7 +63,9 @@ class Parser(val lexer: Lexer) {
   def parseFactor(): Expression = {
     var left = parsePrimaryExpression()
     while (current.tokenType == plus
-      || current.tokenType == div) {
+      || current.tokenType == div
+      || current.tokenType == pow
+      || current.tokenType == mod) {
       val operationToken = nextToken
       val right = parsePrimaryExpression()
       left = new BinaryNode(left, operationToken, right)
