@@ -1,45 +1,70 @@
 package c89
 
-import TokenType.{TokenType, _}
+import c89.TokenType.{TokenType, _}
+import c89.ast._
+
+import scala.io.AnsiColor.{BOLD, RESET, GREEN, BLUE}
 
 class Parser(val lexer: Lexer) {
+  private[this] var tokensList: List[Tokens] = List()
+  private[this] var position: Int = _
+  var diagnostics: List[String] = lexer.diagnostics
 
-
-  sealed abstract class Ast {
-    def getKind(): TokenType
-    def getChildren():List[Expression]
+  def init() = {
+    var token = lexer.nextToken()
+    while (token.tokenType != eof && token.tokenType != wrong) {
+      if (
+        token.tokenType != whiteSpace)
+        tokensList :+= token
+      token = lexer.nextToken()
+    }
   }
 
-  sealed abstract class Expression extends Ast
 
-  sealed class BinaryNode(val left: Expression, val op: Tokens, val right: Expression) extends Expression {
-    override def getKind() = op.tokenType
-
-    override def getChildren(): List[Expression] = List()
+  def peek(offset: Int): Tokens = {
+    val size = tokensList.length
+    val index: Int = position + offset
+    if (index >= size) {
+      return tokensList(size - 1)
+    }
+    tokensList(index)
   }
 
-  sealed class NumberNode(val value: Tokens) extends Expression {
-    override def getKind() = value.tokenType
+  def current: Tokens = peek(0)
 
-    override def getChildren(): List[Expression] = value
+  private def nextToken = {
+    val currentToken = current
+    position += 1
+    currentToken
   }
-
 
   def eat(tokenType: TokenType): Tokens = {
-    if (tokenType == lexer.current.tokenType)
-      lexer.nextToken()
-    Tokens(tokenType, lexer.current.value, lexer.current.line, lexer.current.column)
+    if (tokenType == current.tokenType)
+      return nextToken
+    diagnostics :+= s"error:expected a $tokenType here"
+    Tokens(tokenType, null, current.line, current.column)
   }
 
   def parseExpression(): Expression = {
-    null
+    new ExpressionTree(parseTerm(), eat(eof))
   }
 
-  def parse(): Expression = {
+  def parseTerm(): Expression = {
+    var left = parseFactor()
+    while (current.tokenType == add
+      || current.tokenType == sub) {
+      val operationToken = nextToken
+      val right = parseFactor()
+      left = new BinaryNode(left, operationToken, right)
+    }
+    left
+  }
+
+  def parseFactor(): Expression = {
     var left = parsePrimaryExpression()
-    while (lexer.current.tokenType == add ||
-      lexer.current.tokenType == sub) {
-      val operationToken = lexer.nextToken()
+    while (current.tokenType == plus
+      || current.tokenType == div) {
+      val operationToken = nextToken
       val right = parsePrimaryExpression()
       left = new BinaryNode(left, operationToken, right)
     }
@@ -47,8 +72,44 @@ class Parser(val lexer: Lexer) {
   }
 
   def parsePrimaryExpression(): Expression = {
-    val numberNode = eat(TokenType.numberExpression)
+    if (current.tokenType == lb) {
+      val left = nextToken
+      val expression = parseExpression()
+      val right = eat(rb)
+      return new BraceNode(left, expression, right)
+    }
+    val numberNode = eat(TokenType.literalInt)
     new NumberNode(numberNode)
+  }
+
+
+  def prettyPrint(node: Expression, indent: String = "", isLast: Boolean = true) {
+    var indents = indent
+    val enable = node.getChildren() != null
+    val marker = if (isLast) "└──" else "├──"
+
+
+    print(s"${BLUE}${BOLD}${indent}${RESET}")
+    print(s"${BLUE}${BOLD}${marker}${RESET}")
+    print(s"${GREEN}${BOLD}${node.getKind()}${RESET}")
+
+
+    if (node.isInstanceOf[Tokens] && node.asInstanceOf[Tokens].value != null) {
+      print(" ")
+      print(s"${GREEN}${BOLD}${node.asInstanceOf[Tokens].value}${RESET}")
+    }
+
+    println()
+
+    indents += (if (isLast) "    " else "│   ")
+
+
+    if (enable) {
+      val last = node.getChildren().last
+      for (child <- node.getChildren())
+        prettyPrint(child, indents, child == last)
+    }
+
   }
 
 }

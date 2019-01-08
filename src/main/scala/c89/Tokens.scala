@@ -1,10 +1,18 @@
 package c89
 
 import c89.TokenType.TokenType
+import c89.ast.Expression
 
-class Tokens(val tokenType: TokenType, val value: String, var line: Int, var column: Int) {
-  override def toString: String = s"<$tokenType :$value >  line$line,col$column"
+class Tokens(val tokenType: TokenType,
+             val value: String,
+             var line: Int,
+             var column: Int) extends Expression{
+  override def toString: String =
+    s"<$tokenType :$value >  line$line,col$column"
 
+  override def getKind(): TokenType = tokenType
+
+  override def getChildren(): List[Expression] = null
 }
 
 object Tokens {
@@ -12,8 +20,8 @@ object Tokens {
             value: String,
             line: Int,
             column: Int
-           ): Tokens = new Tokens(tokenType, value, line, column
-  )
+           ): Tokens =
+    new Tokens(tokenType, value, line, column)
 }
 
 object TokenType extends Enumeration {
@@ -42,11 +50,14 @@ object TokenType extends Enumeration {
   pow,
   whiteSpace,
   newline,
-  eof ,
+  eof,
+  wrong,
 
 
   binaryExpression,
-  numberExpression
+  numberExpression,
+  expressionTree,
+  braceExpression
 
   = Value
 }

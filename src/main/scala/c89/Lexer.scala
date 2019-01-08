@@ -5,10 +5,10 @@ import java.io.{ByteArrayInputStream, PushbackInputStream}
 import TokenType._
 
 class Lexer(val pushbackInputStream: PushbackInputStream) {
-  var current:Tokens = _
   var ch: Char = _
   var lineCount: Int = 1
   var columnCount: Int = _
+  var diagnostics:List[String] = List()
 
   def read() = {
     val c = pushbackInputStream.read()
@@ -22,7 +22,7 @@ class Lexer(val pushbackInputStream: PushbackInputStream) {
 
   def nextToken(): Tokens = {
     read()
-    current = ch match {
+    ch match {
       case x if x == ' ' =>
         Tokens(whiteSpace, null, lineCount, columnCount)
       case x if x == '\n' | x == '\r' =>
@@ -87,9 +87,11 @@ class Lexer(val pushbackInputStream: PushbackInputStream) {
         }
       case '\0' =>
         Tokens(eof, "EOF", lineCount, columnCount)
-      case _ => throw new LexerException("unknown token")
+      case _ =>
+        diagnostics :+= s"error:bad character input $ch at line $lineCount ,$columnCount"
+        Tokens(wrong, "wrong", lineCount, columnCount)
     }
-    current
+
   }
 
 
@@ -126,15 +128,10 @@ class Lexer(val pushbackInputStream: PushbackInputStream) {
 
 object Lexer {
 
-  def lexer(expr: String) = {
-    val lexer = new Lexer(new PushbackInputStream(new ByteArrayInputStream((expr + '\0').getBytes)))
-    while (lexer.pushbackInputStream.available() > 0) {
-      val token = lexer.nextToken()
-      println(token)
-    }
+  def newLexer(expr: String):Lexer = {
+    new Lexer(new PushbackInputStream(new ByteArrayInputStream((expr + '\0').getBytes)))
   }
 
   def main(args: Array[String]): Unit = {
-    lexer("\"afa2t2\"+3-4*5-( 6+7 ) -> 3 - asfa_141")
   }
 }
