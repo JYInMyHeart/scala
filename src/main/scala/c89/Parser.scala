@@ -59,8 +59,11 @@ class Parser(val lexer: Lexer) {
         | x == TokenType.plus
         | x == TokenType.pow =>
         2
+      case x if x == TokenType.and
+        | x == TokenType.or =>
+        1
       case _ =>
-        0
+        -1
     }
   }
 
@@ -69,15 +72,17 @@ class Parser(val lexer: Lexer) {
       case x if x == TokenType.add
         | x == TokenType.sub =>
         3
+      case TokenType.not =>
+        1
       case _ =>
-        0
+        -1
     }
 
 
-  def parseExpression(parentPrecedence: Int = 0): Expression = {
+  def parseExpression(parentPrecedence: Int = -1): Expression = {
     var left: Expression = null
     val unaryOperatorPrecedence = getUnaryOperatorPrecedence(current.tokenType)
-    if (unaryOperatorPrecedence != 0 && unaryOperatorPrecedence >= parentPrecedence) {
+    if (unaryOperatorPrecedence != -1 && unaryOperatorPrecedence >= parentPrecedence) {
       val operatorToken = nextToken
       val operand = parseExpression(unaryOperatorPrecedence)
       return new UnaryNode(operatorToken, operand)
@@ -85,7 +90,7 @@ class Parser(val lexer: Lexer) {
       left = parsePrimaryExpression()
     while (true) {
       val precedence = getBinaryOperatorPrecedence(current.tokenType)
-      if (precedence == 0 || precedence <= parentPrecedence)
+      if (precedence == -1 || precedence <= parentPrecedence)
         return left
       val operatorToken = nextToken
       val right = parseExpression(precedence)
@@ -102,7 +107,7 @@ class Parser(val lexer: Lexer) {
       val right = eat(rb)
       return new BraceNode(left, expression, right)
     }
-    val numberNode = eat(TokenType.literalInt)
+    val numberNode = eat(TokenType.literal)
     new NumberNode(numberNode)
   }
 

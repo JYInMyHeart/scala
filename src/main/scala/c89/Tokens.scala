@@ -29,10 +29,9 @@ object TokenType extends Enumeration {
   val
     //tokens
   keyword,
-  literalInt,
   func,
   identifier,
-  literalStr,
+  literal,
   lb,
   rb,
   assign,

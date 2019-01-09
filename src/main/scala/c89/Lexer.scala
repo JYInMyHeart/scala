@@ -8,7 +8,7 @@ class Lexer(val pushbackInputStream: PushbackInputStream) {
   var ch: Char = _
   var lineCount: Int = 1
   var columnCount: Int = _
-  var diagnostics:List[String] = List()
+  var diagnostics: List[String] = List()
 
   def read() = {
     val c = pushbackInputStream.read()
@@ -20,6 +20,11 @@ class Lexer(val pushbackInputStream: PushbackInputStream) {
     pushbackInputStream.unread(c.toInt)
   }
 
+  def unRead(s:String) = {
+    for(i <- (s.length - 1 to 0 by -1))
+      pushbackInputStream.unread(s.charAt(i).toInt)
+  }
+
   def nextToken(): Tokens = {
     read()
     ch match {
@@ -29,8 +34,18 @@ class Lexer(val pushbackInputStream: PushbackInputStream) {
         lineCount += 1
         columnCount = 0
         Tokens(newline, null, lineCount, columnCount)
-      case x if x < '9' && x > '0' =>
-        Tokens(literalInt, getNum, lineCount, columnCount)
+      case 't' =>
+        if (string("true")) {
+              return Tokens(literal, "true", lineCount, columnCount)
+        }
+        Tokens(wrong, "wrong", lineCount, columnCount)
+      case 'f' =>
+        if (string("false")) {
+          return Tokens(literal, "false", lineCount, columnCount)
+        }
+        Tokens(wrong, "wrong", lineCount, columnCount)
+      case x if Character.isDigit(x) =>
+        Tokens(literal, getNum, lineCount, columnCount)
       case x if x == '_' || Character.isLetter(x) =>
         Tokens(identifier, getChars, lineCount, columnCount)
       case '+' => Tokens(add, "+", lineCount, columnCount)
@@ -53,7 +68,7 @@ class Lexer(val pushbackInputStream: PushbackInputStream) {
         }
         token
       case x if x == '\"' =>
-        Tokens(literalStr, getStr, lineCount, columnCount)
+        Tokens(literal, getStr, lineCount, columnCount)
       case '(' =>
         Tokens(lb, "(", lineCount, columnCount)
       case ')' =>
@@ -95,6 +110,20 @@ class Lexer(val pushbackInputStream: PushbackInputStream) {
   }
 
 
+  def satisfied(c: Char): Boolean = ch == c
+
+  def string(str:String):Boolean = {
+    for(i <- str.indices){
+      if(satisfied(str.charAt(i)))
+        read()
+      else {
+        unRead(str.substring(0,i))
+        return false
+      }
+    }
+    true
+  }
+
   def getNum: String = {
     var str: String = ""
     while (Character.isDigit(ch)) {
@@ -128,8 +157,8 @@ class Lexer(val pushbackInputStream: PushbackInputStream) {
 
 object Lexer {
 
-  def newLexer(expr: String):Lexer = {
-    new Lexer(new PushbackInputStream(new ByteArrayInputStream((expr + '\0').getBytes)))
+  def newLexer(expr: String): Lexer = {
+    new Lexer(new PushbackInputStream(new ByteArrayInputStream((expr + '\0').getBytes),5))
   }
 
   def main(args: Array[String]): Unit = {
