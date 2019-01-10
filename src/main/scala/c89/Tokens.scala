@@ -6,7 +6,7 @@ import c89.ast.Expression
 class Tokens(val tokenType: TokenType,
              val value: String,
              var line: Int,
-             var column: Int) extends Expression{
+             var column: Int) extends Expression {
   override def toString: String =
     s"<$tokenType :$value >  line$line,col$column"
 
@@ -27,7 +27,7 @@ object Tokens {
 object TokenType extends Enumeration {
   type TokenType = Value
   val
-    //tokens
+  //tokens
   keyword,
   func,
   identifier,
@@ -62,6 +62,22 @@ object TokenType extends Enumeration {
   expressionTree,
   braceExpression
 
+  = Value
+}
+
+object BindType extends Enumeration {
+  type BindType = Value
+  val identity,
+  negation,
+  addition,
+  subtraction,
+  multiplication,
+  division,
+  and,
+  or,
+  not,
+  pow,
+  mod
   = Value
 }
 

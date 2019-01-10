@@ -12,17 +12,7 @@ object Main {
   }
 
   def parse(lexer: Lexer,showTree:Boolean) = {
-    val parser = new Parser(lexer)
-    parser.init()
-    val tree = parser.parseTreeExpression()
-    if(showTree)
-      parser.prettyPrint(tree)
-    if (parser.diagnostics.nonEmpty) {
-      for (d <- parser.diagnostics) {
-        parser.colorPrintln(RED, d)
-      }
-    }
-    tree
+
   }
 
 
@@ -46,8 +36,16 @@ object Main {
           """.stripMargin)
         case _ =>
           lexer = newLexer(str)
-          val tree = parse(lexer,showTree)
-          val eval = new Eval(tree).eval()
+          val parser = new Parser(lexer)
+          parser.init()
+          val tree = parser.parseTreeExpression()
+          if(showTree)
+            parser.prettyPrint(tree)
+          val binder = new Binder
+          val bindtree = binder.bindExpression(tree)
+          val eval = new Eval(bindtree).eval()
+          binder.diagnostics ++= parser.diagnostics
+          binder.diagnostics.foreach(println)
           println(eval)
       }
 

@@ -1,48 +1,39 @@
 package c89
 
-import c89.ast._
-
-class Eval(expression: Expression) {
-  def eval(): Int = {
+class Eval(expression: BindExpression) {
+  def eval(): Any = {
     expression match {
-      case node: ExpressionTree =>
-        new Eval(node.expr).eval()
-      case node: NumberNode =>
-        node.value.value match {
-          case "true" => 0
-          case "false" => 1
-          case x => x.toInt
+      case node: BindLiteralExpression =>
+        node.value match {
+          case i: Int => i
+          case i: Boolean => i
+          case _ =>
+            throw new Exception(s"unknown literal type")
         }
-      case node: BinaryNode =>
-        val left = new Eval(node.left).eval()
-        val op = node.op.tokenType
-        val right = new Eval(node.right).eval()
-        op match {
-          case TokenType.add => left + right
-          case TokenType.sub => left - right
-          case TokenType.plus => left * right
-          case TokenType.div => left / right
-          case TokenType.pow => math.pow(left, right).toInt
-          case TokenType.mod => left % right
-          case TokenType.or => if (left == 0 || right == 0) 0 else 1
-          case TokenType.and => if (left == 0 && right == 0) 0 else 1
-        }
-      case node: BraceNode =>
-        new Eval(node.op).eval()
-      case node: UnaryNode =>
-        val value = new Eval(node.oprand).eval()
-        node.op.asInstanceOf[Tokens].tokenType match {
-          case TokenType.add =>
-            value
-          case TokenType.sub =>
-            -value
-          case TokenType.not =>
-            if (value == 0)
-              1
-            else
-              0
+      case node: BindBinaryExpression =>
+        val left = new Eval(node.boundLeft).eval()
+        val right = new Eval(node.boundRight).eval()
+        val op = node.bindType
+        (left, right, op) match {
+          case (l: Int, r: Int, BindType.addition) => l + r
+          case (l: Int, r: Int, BindType.subtraction) => l - r
+          case (l: Int, r: Int, BindType.multiplication) => l * r
+          case (l: Int, r: Int, BindType.division) => l / r
+          case (l: Int, r: Int, BindType.pow) => math.pow(l, r)
+          case (l: Int, r: Int, BindType.mod) => l % r
+          case (l: Boolean, r: Boolean, BindType.and) => l && r
+          case (l: Boolean, r: Boolean, BindType.or) => l || r
+          case _ =>
+            throw new Exception(s"unknown literal type")
         }
 
+      case node: BindUnaryExpression =>
+        val value = new Eval(node.boundOperand).eval()
+        (value, node.bindType) match {
+          case (o: Boolean, BindType.not) => !o
+          case (o: Int, BindType.negation) => -o
+          case (o: Int, BindType.identity) => o
+        }
       case _ => throw new LexerException("unknown node type")
     }
 

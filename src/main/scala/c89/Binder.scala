@@ -1,7 +1,8 @@
 package c89
 
+import c89.BindType.BindType
 import c89.TokenType.TokenType
-import c89.ast.{BinaryNode, Expression, NumberNode, UnaryNode}
+import c89.ast._
 
 import scala.collection.mutable.ListBuffer
 
@@ -12,27 +13,22 @@ class Binder() {
   def bindExpression(tree: Expression): BindExpression = {
     tree.getKind() match {
       case TokenType.binaryExpression =>
-        BindBinaryExpression(tree.asInstanceOf[BinaryNode])
+        bindBinaryExpression(tree.asInstanceOf[BinaryNode])
       case TokenType.unaryExpression =>
-        BindUnaryExpression(tree.asInstanceOf[UnaryNode])
+        bindUnaryExpression(tree.asInstanceOf[UnaryNode])
       case TokenType.numberExpression =>
-        BindLiteralExpression(tree.asInstanceOf[NumberNode])
+        bindLiteralExpression(tree.asInstanceOf[NumberNode])
+      case TokenType.expressionTree =>
+        bindExpression(tree.asInstanceOf[ExpressionTree].expr)
+      case TokenType.braceExpression =>
+        bindExpression(tree.asInstanceOf[BraceNode].op)
       case _ =>
         throw new LexerException(s"unexpected syntax ${tree.getKind()}")
     }
   }
 
-  sealed class BindExpression {
 
-  }
-
-  case class BoundBinaryExpression(tokenType: TokenType,
-                                   boundLeft: BindExpression,
-                                   boundRight: BindExpression) extends BindExpression
-  case class BoundUnaryExpression(tokenType: TokenType,
-                                  boundOpearnd: BindExpression) extends BindExpression
-
-  private def BindLiteralExpression(node: NumberNode): BindExpression = {
+  private def bindLiteralExpression(node: NumberNode): BindExpression = {
     val value = node.value.value match {
       case "true" => true
       case "false" => false
@@ -41,45 +37,82 @@ class Binder() {
     BindLiteralExpression(value)
   }
 
-  private def BindBinaryExpression(node: BinaryNode): BindExpression = {
+  private def bindBinaryExpression(node: BinaryNode): BindExpression = {
     val boundLeft = bindExpression(node.left)
     val boundRight = bindExpression(node.right)
-    val boundOperatorKind = bindBinaryOperatorKind(node.op.tokenType, boundLeft.getClass, boundRight.getClass)
+    val boundOperatorKind = bindBinaryOperatorKind(node.op.tokenType, boundLeft.bindTypeClass, boundRight.bindTypeClass)
     if (boundOperatorKind == null) {
-      diagnostics += s"Unary operator ${node.op.value} is not defined for type ${boundLeft.getClass}"
+      diagnostics += s"Unary operator ${node.op.value} is not defined for type ${boundLeft.bindTypeClass}"
       return boundLeft
     }
-    BoundBinaryExpression(boundOperatorKind.tokenType, boundLeft, boundRight)
+    BindBinaryExpression(boundOperatorKind, boundLeft, boundRight)
   }
 
-  private def BindUnaryExpression(node: UnaryNode): BindExpression = {
-    val boundOpearnd = bindExpression(node.op)
-    val boundOperatorKind = BindUnaryOperatorKind(node.op.getKind(), boundOpearnd.getClass)
+  private def bindUnaryExpression(node: UnaryNode): BindExpression = {
+    val boundOperand = bindExpression(node.oprand)
+    val boundOperatorKind = bindUnaryOperatorKind(node.op.getKind(), boundOperand.bindTypeClass)
     if (boundOperatorKind == null) {
-      diagnostics += s"Unary operator ${node.op.asInstanceOf[Tokens].value} is not defined for type ${boundOpearnd.getClass}"
-      return boundOpearnd
+      diagnostics += s"Unary operator ${node.op.asInstanceOf[Tokens].value} is not defined for type ${boundOperand.bindTypeClass}"
+      return boundOperand
     }
-    BoundUnaryExpression(boundOperatorKind.tokenType, boundOpearnd)
+    BindUnaryExpression(boundOperatorKind, boundOperand)
   }
-
-
-
-  case class BindLiteralExpression(value: AnyVal) extends BindExpression
 
 
   private def bindBinaryOperatorKind(tokenType: TokenType,
-                                    left: Class[_ <: BindExpression],
-                                    right: Class[_ <: BindExpression]) = {
-
+                                     left: Class[_],
+                                     right: Class[_]): BindType = {
+    if (left != right || (!left.isInstanceOf[Class[_]] && !left.isInstanceOf[Class[_]] )) {
+      return null
+    }
+    tokenType match {
+      case TokenType.add => BindType.addition
+      case TokenType.sub => BindType.subtraction
+      case TokenType.plus => BindType.multiplication
+      case TokenType.div => BindType.division
+      case TokenType.pow => BindType.pow
+      case TokenType.mod => BindType.mod
+      case TokenType.and => BindType.and
+      case TokenType.or => BindType.or
+      case _ =>
+        throw new Exception(s"Unexpected binary operator ${tokenType}")
+    }
   }
 
 
-
-  private def BindUnaryOperatorKind(tokenType: TokenType,
-                                   op: Class[_ <: BindExpression]) = {
-
+  private def bindUnaryOperatorKind(tokenType: TokenType,
+                                    op: Class[_]): BindType = {
+    if(!op.isInstanceOf[Class[_]] && !op.isInstanceOf[Class[_]])
+      return null
+    tokenType match {
+      case TokenType.add => BindType.identity
+      case TokenType.sub => BindType.negation
+      case TokenType.not => BindType.not
+      case _ =>
+        throw new Exception(s"Unexpected unary operator ${tokenType}")
+    }
   }
 
+}
 
+abstract class BoundNode {
+  def bindTypeClass: Class[_]
+}
 
+abstract class BindExpression extends BoundNode {
+}
+
+case class BindBinaryExpression(bindType: BindType,
+                                boundLeft: BindExpression,
+                                boundRight: BindExpression) extends BindExpression {
+  override def bindTypeClass: Class[_] = boundLeft.bindTypeClass
+}
+
+case class BindUnaryExpression(bindType: BindType,
+                               boundOperand: BindExpression) extends BindExpression {
+  override def bindTypeClass: Class[_] = boundOperand.bindTypeClass
+}
+
+case class BindLiteralExpression(value: AnyVal) extends BindExpression {
+  override def bindTypeClass: Class[_] = value.getClass
 }

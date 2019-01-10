@@ -32,7 +32,7 @@ class Parser(val lexer: Lexer) {
 
   def current: Tokens = peek(0)
 
-  private def nextToken = {
+  private def nextToken: Tokens = {
     val currentToken = current
     position += 1
     currentToken

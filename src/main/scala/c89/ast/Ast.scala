@@ -22,7 +22,7 @@ sealed class ExpressionTree(val expr:Expression) extends Expression{
 sealed class BinaryNode(val left: Expression,
                         val op: Tokens,
                         val right: Expression) extends Expression {
-  override def getKind() = op.tokenType
+  override def getKind(): TokenType = binaryExpression
 
   override def getChildren(): List[Expression] = {
     List[Expression](left,op,right)
@@ -32,7 +32,7 @@ sealed class BinaryNode(val left: Expression,
 }
 
 sealed class NumberNode(val value: Tokens) extends Expression {
-  override def getKind() = value.tokenType
+  override def getKind(): TokenType = numberExpression
 
   override def getChildren(): List[Expression] = {
     List[Expression](value)
