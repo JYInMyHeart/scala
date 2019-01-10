@@ -62,6 +62,12 @@ class Parser(val lexer: Lexer) {
       case x if x == TokenType.and
         | x == TokenType.or =>
         1
+      case x if x == TokenType.lt
+        | x == lte
+        | x == gt
+        | x == gte
+        | x == equal =>
+        0
       case _ =>
         -1
     }
@@ -101,14 +107,20 @@ class Parser(val lexer: Lexer) {
 
 
   def parsePrimaryExpression(): Expression = {
-    if (current.tokenType == lb) {
-      val left = nextToken
-      val expression = parseTreeExpression()
-      val right = eat(rb)
-      return new BraceNode(left, expression, right)
+    current.tokenType match {
+      case TokenType.lb =>
+        val left = nextToken
+        val expression = parseTreeExpression()
+        val right = eat(rb)
+        new BraceNode(left, expression, right)
+      case x if x == trueKeyword || x == falseKeyword =>
+        val token = current
+        nextToken
+        new LiteralNode(token)
+      case _ =>
+        val literalNode = eat(TokenType.literal)
+        new LiteralNode(literalNode)
     }
-    val numberNode = eat(TokenType.literal)
-    new NumberNode(numberNode)
   }
 
   def colorPrint(colorType: String, text: String): Unit =

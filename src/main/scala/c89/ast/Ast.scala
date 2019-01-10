@@ -31,7 +31,7 @@ sealed class BinaryNode(val left: Expression,
   override def toString: String = s"BinaryNode:${left.getKind()}"
 }
 
-sealed class NumberNode(val value: Tokens) extends Expression {
+sealed class LiteralNode(val value: Tokens) extends Expression {
   override def getKind(): TokenType = numberExpression
 
   override def getChildren(): List[Expression] = {

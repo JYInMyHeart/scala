@@ -53,6 +53,8 @@ object TokenType extends Enumeration {
   newline,
   eof,
   wrong,
+  falseKeyword,
+  trueKeyword,
 
 
   //expressions
@@ -77,7 +79,12 @@ object BindType extends Enumeration {
   or,
   not,
   pow,
-  mod
+  mod,
+  lt,
+  lte,
+  gt,
+  gte,
+  equal
   = Value
 }
 

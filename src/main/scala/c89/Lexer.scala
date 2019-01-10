@@ -25,6 +25,14 @@ class Lexer(val pushbackInputStream: PushbackInputStream) {
       pushbackInputStream.unread(s.charAt(i).toInt)
   }
 
+  def getKeyWordType(text: String) = {
+    text match {
+      case "false" => falseKeyword
+      case "true" => trueKeyword
+      case _ => identifier
+    }
+  }
+
   def nextToken(): Tokens = {
     read()
     ch match {
@@ -34,20 +42,12 @@ class Lexer(val pushbackInputStream: PushbackInputStream) {
         lineCount += 1
         columnCount = 0
         Tokens(newline, null, lineCount, columnCount)
-      case 't' =>
-        if (string("true")) {
-              return Tokens(literal, "true", lineCount, columnCount)
-        }
-        Tokens(wrong, "wrong", lineCount, columnCount)
-      case 'f' =>
-        if (string("false")) {
-          return Tokens(literal, "false", lineCount, columnCount)
-        }
-        Tokens(wrong, "wrong", lineCount, columnCount)
       case x if Character.isDigit(x) =>
         Tokens(literal, getNum, lineCount, columnCount)
       case x if x == '_' || Character.isLetter(x) =>
-        Tokens(identifier, getChars, lineCount, columnCount)
+        val text = getChars
+        val tokenType = getKeyWordType(text)
+        Tokens(tokenType, text, lineCount, columnCount)
       case '+' => Tokens(add, "+", lineCount, columnCount)
       case '*' => Tokens(plus, "*", lineCount, columnCount)
       case '/' => Tokens(div, "/", lineCount, columnCount)

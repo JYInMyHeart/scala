@@ -21,8 +21,14 @@ class Eval(expression: BindExpression) {
           case (l: Int, r: Int, BindType.division) => l / r
           case (l: Int, r: Int, BindType.pow) => math.pow(l, r)
           case (l: Int, r: Int, BindType.mod) => l % r
+          case (l: Int, r: Int, BindType.lt ) => l < r
+          case (l: Int, r: Int, BindType.lte) => l <= r
+          case (l: Int, r: Int, BindType.gt ) => l > r
+          case (l: Int, r: Int, BindType.gte) => l >= r
+          case (l: Int, r: Int, BindType.equal) => l == r
           case (l: Boolean, r: Boolean, BindType.and) => l && r
           case (l: Boolean, r: Boolean, BindType.or) => l || r
+          case (l: Boolean, r: Boolean, BindType.equal) => l == r
           case _ =>
             throw new Exception(s"unknown literal type")
         }
@@ -36,8 +42,5 @@ class Eval(expression: BindExpression) {
         }
       case _ => throw new LexerException("unknown node type")
     }
-
-
   }
-
 }

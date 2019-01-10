@@ -17,7 +17,7 @@ class Binder() {
       case TokenType.unaryExpression =>
         bindUnaryExpression(tree.asInstanceOf[UnaryNode])
       case TokenType.numberExpression =>
-        bindLiteralExpression(tree.asInstanceOf[NumberNode])
+        bindLiteralExpression(tree.asInstanceOf[LiteralNode])
       case TokenType.expressionTree =>
         bindExpression(tree.asInstanceOf[ExpressionTree].expr)
       case TokenType.braceExpression =>
@@ -28,7 +28,7 @@ class Binder() {
   }
 
 
-  private def bindLiteralExpression(node: NumberNode): BindExpression = {
+  private def bindLiteralExpression(node: LiteralNode): BindExpression = {
     val value = node.value.value match {
       case "true" => true
       case "false" => false
@@ -62,7 +62,9 @@ class Binder() {
   private def bindBinaryOperatorKind(tokenType: TokenType,
                                      left: Class[_],
                                      right: Class[_]): BindType = {
-    if (left != right || (!left.isInstanceOf[Class[_]] && !left.isInstanceOf[Class[_]] )) {
+    if (left != right
+      || (!left.isInstanceOf[Class[_]]
+      && !left.isInstanceOf[Class[_]] )) {
       return null
     }
     tokenType match {
@@ -74,6 +76,11 @@ class Binder() {
       case TokenType.mod => BindType.mod
       case TokenType.and => BindType.and
       case TokenType.or => BindType.or
+      case TokenType.lt => BindType.lt
+      case TokenType.lte => BindType.lte
+      case TokenType.gt => BindType.gt
+      case TokenType.gte => BindType.gte
+      case TokenType.equal => BindType.equal
       case _ =>
         throw new Exception(s"Unexpected binary operator ${tokenType}")
     }
@@ -82,7 +89,8 @@ class Binder() {
 
   private def bindUnaryOperatorKind(tokenType: TokenType,
                                     op: Class[_]): BindType = {
-    if(!op.isInstanceOf[Class[_]] && !op.isInstanceOf[Class[_]])
+    if(!op.isInstanceOf[Class[_]]
+      && !op.isInstanceOf[Class[_]])
       return null
     tokenType match {
       case TokenType.add => BindType.identity
