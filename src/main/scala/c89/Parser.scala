@@ -24,7 +24,7 @@ class Parser(val lexer: Lexer) {
     val size = tokensList.length
     val index: Int = position + offset
     if (index >= size) {
-      return tokensList(size - 1)
+      return Tokens(TokenType.eof,"eof",tokensList.last.span)
     }
     tokensList(index)
   }
@@ -83,13 +83,28 @@ class Parser(val lexer: Lexer) {
         -1
     }
 
+  def parseExpression():Expression = {
+    parseAssignmentExpression()
+  }
 
-  def parseExpression(parentPrecedence: Int = -1): Expression = {
+  def parseAssignmentExpression():Expression = {
+    if(peek(0).tokenType == identifier &&
+    peek(1).tokenType == assign){
+      val identifierToken = nextToken
+      val operatorToken = nextToken
+      val right = parseAssignmentExpression()
+      return new AssignmentNode(identifierToken,operatorToken,right)
+    }
+    parseBinaryExpression()
+  }
+
+
+  def parseBinaryExpression(parentPrecedence: Int = -1): Expression = {
     var left: Expression = null
     val unaryOperatorPrecedence = getUnaryOperatorPrecedence(current.tokenType)
     if (unaryOperatorPrecedence != -1 && unaryOperatorPrecedence >= parentPrecedence) {
       val operatorToken = nextToken
-      val operand = parseExpression(unaryOperatorPrecedence)
+      val operand = parseBinaryExpression(unaryOperatorPrecedence)
       return new UnaryNode(operatorToken, operand)
     } else
       left = parsePrimaryExpression()
@@ -98,7 +113,7 @@ class Parser(val lexer: Lexer) {
       if (precedence == -1 || precedence <= parentPrecedence)
         return left
       val operatorToken = nextToken
-      val right = parseExpression(precedence)
+      val right = parseBinaryExpression(precedence)
       left = new BinaryNode(left, operatorToken, right)
     }
     left
@@ -116,6 +131,10 @@ class Parser(val lexer: Lexer) {
         val token = current
         nextToken
         new LiteralNode(token)
+      case TokenType.identifier =>
+        val token = current
+        nextToken
+        new NameNode(token)
       case _ =>
         val literalNode = eat(TokenType.literal)
         new LiteralNode(literalNode)

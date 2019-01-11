@@ -1,7 +1,9 @@
 package c89
 
+import scala.collection.mutable
+
 class Eval(expression: BindExpression) {
-  def eval(): Any = {
+  def eval(variables:mutable.HashMap[String,AnyVal]): AnyVal = {
     expression match {
       case node: BindLiteralExpression =>
         node.value match {
@@ -11,9 +13,9 @@ class Eval(expression: BindExpression) {
             throw new Exception(s"unknown literal type")
         }
       case node: BindBinaryExpression =>
-        val left = new Eval(node.boundLeft).eval()
-        val right = new Eval(node.boundRight).eval()
-        val op = node.bindType
+        val left = new Eval(node.boundLeft).eval(variables)
+        val right = new Eval(node.boundRight).eval(variables)
+        val op = node.bindType.bindType
         (left, right, op) match {
           case (l: Int, r: Int, BindType.addition) => l + r
           case (l: Int, r: Int, BindType.subtraction) => l - r
@@ -36,14 +38,27 @@ class Eval(expression: BindExpression) {
         }
 
       case node: BindUnaryExpression =>
-        val value = new Eval(node.boundOperand).eval()
-        (value, node.bindType) match {
+        val value = new Eval(node.boundOperand).eval(variables)
+        (value, node.bindType.bindType) match {
           case (o: Boolean, BindType.not) => !o
           case (o: Int, BindType.negation) => -o
           case (o: Int, BindType.identity) => o
           case _ => throw new LexerException("unknown node type")
         }
+      case node:BindVariableExpression =>
+        variables(node.name)
+      case node:BindAssignmentExpression =>
+        variables(node.name) = new Eval(node.expression).eval(variables)
       case _ => throw new LexerException("unknown node type")
     }
   }
 }
+
+object Eval{
+  def apply(expression: BindExpression): Eval = new Eval(expression)
+}
+
+case class EvaluationResult(diagnosticsBag: DiagnosticsBag,
+                            value:AnyVal)
+
+

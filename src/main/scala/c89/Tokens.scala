@@ -52,6 +52,9 @@ object TokenType extends Enumeration {
   newline,
   eof,
   wrong,
+  equalsToken,
+
+  //keyword
   falseKeyword,
   trueKeyword,
 
@@ -61,7 +64,9 @@ object TokenType extends Enumeration {
   numberExpression,
   unaryExpression,
   expressionTree,
-  braceExpression
+  braceExpression,
+  nameExpression,
+  assignmentExpression
 
   = Value
 }

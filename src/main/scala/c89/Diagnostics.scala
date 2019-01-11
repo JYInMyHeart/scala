@@ -19,6 +19,8 @@ object Diagnostics {
 }
 
 class DiagnosticsBag {
+
+
   val reports: ListBuffer[Diagnostics] = new ListBuffer[Diagnostics]()
 
   def report(span: Span, msg: String): reports.type = {
@@ -51,9 +53,16 @@ class DiagnosticsBag {
     report(span, msg)
   }
 
+  def reportUndefinedName(span: Span, name: String) = {
+    val msg = s"Undefined variable $name at $span"
+    report(span,msg)
+  }
+
   def concat(diagnosticsBag: DiagnosticsBag):Unit = {
     reports ++= diagnosticsBag.reports
   }
+
+  def isEmpty: Boolean = reports.isEmpty
 }
 object DiagnosticsBag{
   def apply(): DiagnosticsBag = new DiagnosticsBag()

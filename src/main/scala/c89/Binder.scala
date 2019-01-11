@@ -3,13 +3,20 @@ package c89
 import c89.BindType.BindType
 import c89.TokenType.TokenType
 import c89.ast._
+import TypeMapping._
 
+import scala.collection.mutable
 
 class Binder() {
   val diagnostics: DiagnosticsBag = DiagnosticsBag()
+  val variables: mutable.HashMap[String, AnyVal] = new mutable.HashMap[String, AnyVal]()
 
   def bindExpression(tree: Expression): BindExpression = {
     tree.getKind() match {
+      case TokenType.nameExpression =>
+        bindNameExpression(tree.asInstanceOf[NameNode])
+      case TokenType.assignmentExpression =>
+        bindAssignmentExpression(tree.asInstanceOf[AssignmentNode])
       case TokenType.binaryExpression =>
         bindBinaryExpression(tree.asInstanceOf[BinaryNode])
       case TokenType.unaryExpression =>
@@ -25,6 +32,30 @@ class Binder() {
     }
   }
 
+  private def bindNameExpression(node: NameNode): BindExpression = {
+    val name = node.identifierToken.value
+    if (!variables.contains(name)) {
+      diagnostics.reportUndefinedName(node.identifierToken.span, name)
+      return BindLiteralExpression(0)
+    }
+    val value = variables(name)
+    val clazz = value.getClass.getSimpleName
+    BindVariableExpression(name, clazz)
+  }
+
+  private def bindAssignmentExpression(node: AssignmentNode): BindExpression = {
+    val name = node.identifierToken.value
+    val boundExpression = bindExpression(node.expression)
+    val defaultValue = boundExpression.bindTypeClass match {
+      case TypeMapping.int => 0
+      case TypeMapping.bool => false
+      case _ =>
+        throw new Exception(s"Unsupported variable type: ${boundExpression.bindTypeClass}")
+    }
+
+    variables(name) = defaultValue
+    BindAssignmentExpression(name, boundExpression)
+  }
 
   private def bindLiteralExpression(node: LiteralNode): BindExpression = {
     val value = node.value.value match {
@@ -41,19 +72,19 @@ class Binder() {
     val boundOperator =
       BoundBinaryOperator.bind(
         node.op.tokenType,
-        boundLeft.bindTypeClass.getSimpleName,
-        boundRight.bindTypeClass.getSimpleName
+        boundLeft.bindTypeClass,
+        boundRight.bindTypeClass
       )
     if (boundOperator == null) {
       diagnostics.reportUndefinedBinaryOperator(
         node.op.span,
         node.op.value,
-        boundLeft.bindTypeClass.getSimpleName,
-        boundRight.bindTypeClass.getSimpleName
+        boundLeft.bindTypeClass,
+        boundRight.bindTypeClass
       )
       return boundLeft
     }
-    BindBinaryExpression(boundOperator.bindType, boundLeft, boundRight)
+    BindBinaryExpression(boundOperator, boundLeft, boundRight)
   }
 
   private def bindUnaryExpression(node: UnaryNode): BindExpression = {
@@ -61,42 +92,46 @@ class Binder() {
     val boundOperatorKind =
       BoundUnaryOperator.bind(
         node.op.getKind(),
-        boundOperand.bindTypeClass.getSimpleName
+        boundOperand.bindTypeClass
       )
     if (boundOperatorKind == null) {
       diagnostics.reportUndefinedUnaryOperator(
         node.op.asInstanceOf[Tokens].span,
         node.op.asInstanceOf[Tokens].value,
-        boundOperand.bindTypeClass.getSimpleName
+        boundOperand.bindTypeClass
 
       )
       return boundOperand
     }
-    BindUnaryExpression(boundOperatorKind.bindType, boundOperand)
+    BindUnaryExpression(boundOperatorKind, boundOperand)
   }
+}
 
+object Binder {
+  def apply(): Binder = new Binder()
 }
 
 abstract class BoundNode {
-  def bindTypeClass: Class[_]
+  def bindTypeClass: String
 }
 
 abstract class BindExpression extends BoundNode {
+
 }
 
-case class BindBinaryExpression(bindType: BindType,
+case class BindBinaryExpression(bindType: BoundBinaryOperator,
                                 boundLeft: BindExpression,
                                 boundRight: BindExpression) extends BindExpression {
-  override def bindTypeClass: Class[_] = boundLeft.bindTypeClass
+  override def bindTypeClass: String = bindType.result
 }
 
-case class BindUnaryExpression(bindType: BindType,
+case class BindUnaryExpression(bindType: BoundUnaryOperator,
                                boundOperand: BindExpression) extends BindExpression {
-  override def bindTypeClass: Class[_] = boundOperand.bindTypeClass
+  override def bindTypeClass: String = bindType.result
 }
 
 case class BindLiteralExpression(value: AnyVal) extends BindExpression {
-  override def bindTypeClass: Class[_] = value.getClass
+  override def bindTypeClass: String = value.getClass.getSimpleName
 }
 
 sealed class BoundBinaryOperator(val tokenType: TokenType,
@@ -105,10 +140,18 @@ sealed class BoundBinaryOperator(val tokenType: TokenType,
                                  val right: String,
                                  val result: String)
 
+case class BindVariableExpression(name: String,
+                                  clazz: String) extends BindExpression {
+  override def bindTypeClass: String = clazz
+}
+
+case class BindAssignmentExpression(name: String,
+                                    expression: BindExpression) extends BindExpression {
+  override def bindTypeClass: String = expression.bindTypeClass
+}
+
 object BoundBinaryOperator {
-  private[this] val int = "Integer"
-  private[this] val bool = "Boolean"
-  private[this] val double = "Double"
+
 
   def apply(
              tokenType: TokenType,
@@ -160,8 +203,7 @@ sealed class BoundUnaryOperator(val tokenType: TokenType,
                                 val result: String)
 
 object BoundUnaryOperator {
-  private[this] val int = "Integer"
-  private[this] val bool = "Boolean"
+
 
   def apply(
              tokenType: TokenType,
@@ -189,6 +231,12 @@ object BoundUnaryOperator {
     else
       null
   }
+}
+
+object TypeMapping {
+  val int = "Integer"
+  val bool = "Boolean"
+  val double = "Double"
 }
 
 

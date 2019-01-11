@@ -1,6 +1,7 @@
 package c89
 
 import c89.Lexer.newLexer
+import c89.ast.SyntaxTree
 
 import scala.io.StdIn
 
@@ -21,7 +22,6 @@ object Main {
     while (true) {
       print("> ")
       val str = StdIn.readLine()
-      var lexer: Lexer = null
       str match {
         case "q" => System.exit(0)
         case "show" => showTree = !showTree
@@ -36,28 +36,22 @@ object Main {
               |show:show ast?
             """.stripMargin)
         case _ =>
-          lexer = newLexer(str)
-          val parser = new Parser(lexer)
-          parser.init()
-          val tree = parser.parseTreeExpression()
+          val tree = SyntaxTree.parse(str)
           if (showTree)
-            prettyPrint(tree)
-          if (parser.diagnostics.reports.nonEmpty) {
-            parser.diagnostics.reports.foreach(
+            prettyPrint(tree.root)
+          if (tree.diagnostics.reports.nonEmpty) {
+            tree.diagnostics.reports.foreach(
               x => colorPrintln(scala.io.AnsiColor.RED, x.toString)
             )
           } else {
-            val binder = new Binder
-            val bindTree = binder.bindExpression(tree)
-            if (binder.diagnostics.reports.nonEmpty) {
-              binder.diagnostics.concat(parser.diagnostics)
-              binder.diagnostics.reports.foreach(
+            val compilation = new Compilation(tree)
+            val result = compilation.evaluate()
+            if (!result.diagnosticsBag.isEmpty) {
+              result.diagnosticsBag.reports.foreach(
                 x => colorPrintln(scala.io.AnsiColor.RED, x.toString)
               )
-            } else {
-              val eval = new Eval(bindTree).eval()
-              println(eval)
-            }
+            } else
+              println(result.value)
           }
       }
     }
