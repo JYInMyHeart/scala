@@ -9,9 +9,11 @@ import scala.collection.mutable
 
 class Binder() {
   val diagnostics: DiagnosticsBag = DiagnosticsBag()
-  val variables: mutable.HashMap[String, AnyVal] = new mutable.HashMap[String, AnyVal]()
+  val variables: mutable.HashMap[VariableSymbol, AnyVal] =
+    new mutable.HashMap[VariableSymbol, AnyVal]()
 
-  def bindExpression(tree: Expression): BindExpression = {
+  def bindExpression(tree: Expression,variables: mutable.HashMap[VariableSymbol,AnyVal]): BindExpression = {
+    this.variables ++= variables
     tree.getKind() match {
       case TokenType.nameExpression =>
         bindNameExpression(tree.asInstanceOf[NameNode])
@@ -24,9 +26,9 @@ class Binder() {
       case TokenType.numberExpression =>
         bindLiteralExpression(tree.asInstanceOf[LiteralNode])
       case TokenType.expressionTree =>
-        bindExpression(tree.asInstanceOf[ExpressionTree].expr)
+        bindExpression(tree.asInstanceOf[ExpressionTree].expr,this.variables)
       case TokenType.braceExpression =>
-        bindExpression(tree.asInstanceOf[BraceNode].op)
+        bindExpression(tree.asInstanceOf[BraceNode].op,this.variables)
       case _ =>
         throw new LexerException(s"unexpected syntax ${tree.getKind()}")
     }
@@ -34,27 +36,24 @@ class Binder() {
 
   private def bindNameExpression(node: NameNode): BindExpression = {
     val name = node.identifierToken.value
-    if (!variables.contains(name)) {
+    if (!variables.keys.map(_.name).exists(x => x == name)) {
       diagnostics.reportUndefinedName(node.identifierToken.span, name)
       return BindLiteralExpression(0)
     }
-    val value = variables(name)
-    val clazz = value.getClass.getSimpleName
-    BindVariableExpression(name, clazz)
+    val variable = variables.keys.find(_.name == name).get
+    BindVariableExpression(variable)
   }
 
   private def bindAssignmentExpression(node: AssignmentNode): BindExpression = {
     val name = node.identifierToken.value
-    val boundExpression = bindExpression(node.expression)
-    val defaultValue = boundExpression.bindTypeClass match {
-      case TypeMapping.int => 0
-      case TypeMapping.bool => false
-      case _ =>
-        throw new Exception(s"Unsupported variable type: ${boundExpression.bindTypeClass}")
-    }
+    val boundExpression = bindExpression(node.expression,this.variables)
+    val existingVariable = variables.keys.find(_.name == name)
+    if(existingVariable.nonEmpty)
+      variables remove existingVariable.get
 
-    variables(name) = defaultValue
-    BindAssignmentExpression(name, boundExpression)
+    val variable = VariableSymbol(name,boundExpression.bindTypeClass)
+    variables(variable) = null.asInstanceOf[AnyVal]
+    BindAssignmentExpression(variable, boundExpression)
   }
 
   private def bindLiteralExpression(node: LiteralNode): BindExpression = {
@@ -67,8 +66,8 @@ class Binder() {
   }
 
   private def bindBinaryExpression(node: BinaryNode): BindExpression = {
-    val boundLeft = bindExpression(node.left)
-    val boundRight = bindExpression(node.right)
+    val boundLeft = bindExpression(node.left,this.variables)
+    val boundRight = bindExpression(node.right,this.variables)
     val boundOperator =
       BoundBinaryOperator.bind(
         node.op.tokenType,
@@ -88,7 +87,7 @@ class Binder() {
   }
 
   private def bindUnaryExpression(node: UnaryNode): BindExpression = {
-    val boundOperand = bindExpression(node.oprand)
+    val boundOperand = bindExpression(node.oprand,this.variables)
     val boundOperatorKind =
       BoundUnaryOperator.bind(
         node.op.getKind(),
@@ -140,12 +139,11 @@ sealed class BoundBinaryOperator(val tokenType: TokenType,
                                  val right: String,
                                  val result: String)
 
-case class BindVariableExpression(name: String,
-                                  clazz: String) extends BindExpression {
-  override def bindTypeClass: String = clazz
+case class BindVariableExpression(variableSymbol: VariableSymbol) extends BindExpression {
+  override def bindTypeClass: String = variableSymbol.varType
 }
 
-case class BindAssignmentExpression(name: String,
+case class BindAssignmentExpression(variable: VariableSymbol,
                                     expression: BindExpression) extends BindExpression {
   override def bindTypeClass: String = expression.bindTypeClass
 }

@@ -1,23 +1,14 @@
 package c89
 
-import c89.Lexer.newLexer
 import c89.ast.SyntaxTree
 
+import scala.collection.mutable
 import scala.io.StdIn
 
 object Main {
-  def exec(str: String): Unit = {
-    val lexer = newLexer(str)
-    parse(lexer, showTree = true)
-  }
-
-  def parse(lexer: Lexer, showTree: Boolean): Unit = {
-
-  }
-
-
   def main(args: Array[String]): Unit = {
     import Printer._
+    val variables = new mutable.HashMap[VariableSymbol,AnyVal]()
     var showTree = false
     while (true) {
       print("> ")
@@ -45,7 +36,7 @@ object Main {
             )
           } else {
             val compilation = new Compilation(tree)
-            val result = compilation.evaluate()
+            val result = compilation.evaluate(variables)
             if (!result.diagnosticsBag.isEmpty) {
               result.diagnosticsBag.reports.foreach(
                 x => colorPrintln(scala.io.AnsiColor.RED, x.toString)
