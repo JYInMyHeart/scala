@@ -62,43 +62,51 @@ class Binder() {
   private def bindBinaryOperatorKind(tokenType: TokenType,
                                      left: Class[_],
                                      right: Class[_]): BindType = {
-    if (left != right
-      || (!left.isInstanceOf[Class[_]]
-      && !left.isInstanceOf[Class[_]] )) {
-      return null
-    }
-    tokenType match {
-      case TokenType.add => BindType.addition
-      case TokenType.sub => BindType.subtraction
-      case TokenType.plus => BindType.multiplication
-      case TokenType.div => BindType.division
-      case TokenType.pow => BindType.pow
-      case TokenType.mod => BindType.mod
-      case TokenType.and => BindType.and
-      case TokenType.or => BindType.or
-      case TokenType.lt => BindType.lt
-      case TokenType.lte => BindType.lte
-      case TokenType.gt => BindType.gt
-      case TokenType.gte => BindType.gte
-      case TokenType.equal => BindType.equal
-      case _ =>
-        throw new Exception(s"Unexpected binary operator ${tokenType}")
+    (left.getSimpleName, right.getSimpleName) match {
+      case ("Integer", "Integer") =>
+        tokenType match {
+          case TokenType.add => BindType.addition
+          case TokenType.sub => BindType.subtraction
+          case TokenType.plus => BindType.multiplication
+          case TokenType.div => BindType.division
+          case TokenType.pow => BindType.pow
+          case TokenType.mod => BindType.mod
+          case TokenType.equal => BindType.equal
+          case _ => null
+        }
+      case ("Boolean", "Boolean") =>
+        tokenType match {
+          case TokenType.and => BindType.and
+          case TokenType.or => BindType.or
+          case TokenType.lt => BindType.lt
+          case TokenType.lte => BindType.lte
+          case TokenType.gt => BindType.gt
+          case TokenType.gte => BindType.gte
+          case TokenType.equal => BindType.equal
+          case _ => null
+        }
+      case _ => null
     }
   }
 
 
   private def bindUnaryOperatorKind(tokenType: TokenType,
                                     op: Class[_]): BindType = {
-    if(!op.isInstanceOf[Class[_]]
-      && !op.isInstanceOf[Class[_]])
-      return null
-    tokenType match {
-      case TokenType.add => BindType.identity
-      case TokenType.sub => BindType.negation
-      case TokenType.not => BindType.not
-      case _ =>
-        throw new Exception(s"Unexpected unary operator ${tokenType}")
+    op.getSimpleName match {
+      case "Integer" =>
+        tokenType match {
+          case TokenType.add => BindType.identity
+          case TokenType.sub => BindType.negation
+          case _ => null
+        }
+      case "Boolean" =>
+        tokenType match {
+          case TokenType.not => BindType.not
+          case _ => null
+        }
+      case _ => null
     }
+
   }
 
 }

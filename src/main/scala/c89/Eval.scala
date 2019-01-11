@@ -39,6 +39,7 @@ class Eval(expression: BindExpression) {
           case (o: Boolean, BindType.not) => !o
           case (o: Int, BindType.negation) => -o
           case (o: Int, BindType.identity) => o
+          case _ => throw new LexerException("unknown node type")
         }
       case _ => throw new LexerException("unknown node type")
     }

@@ -2,7 +2,6 @@ package c89
 
 import c89.Lexer.newLexer
 
-import scala.io.AnsiColor.RED
 import scala.io.StdIn
 
 object Main {
@@ -43,10 +42,13 @@ object Main {
             parser.prettyPrint(tree)
           val binder = new Binder
           val bindtree = binder.bindExpression(tree)
-          val eval = new Eval(bindtree).eval()
-          binder.diagnostics ++= parser.diagnostics
-          binder.diagnostics.foreach(println)
-          println(eval)
+          if(binder.diagnostics.nonEmpty){
+            binder.diagnostics ++= parser.diagnostics
+            binder.diagnostics.foreach(x => parser.colorPrintln( scala.io.AnsiColor.RED, x))
+          }else{
+            val eval = new Eval(bindtree).eval()
+            println(eval)
+          }
       }
 
     }
