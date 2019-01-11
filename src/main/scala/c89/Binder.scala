@@ -4,11 +4,9 @@ import c89.BindType.BindType
 import c89.TokenType.TokenType
 import c89.ast._
 
-import scala.collection.mutable.ListBuffer
 
 class Binder() {
-  val diagnostics: ListBuffer[String] = new ListBuffer()
-
+  val diagnostics: DiagnosticsBag = DiagnosticsBag()
 
   def bindExpression(tree: Expression): BindExpression = {
     tree.getKind() match {
@@ -47,7 +45,12 @@ class Binder() {
         boundRight.bindTypeClass.getSimpleName
       )
     if (boundOperator == null) {
-      diagnostics += s"Unary operator ${node.op.value} is not defined for type ${boundLeft.bindTypeClass}"
+      diagnostics.reportUndefinedBinaryOperator(
+        node.op.span,
+        node.op.value,
+        boundLeft.bindTypeClass.getSimpleName,
+        boundRight.bindTypeClass.getSimpleName
+      )
       return boundLeft
     }
     BindBinaryExpression(boundOperator.bindType, boundLeft, boundRight)
@@ -61,7 +64,12 @@ class Binder() {
         boundOperand.bindTypeClass.getSimpleName
       )
     if (boundOperatorKind == null) {
-      diagnostics += s"Unary operator ${node.op.asInstanceOf[Tokens].value} is not defined for type ${boundOperand.bindTypeClass}"
+      diagnostics.reportUndefinedUnaryOperator(
+        node.op.asInstanceOf[Tokens].span,
+        node.op.asInstanceOf[Tokens].value,
+        boundOperand.bindTypeClass.getSimpleName
+
+      )
       return boundOperand
     }
     BindUnaryExpression(boundOperatorKind.bindType, boundOperand)

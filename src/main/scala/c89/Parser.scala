@@ -3,12 +3,11 @@ package c89
 import c89.TokenType.{TokenType, _}
 import c89.ast._
 
-import scala.io.AnsiColor.{BLUE, BOLD, GREEN, RESET}
-
 class Parser(val lexer: Lexer) {
   private[this] var tokensList: List[Tokens] = List()
   private[this] var position: Int = _
-  var diagnostics: List[String] = lexer.diagnostics
+  val diagnostics: DiagnosticsBag = DiagnosticsBag()
+  diagnostics.concat(lexer.diagnostics)
 
   def init(): Unit = {
     var token = lexer.nextToken()
@@ -41,8 +40,8 @@ class Parser(val lexer: Lexer) {
   def eat(tokenType: TokenType): Tokens = {
     if (tokenType == current.tokenType)
       return nextToken
-    diagnostics :+= s"error:expected a $tokenType here"
-    Tokens(tokenType, null, current.line, current.column)
+    diagnostics.reportUnexpectedToken(current.span, current.tokenType, tokenType)
+    Tokens(tokenType, null, current.span)
   }
 
   def parseTreeExpression(): Expression = {
@@ -122,43 +121,4 @@ class Parser(val lexer: Lexer) {
         new LiteralNode(literalNode)
     }
   }
-
-  def colorPrint(colorType: String, text: String): Unit =
-    print(s"$colorType$BOLD$text$RESET")
-
-  def colorPrintln(colorType: String, text: String): Unit =
-    colorPrint(colorType, text + "\r\n")
-
-
-  def prettyPrint(node: Expression, indent: String = "", isLast: Boolean = true) {
-    var indents = indent
-    val enable = node.getChildren() != null
-    val marker = if (isLast) "└──" else "├──"
-
-
-    colorPrint(BLUE, indent)
-    colorPrint(BLUE, marker)
-    colorPrint(BLUE, node.getKind().toString)
-
-
-    node match {
-      case tokens: Tokens if tokens.value != null =>
-        print(" ")
-        colorPrint(GREEN, tokens.value)
-      case _ =>
-    }
-
-    println()
-
-    indents += (if (isLast) "    " else "│   ")
-
-
-    if (enable) {
-      val last = node.getChildren().last
-      for (child <- node.getChildren())
-        prettyPrint(child, indents, child == last)
-    }
-
-  }
-
 }

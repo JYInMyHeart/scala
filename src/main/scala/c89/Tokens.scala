@@ -5,10 +5,9 @@ import c89.ast.Expression
 
 class Tokens(val tokenType: TokenType,
              val value: String,
-             var line: Int,
-             var column: Int) extends Expression {
+             val span: Span) extends Expression {
   override def toString: String =
-    s"<$tokenType :$value >  line$line,col$column"
+    s"<$tokenType :$value >  $span"
 
   override def getKind(): TokenType = tokenType
 
@@ -18,10 +17,9 @@ class Tokens(val tokenType: TokenType,
 object Tokens {
   def apply(tokenType: TokenType,
             value: String,
-            line: Int,
-            column: Int
+            span: Span
            ): Tokens =
-    new Tokens(tokenType, value, line, column)
+    new Tokens(tokenType, value, span)
 }
 
 object TokenType extends Enumeration {

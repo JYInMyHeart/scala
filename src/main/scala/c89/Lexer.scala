@@ -4,28 +4,28 @@ import java.io.{ByteArrayInputStream, PushbackInputStream}
 
 import TokenType._
 
-class Lexer(val pushbackInputStream: PushbackInputStream) {
+class Lexer(val pushBackInputStream: PushbackInputStream) {
   var ch: Char = _
   var lineCount: Int = 1
   var columnCount: Int = _
-  var diagnostics: List[String] = List()
+  var diagnostics:DiagnosticsBag = DiagnosticsBag()
 
-  def read() = {
-    val c = pushbackInputStream.read()
+  def read(): Unit = {
+    val c = pushBackInputStream.read()
     ch = c.toChar
     columnCount += 1
   }
 
-  def unRead(c: Char) = {
-    pushbackInputStream.unread(c.toInt)
+  def unRead(c: Char): Unit = {
+    pushBackInputStream.unread(c.toInt)
   }
 
-  def unRead(s:String) = {
-    for(i <- (s.length - 1 to 0 by -1))
-      pushbackInputStream.unread(s.charAt(i).toInt)
+  def unRead(s: String): Unit = {
+    for (i <- s.length - 1 to 0 by -1)
+      pushBackInputStream.unread(s.charAt(i).toInt)
   }
 
-  def getKeyWordType(text: String) = {
+  def getKeyWordType(text: String): c89.TokenType.Value = {
     text match {
       case "false" => falseKeyword
       case "true" => trueKeyword
@@ -37,74 +37,77 @@ class Lexer(val pushbackInputStream: PushbackInputStream) {
     read()
     ch match {
       case x if x == ' ' =>
-        Tokens(whiteSpace, null, lineCount, columnCount)
+        Tokens(whiteSpace, null, Span(lineCount, columnCount))
       case x if x == '\n' | x == '\r' =>
         lineCount += 1
         columnCount = 0
-        Tokens(newline, null, lineCount, columnCount)
+        Tokens(newline, null, Span(lineCount, columnCount))
       case x if Character.isDigit(x) =>
-        Tokens(literal, getNum, lineCount, columnCount)
+        Tokens(literal, getNum, Span(lineCount, columnCount))
       case x if x == '_' || Character.isLetter(x) =>
         val text = getChars
         val tokenType = getKeyWordType(text)
-        Tokens(tokenType, text, lineCount, columnCount)
-      case '+' => Tokens(add, "+", lineCount, columnCount)
-      case '*' => Tokens(plus, "*", lineCount, columnCount)
-      case '/' => Tokens(div, "/", lineCount, columnCount)
-      case '%' => Tokens(mod, "%", lineCount, columnCount)
-      case '^' => Tokens(pow, "^", lineCount, columnCount)
-      case '&' => Tokens(and, "&", lineCount, columnCount)
-      case '|' => Tokens(or, "|", lineCount, columnCount)
-      case '!' => Tokens(not, "!", lineCount, columnCount)
+        Tokens(tokenType, text, Span(lineCount, columnCount))
+      case '+' => Tokens(add, "+", Span(lineCount, columnCount))
+      case '*' => Tokens(plus, "*", Span(lineCount, columnCount))
+      case '/' => Tokens(div, "/", Span(lineCount, columnCount))
+      case '%' => Tokens(mod, "%", Span(lineCount, columnCount))
+      case '^' => Tokens(pow, "^", Span(lineCount, columnCount))
+      case '&' => Tokens(and, "&", Span(lineCount, columnCount))
+      case '|' => Tokens(or, "|", Span(lineCount, columnCount))
+      case '!' => Tokens(not, "!", Span(lineCount, columnCount))
       case x if x == '-' =>
         read()
         var token: Tokens = null
         ch match {
           case '>' =>
-            token = Tokens(keyword, "->", lineCount, columnCount)
+            token = Tokens(keyword, "->", Span(lineCount, columnCount))
           case _ =>
             unRead(ch)
-            token = Tokens(sub, "-", lineCount, columnCount)
+            token = Tokens(sub, "-", Span(lineCount, columnCount))
         }
         token
       case x if x == '\"' =>
-        Tokens(literal, getStr, lineCount, columnCount)
+        Tokens(literal, getStr, Span(lineCount, columnCount))
       case '(' =>
-        Tokens(lb, "(", lineCount, columnCount)
+        Tokens(lb, "(", Span(lineCount, columnCount))
       case ')' =>
-        Tokens(rb, ")", lineCount, columnCount)
+        Tokens(rb, ")", Span(lineCount, columnCount))
       case '<' =>
         read()
         ch match {
           case '=' =>
-            Tokens(lte, "<=", lineCount, columnCount)
+            Tokens(lte, "<=", Span(lineCount, columnCount))
           case _ =>
             unRead(ch)
-            Tokens(lt, "<", lineCount, columnCount)
+            Tokens(lt, "<", Span(lineCount, columnCount))
         }
       case '>' =>
         read()
         ch match {
           case '=' =>
-            Tokens(gte, ">=", lineCount, columnCount)
+            Tokens(gte, ">=", Span(lineCount, columnCount))
           case _ =>
             unRead(ch)
-            Tokens(gt, ">", lineCount, columnCount)
+            Tokens(gt, ">", Span(lineCount, columnCount))
         }
       case '=' =>
         read()
         ch match {
           case '=' =>
-            Tokens(equal, "==", lineCount, columnCount)
+            Tokens(equal, "==", Span(lineCount, columnCount))
           case _ =>
             unRead(ch)
-            Tokens(assign, "=", lineCount, columnCount)
+            Tokens(assign, "=", Span(lineCount, columnCount))
         }
       case '\0' =>
-        Tokens(eof, "EOF", lineCount, columnCount)
+        Tokens(eof, "EOF", Span(lineCount, columnCount))
       case _ =>
-        diagnostics :+= s"error:bad character input $ch at line $lineCount ,$columnCount"
-        Tokens(wrong, "wrong", lineCount, columnCount)
+        diagnostics.report(
+          Span(lineCount, columnCount),
+          s"error:bad character input $ch at line $lineCount ,$columnCount"
+        )
+        Tokens(wrong, "wrong", Span(lineCount, columnCount))
     }
 
   }
@@ -112,12 +115,12 @@ class Lexer(val pushbackInputStream: PushbackInputStream) {
 
   def satisfied(c: Char): Boolean = ch == c
 
-  def string(str:String):Boolean = {
-    for(i <- str.indices){
-      if(satisfied(str.charAt(i)))
+  def string(str: String): Boolean = {
+    for (i <- str.indices) {
+      if (satisfied(str.charAt(i)))
         read()
       else {
-        unRead(str.substring(0,i))
+        unRead(str.substring(0, i))
         return false
       }
     }
@@ -156,11 +159,11 @@ class Lexer(val pushbackInputStream: PushbackInputStream) {
 }
 
 object Lexer {
-
   def newLexer(expr: String): Lexer = {
-    new Lexer(new PushbackInputStream(new ByteArrayInputStream((expr + '\0').getBytes),5))
+    new Lexer(new PushbackInputStream(new ByteArrayInputStream((expr + '\0').getBytes), 5))
   }
 
-  def main(args: Array[String]): Unit = {
-  }
+  def apply(pushbackInputStream: PushbackInputStream): Lexer = new Lexer(
+    pushbackInputStream
+  )
 }
