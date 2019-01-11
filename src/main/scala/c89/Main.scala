@@ -35,8 +35,8 @@ object Main {
               x => colorPrintln(scala.io.AnsiColor.RED, x.toString)
             )
           } else {
-            val compilation = new Compilation(tree)
-            val result = compilation.evaluate(variables)
+            val compilation = new Compilation(tree,variables)
+            val result = compilation.evaluate()
             if (!result.diagnosticsBag.isEmpty) {
               result.diagnosticsBag.reports.foreach(
                 x => colorPrintln(scala.io.AnsiColor.RED, x.toString)

@@ -7,12 +7,10 @@ import TypeMapping._
 
 import scala.collection.mutable
 
-class Binder() {
+class Binder(val variables:mutable.HashMap[VariableSymbol, AnyVal]) {
   val diagnostics: DiagnosticsBag = DiagnosticsBag()
-  val variables: mutable.HashMap[VariableSymbol, AnyVal] =
-    new mutable.HashMap[VariableSymbol, AnyVal]()
 
-  def bindExpression(tree: Expression,variables: mutable.HashMap[VariableSymbol,AnyVal]): BindExpression = {
+  def bindExpression(tree: Expression): BindExpression = {
     this.variables ++= variables
     tree.getKind() match {
       case TokenType.nameExpression =>
@@ -26,9 +24,9 @@ class Binder() {
       case TokenType.numberExpression =>
         bindLiteralExpression(tree.asInstanceOf[LiteralNode])
       case TokenType.expressionTree =>
-        bindExpression(tree.asInstanceOf[ExpressionTree].expr,this.variables)
+        bindExpression(tree.asInstanceOf[ExpressionTree].expr)
       case TokenType.braceExpression =>
-        bindExpression(tree.asInstanceOf[BraceNode].op,this.variables)
+        bindExpression(tree.asInstanceOf[BraceNode].op)
       case _ =>
         throw new LexerException(s"unexpected syntax ${tree.getKind()}")
     }
@@ -46,7 +44,7 @@ class Binder() {
 
   private def bindAssignmentExpression(node: AssignmentNode): BindExpression = {
     val name = node.identifierToken.value
-    val boundExpression = bindExpression(node.expression,this.variables)
+    val boundExpression = bindExpression(node.expression)
     val existingVariable = variables.keys.find(_.name == name)
     if(existingVariable.nonEmpty)
       variables remove existingVariable.get
@@ -66,8 +64,8 @@ class Binder() {
   }
 
   private def bindBinaryExpression(node: BinaryNode): BindExpression = {
-    val boundLeft = bindExpression(node.left,this.variables)
-    val boundRight = bindExpression(node.right,this.variables)
+    val boundLeft = bindExpression(node.left)
+    val boundRight = bindExpression(node.right)
     val boundOperator =
       BoundBinaryOperator.bind(
         node.op.tokenType,
@@ -87,7 +85,7 @@ class Binder() {
   }
 
   private def bindUnaryExpression(node: UnaryNode): BindExpression = {
-    val boundOperand = bindExpression(node.oprand,this.variables)
+    val boundOperand = bindExpression(node.oprand)
     val boundOperatorKind =
       BoundUnaryOperator.bind(
         node.op.getKind(),
@@ -107,7 +105,7 @@ class Binder() {
 }
 
 object Binder {
-  def apply(): Binder = new Binder()
+  def apply(variables:mutable.HashMap[VariableSymbol, AnyVal]): Binder = new Binder(variables)
 }
 
 abstract class BoundNode {
