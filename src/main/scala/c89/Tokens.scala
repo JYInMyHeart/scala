@@ -36,6 +36,7 @@ object TokenType extends Enumeration {
   rb,
   assign,
   equal,
+  notequal,
   lt,
   gt,
   lte,
@@ -84,7 +85,8 @@ object BindType extends Enumeration {
   lte,
   gt,
   gte,
-  equal
+  equal,
+  notequal
   = Value
 }
 

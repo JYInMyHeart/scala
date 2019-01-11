@@ -17,8 +17,8 @@ class Eval(expression: BindExpression) {
         (left, right, op) match {
           case (l: Int, r: Int, BindType.addition) => l + r
           case (l: Int, r: Int, BindType.subtraction) => l - r
-          case (l: Int, r: Int, BindType.multiplication) => l * r
-          case (l: Int, r: Int, BindType.division) => l / r
+          case (l: Int, r: Int, BindType.multiplication) => l.toDouble * r
+          case (l: Int, r: Int, BindType.division) => l.toDouble / r
           case (l: Int, r: Int, BindType.pow) => math.pow(l, r)
           case (l: Int, r: Int, BindType.mod) => l % r
           case (l: Int, r: Int, BindType.lt ) => l < r
@@ -26,9 +26,11 @@ class Eval(expression: BindExpression) {
           case (l: Int, r: Int, BindType.gt ) => l > r
           case (l: Int, r: Int, BindType.gte) => l >= r
           case (l: Int, r: Int, BindType.equal) => l == r
+          case (l: Int, r: Int, BindType.notequal) => l != r
           case (l: Boolean, r: Boolean, BindType.and) => l && r
           case (l: Boolean, r: Boolean, BindType.or) => l || r
           case (l: Boolean, r: Boolean, BindType.equal) => l == r
+          case (l: Boolean, r: Boolean, BindType.notequal) => l != r
           case _ =>
             throw new Exception(s"unknown literal type")
         }

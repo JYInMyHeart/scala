@@ -40,73 +40,31 @@ class Binder() {
   private def bindBinaryExpression(node: BinaryNode): BindExpression = {
     val boundLeft = bindExpression(node.left)
     val boundRight = bindExpression(node.right)
-    val boundOperatorKind = bindBinaryOperatorKind(node.op.tokenType, boundLeft.bindTypeClass, boundRight.bindTypeClass)
-    if (boundOperatorKind == null) {
+    val boundOperator =
+      BoundBinaryOperator.bind(
+        node.op.tokenType,
+        boundLeft.bindTypeClass.getSimpleName,
+        boundRight.bindTypeClass.getSimpleName
+      )
+    if (boundOperator == null) {
       diagnostics += s"Unary operator ${node.op.value} is not defined for type ${boundLeft.bindTypeClass}"
       return boundLeft
     }
-    BindBinaryExpression(boundOperatorKind, boundLeft, boundRight)
+    BindBinaryExpression(boundOperator.bindType, boundLeft, boundRight)
   }
 
   private def bindUnaryExpression(node: UnaryNode): BindExpression = {
     val boundOperand = bindExpression(node.oprand)
-    val boundOperatorKind = bindUnaryOperatorKind(node.op.getKind(), boundOperand.bindTypeClass)
+    val boundOperatorKind =
+      BoundUnaryOperator.bind(
+        node.op.getKind(),
+        boundOperand.bindTypeClass.getSimpleName
+      )
     if (boundOperatorKind == null) {
       diagnostics += s"Unary operator ${node.op.asInstanceOf[Tokens].value} is not defined for type ${boundOperand.bindTypeClass}"
       return boundOperand
     }
-    BindUnaryExpression(boundOperatorKind, boundOperand)
-  }
-
-
-  private def bindBinaryOperatorKind(tokenType: TokenType,
-                                     left: Class[_],
-                                     right: Class[_]): BindType = {
-    (left.getSimpleName, right.getSimpleName) match {
-      case ("Integer", "Integer") =>
-        tokenType match {
-          case TokenType.add => BindType.addition
-          case TokenType.sub => BindType.subtraction
-          case TokenType.plus => BindType.multiplication
-          case TokenType.div => BindType.division
-          case TokenType.pow => BindType.pow
-          case TokenType.mod => BindType.mod
-          case TokenType.equal => BindType.equal
-          case _ => null
-        }
-      case ("Boolean", "Boolean") =>
-        tokenType match {
-          case TokenType.and => BindType.and
-          case TokenType.or => BindType.or
-          case TokenType.lt => BindType.lt
-          case TokenType.lte => BindType.lte
-          case TokenType.gt => BindType.gt
-          case TokenType.gte => BindType.gte
-          case TokenType.equal => BindType.equal
-          case _ => null
-        }
-      case _ => null
-    }
-  }
-
-
-  private def bindUnaryOperatorKind(tokenType: TokenType,
-                                    op: Class[_]): BindType = {
-    op.getSimpleName match {
-      case "Integer" =>
-        tokenType match {
-          case TokenType.add => BindType.identity
-          case TokenType.sub => BindType.negation
-          case _ => null
-        }
-      case "Boolean" =>
-        tokenType match {
-          case TokenType.not => BindType.not
-          case _ => null
-        }
-      case _ => null
-    }
-
+    BindUnaryExpression(boundOperatorKind.bindType, boundOperand)
   }
 
 }
@@ -132,3 +90,97 @@ case class BindUnaryExpression(bindType: BindType,
 case class BindLiteralExpression(value: AnyVal) extends BindExpression {
   override def bindTypeClass: Class[_] = value.getClass
 }
+
+sealed class BoundBinaryOperator(val tokenType: TokenType,
+                                 val bindType: BindType,
+                                 val left: String,
+                                 val right: String,
+                                 val result: String)
+
+object BoundBinaryOperator {
+  private[this] val int = "Integer"
+  private[this] val bool = "Boolean"
+  private[this] val double = "Double"
+
+  def apply(
+             tokenType: TokenType,
+             bindType: BindType,
+             left: String,
+             right: String,
+             result: String
+           ): BoundBinaryOperator =
+    new BoundBinaryOperator(
+      tokenType,
+      bindType,
+      left,
+      right,
+      result
+    )
+
+  private[this] def binaryOperators: List[BoundBinaryOperator] =
+    List(
+      BoundBinaryOperator(TokenType.add, BindType.addition, int, int, int),
+      BoundBinaryOperator(TokenType.sub, BindType.subtraction, int, int, int),
+      BoundBinaryOperator(TokenType.div, BindType.division, int, int, double),
+      BoundBinaryOperator(TokenType.plus, BindType.multiplication, int, int, double),
+      BoundBinaryOperator(TokenType.pow, BindType.pow, int, int, double),
+      BoundBinaryOperator(TokenType.mod, BindType.mod, int, int, int),
+      BoundBinaryOperator(TokenType.lt, BindType.lt, int, int, bool),
+      BoundBinaryOperator(TokenType.gt, BindType.gt, int, int, bool),
+      BoundBinaryOperator(TokenType.lte, BindType.lte, int, int, bool),
+      BoundBinaryOperator(TokenType.gte, BindType.gte, int, int, bool),
+      BoundBinaryOperator(TokenType.equal, BindType.equal, int, int, bool),
+      BoundBinaryOperator(TokenType.equal, BindType.equal, bool, bool, bool),
+      BoundBinaryOperator(TokenType.notequal, BindType.notequal, int, int, bool),
+      BoundBinaryOperator(TokenType.notequal, BindType.notequal, bool, bool, bool),
+      BoundBinaryOperator(TokenType.and, BindType.and, bool, bool, bool),
+      BoundBinaryOperator(TokenType.or, BindType.or, bool, bool, bool)
+    )
+
+  def bind(tokenType: TokenType, left: String, right: String): BoundBinaryOperator = {
+    val binaryOperator = binaryOperators.filter(x => x.tokenType == tokenType && x.left == left && x.right == right)
+    if (binaryOperator.nonEmpty)
+      binaryOperator.last
+    else
+      null
+  }
+}
+
+sealed class BoundUnaryOperator(val tokenType: TokenType,
+                                val bindType: BindType,
+                                val operand: String,
+                                val result: String)
+
+object BoundUnaryOperator {
+  private[this] val int = "Integer"
+  private[this] val bool = "Boolean"
+
+  def apply(
+             tokenType: TokenType,
+             bindType: BindType,
+             operand: String,
+             result: String
+           ): BoundUnaryOperator = new BoundUnaryOperator(
+    tokenType,
+    bindType,
+    operand,
+    result
+  )
+
+  private[this] def unaryOperators: List[BoundUnaryOperator] =
+    List(
+      BoundUnaryOperator(TokenType.not, BindType.not, bool, bool),
+      BoundUnaryOperator(TokenType.sub, BindType.negation, int, bool),
+      BoundUnaryOperator(TokenType.add, BindType.identity, int, bool)
+    )
+
+  def bind(tokenType: TokenType, operand: String): BoundUnaryOperator = {
+    val unaryOperator = unaryOperators.filter(x => x.tokenType == tokenType && x.operand == operand)
+    if (unaryOperator.nonEmpty)
+      unaryOperator.last
+    else
+      null
+  }
+}
+
+
