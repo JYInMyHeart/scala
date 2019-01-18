@@ -27,13 +27,15 @@ case class Lexer(fileName: String,
         throw new Exception(s"Unexpected Token ${startNode.next()}")
       else {
         if (startNode.indent < indent || args.startNodeStack.empty())
-          throw new NoSuchElementException(s"position = ${args.currentLine}:${args.currentCol},indent=$indent")
+          throw new NoSuchElementException(s"position = " +
+            s"${args.currentLine}:${args.currentCol},indent=$indent")
         redirectToStartNodeByIndent(args, indent)
       }
   }
 
   def createStartNode(args: Args): Unit = {
-    val elementStartNode = ElementStartNode(args, args.startNodeStack.lastElement().indent + indent)
+    val elementStartNode =
+      ElementStartNode(args, args.startNodeStack.lastElement().indent + indent)
     args.previous = null
     args.startNodeStack.push(elementStartNode)
   }
@@ -122,10 +124,11 @@ case class Lexer(fileName: String,
                   s"""illegal undef command
                      |(there should be any characters after <target>)
                      | at ${args.generateLineCol}""".stripMargin)
-              case l if !args.defined.contains(target) =>
-                throw new Exception(s"$target is not defined at $lineStart")
               case _ =>
-                throw new Exception(s"unknown exception at ${las1.lineCol}")
+                if (!args.defined.contains(target))
+                  throw new Exception(s"$target is not defined at $lineStart")
+                else
+                  throw new Exception(s"unknown exception at ${las1.lineCol}")
             }
             args.defined -= target
             line = reader.readLine()
@@ -262,7 +265,8 @@ case class Lexer(fileName: String,
               else if (args.startNodeStack.lastElement().indent == startNode.indent - indent)
                 args.previous = startNode
               else
-                throw new Exception(s"indentation of $token should >= $start 's indent or equal to 's indent - $indent at ${args.generateLineCol}")
+                throw new Exception(s"indentation of $token should >= " +
+                  s"$start 's indent or equal to 's indent - $indent at ${args.generateLineCol}")
               args.previous = Element(token, args)
             case _ =>
               throw new Exception(s"$token ${args.generateLineCol}")
