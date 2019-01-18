@@ -67,6 +67,8 @@ class Parser(val lexer: Lexer) {
         | x == gte
         | x == equal =>
         0
+      case TokenType.assign =>
+        6
       case _ =>
         -1
     }
