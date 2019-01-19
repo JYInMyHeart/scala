@@ -24,17 +24,17 @@ case class Args() {
   val startNodeStack: Stack[ElementStartNode] =
     new Stack[ElementStartNode]()
   val pairEntryStack: Stack[PairEntry] = new Stack[PairEntry]
-  lazy val generateLineCol = LineCol(fileName, currentLine, currentCol)
+  lazy val generateLineCol = new LineCol(fileName, currentLine, currentCol)
   var defined: Map[String, String] = Map()
 }
 
-abstract class Node {
+abstract class Node() {
   var next: Node = _
   var previous: Node = _
   var lineCol: LineCol = _
 
   def this(args: Args) = {
-    this
+    this()
     lineCol = LineCol(args.fileName, args.currentLine, args.currentCol)
     this.previous = args.previous
     if (hasPrevious) {
@@ -52,10 +52,8 @@ abstract class Node {
 }
 
 case class EndingNode(nodeType: Int,
-                      args: Args) extends Node {
-  override var next: Node = _
-  override var previous: Node = _
-  override var lineCol: LineCol = _
+                      arg: Args) extends Node(arg) {
+
 
   override def toString(indent: Int): String = {
     var sb = ""
@@ -80,15 +78,20 @@ object EndingNode {
   val WEAK = 1
 }
 
-case class Element(private var content: String,
-                   args: Args) extends Node {
+case class Element(var content: String,
+                   arg: Args) extends Node(arg) {
 
   def checkWhetherIsValidName(): Unit = {
     if (CompilerUtil.isValidName(content))
       isValidName = true
     if (content.startsWith("`"))
       content = content.substring(1, content.length - 1)
+  }
 
+  override def equals(obj: Any): Boolean = {
+    if (obj == null || getClass != obj.getClass) return false
+    val that: Element = obj.asInstanceOf[Element]
+    content == that.content
   }
 
   override def toString(indent: Int): String = {
@@ -107,12 +110,11 @@ case class Element(private var content: String,
   var isValidName: Boolean = _
 }
 
-case class ElementStartNode(args: Args, indent: Int) extends Node {
+case class ElementStartNode(arg: Args, indent: Int) extends Node(arg) {
   var linkNode: Node = _
 
 
   override def equals(obj: Any): Boolean = {
-    if (this == obj) return true
     if (obj == null || getClass != obj.getClass) return false
     val that: ElementStartNode = obj.asInstanceOf[ElementStartNode]
     linkNode == that.linkNode

@@ -1,6 +1,6 @@
 package latte
 
-import java.io.BufferedReader
+import java.io.{BufferedReader, StringReader}
 
 import latte.Lexer._
 
@@ -22,15 +22,17 @@ case class Lexer(fileName: String,
     val startNode = args.startNodeStack.pop()
 
     if (startNode == null) throw new NoSuchElementException()
-    if (startNode.indent == indent)
+    if (startNode.indent == i) {
       if (startNode.hasNext)
-        throw new Exception(s"Unexpected Token ${startNode.next()}")
-      else {
-        if (startNode.indent < indent || args.startNodeStack.empty())
-          throw new NoSuchElementException(s"position = " +
-            s"${args.currentLine}:${args.currentCol},indent=$indent")
-        redirectToStartNodeByIndent(args, indent)
-      }
+        throw new Exception(s"Unexpected Token ${startNode.next}")
+      args.previous = startNode
+    }
+    else {
+      if (startNode.indent < i || args.startNodeStack.empty())
+        throw new NoSuchElementException(s"position = " +
+          s"${args.currentLine}:${args.currentCol},indent=$i")
+      redirectToStartNodeByIndent(args, i)
+    }
   }
 
   def createStartNode(args: Args): Unit = {
@@ -151,12 +153,8 @@ case class Lexer(fileName: String,
                 line = line.replace(entry._1, entry._2)
             }
             var spaces = 0
-            for (i <- 0 until line.length) {
-              if (line.charAt(i) != ' ') {
-                spaces = i
-                return
-              }
-            }
+            spaces = line.takeWhile(_ == ' ').length
+
 
             if (rootIndent == -1) {
               rootIndent = spaces
@@ -213,69 +211,70 @@ case class Lexer(fileName: String,
       val copyOfLine = line
       val str = line.substring(0, minIndex)
       str match {
-        case s if s.isEmpty =>
+        case s if s.nonEmpty =>
           args.previous = Element(s, args)
           args.currentCol += str.length
-        case s if LAYER.contains(s) =>
+        case _ =>
+      }
+      token match {
+        case t if LAYER.contains(t) =>
           args.previous = Element(token, args)
           createStartNode(args)
-        case _ =>
-          token match {
-            case t if SPLITS.contains(t) =>
-              if (!NO_RECORD.contains(t))
-                args.previous = Element(t, args)
-            case t if STRING.contains(t) =>
-              var lastIndex = minIndex
-              var enable = true
-              while (enable) {
-                val index = line.indexOf(token, lastIndex + 1)
-                if (line.length <= 1 || index == -1)
-                  throw new Exception("end of string not found")
-                val c = line.charAt(index - 1)
-                if (ESCAPE != c.toString) {
-                  val s = line.substring(minIndex, index + 1)
-                  args.previous = Element(s, args)
-                  args.currentCol += (index - minIndex + 1 - t.length)
-                  line = line.substring(index + 1)
-                  token = s
-                  enable = false
-                } else {
-                  lastIndex = index
-                }
-              }
-            case ENDING =>
-              if (args.previous.isInstanceOf[Element])
-                args.previous = EndingNode(EndingNode.STRONG, args)
-            case COMMENT =>
-              line = ""
-            case t if PAIR.contains(t) =>
-              args.previous = Element(token, args)
-              createStartNode(args)
-              args.pairEntryStack.push(PairEntry(token, args.startNodeStack.lastElement()))
-            case t if PAIR.values.exists(_ == t) =>
-              val entry = args.pairEntryStack.pop()
-              val start = entry.key
-              if (token != PAIR(start))
-                throw new Exception(s"${PAIR(start)}$token${args.generateLineCol}")
-              val startNode = entry.startNode
-              if (startNode.hasNext)
-                throw new Exception(s"null${startNode.next.toString()}${args.generateLineCol}")
-              if (args.startNodeStack.lastElement().indent >= startNode.indent)
-                redirectToStartNodeByIndent(args, startNode.indent)
-              else if (args.startNodeStack.lastElement().indent == startNode.indent - indent)
-                args.previous = startNode
-              else
-                throw new Exception(s"indentation of $token should >= " +
-                  s"$start 's indent or equal to 's indent - $indent at ${args.generateLineCol}")
-              args.previous = Element(token, args)
-            case _ =>
-              throw new Exception(s"$token ${args.generateLineCol}")
+        case t if SPLITS.contains(t) =>
+          if (!NO_RECORD.contains(t))
+            args.previous = Element(t, args)
+        case t if STRING.contains(t) =>
+          var lastIndex = minIndex
+          var enable = true
+          while (enable) {
+            val index = line.indexOf(token, lastIndex + 1)
+            if (line.length <= 1 || index == -1)
+              throw new Exception("end of string not found")
+            val c = line.charAt(index - 1)
+            if (ESCAPE != c.toString) {
+              val s = line.substring(minIndex, index + 1)
+              args.previous = Element(s, args)
+              args.currentCol += (index - minIndex + 1 - t.length)
+              line = line.substring(index + 1)
+              token = s
+              enable = false
+            } else {
+              lastIndex = index
+            }
           }
-          args.currentCol += token.length
-          if (copyOfLine == line)
-            line = line.substring(minIndex + token.length)
-          parse(line, args)
+        case ENDING =>
+          if (args.previous.isInstanceOf[Element])
+            args.previous = EndingNode(EndingNode.STRONG, args)
+        case COMMENT =>
+          line = ""
+        case t if PAIR.contains(t) =>
+          args.previous = Element(token, args)
+          createStartNode(args)
+          args.pairEntryStack.push(PairEntry(token, args.startNodeStack.lastElement()))
+        case t if PAIR.values.exists(_ == t) =>
+          val entry = args.pairEntryStack.pop()
+          val start = entry.key
+          if (token != PAIR(start))
+            throw new Exception(s"${PAIR(start)}$token${args.generateLineCol}")
+          val startNode = entry.startNode
+          if (startNode.hasNext)
+            throw new Exception(s"null${startNode.next.toString()}${args.generateLineCol}")
+          if (args.startNodeStack.lastElement().indent >= startNode.indent)
+            redirectToStartNodeByIndent(args, startNode.indent)
+          else if (args.startNodeStack.lastElement().indent == startNode.indent - indent)
+            args.previous = startNode
+          else
+            throw new Exception(s"indentation of $token should >= " +
+              s"$start 's indent or equal to 's indent - $indent at ${args.generateLineCol}")
+          args.previous = Element(token, args)
+        case _ =>
+          throw new Exception(s"$token ${args.generateLineCol}")
       }
+      args.currentCol += token.length
+      if (copyOfLine == line)
+        line = line.substring(minIndex + token.length)
+      parse(line, args)
+
     }
   }
 
@@ -316,8 +315,70 @@ case class Lexer(fileName: String,
     las
   }
 
-  private def finalCheck(root: ElementStartNode) = {
-
+  private def finalCheck(root: ElementStartNode): Unit = {
+    if (root.hasLinkedNode) {
+      var n = root.linkNode
+      while (n != null) {
+        n match {
+          case x: ElementStartNode =>
+            finalCheck(x)
+          case x: EndingNode if !x.hasNext || !x.next.isInstanceOf[Element] =>
+            if (n.hasPrevious)
+              n.previous.next = x.next
+            if (n.hasNext)
+              n.next.previous = n.previous
+          case x: Element =>
+            x.checkWhetherIsValidName()
+            if (x.content == "."
+              && n.hasNext
+              && n.hasPrevious
+              && n.previous.isInstanceOf[Element]
+              && n.next.isInstanceOf[Element]
+              && CompilerUtil.isNumber(n.previous.asInstanceOf[Element].content)
+              && CompilerUtil.isNumber(n.next.asInstanceOf[Element].content)
+              && !n.previous.asInstanceOf[Element].content.contains(".")
+              && !n.next.asInstanceOf[Element].content.contains(".")
+            ) {
+              val pre = x.previous.asInstanceOf[Element]
+              val nextElement = x.next.asInstanceOf[Element]
+              val s = pre.content + "." + nextElement.content
+              val element = Element(s, Args())
+              element.lineCol = pre.lineCol
+              element.previous = pre.previous
+              element.next = nextElement.next
+              if (element.hasPrevious)
+                element.previous.next = element
+              else
+                root.linkNode = element
+              if (element.hasNext)
+                element.next.previous = element
+            }
+          case _ =>
+        }
+        n = n.next
+      }
+      n = root.linkNode
+      while (n != null) {
+        n match {
+          case x: ElementStartNode if x.hasNext =>
+            val nextElement = x.next
+            val args = Args()
+            args.previous = n
+            args.currentLine = x.lineCol.line
+            args.currentCol = x.lineCol.column
+            val endingNode = EndingNode(EndingNode.WEAK, args)
+            endingNode.next = nextElement
+            nextElement.previous = endingNode
+          case _ =>
+        }
+        n = n.next
+      }
+    } else {
+      if (root.hasPrevious)
+        root.previous.next = root.next
+      if (root.hasNext)
+        root.next.previous = root.previous
+    }
   }
 }
 
@@ -363,7 +424,11 @@ object Lexer {
       Set(ENDING, COMMENT) ++
       PAIR.keySet ++
       PAIR.values.toSet
-      ).toList.sortBy(_.length)
+      ).toList.sortBy(_.length).reverse
+}
 
-
+object Main extends App {
+  val processor = new Lexer("test", new BufferedReader(new StringReader("" + "#> package::name::*\n" + "    package::name::Test")), 4)
+  val root = processor.parse
+  println(root.linkNode)
 }

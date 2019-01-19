@@ -16,6 +16,9 @@ object CompilerUtil {
     "is", "bool", "yes", "no", "type", "as", "undefined"
   )
 
+  def isNumber(str:String) :Boolean =
+    str.forall(Character.isDigit)
+
   def isValidNameStartChar(c: Char): Boolean =
     Character.isLetter(c) || c == '$' || c == '_'
 
