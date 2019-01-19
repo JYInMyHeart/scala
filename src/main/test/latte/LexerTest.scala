@@ -376,4 +376,44 @@ class LexerTest extends UnitSpec {
   }
 
 
+  "indent" should "be 2" in {
+    val processor = new Lexer("test",
+      new BufferedReader(
+        new StringReader(""
+          + "if true\n"
+          + "  <\"hello world\"\n"
+          + "elseif false\n"
+          + "  <\"hello\"\n"
+          + "else\n"
+          + "  <\"world\"")), 2)
+    val root = processor.parse
+    assert(root != null)
+  }
+
+  "define" should "be nice" in {
+    val processor = new Lexer("test",
+      new BufferedReader(
+        new StringReader(""
+          + "define 'CREATE TABLE' as 'class'\n"
+          + "CREATE TABLE User")), 2)
+    val root = processor.parse
+    var node = root.linkNode
+    assertResult(true)(node.isInstanceOf[Element])
+    assert("class" == node.asInstanceOf[Element].content)
+    node = node.next
+    assertResult(true)(node.isInstanceOf[Element])
+    assert("User" == node.asInstanceOf[Element].content)
+    assert(node.next == null)
+  }
+
+  "undef" should "ne nice" in {
+    val processor = new Lexer("test",
+      new BufferedReader(
+        new StringReader(""
+          + "define 'A' as 'class'\n"
+          + "undef 'A'")), 2)
+    val root = processor.parse
+  }
+
+
 }

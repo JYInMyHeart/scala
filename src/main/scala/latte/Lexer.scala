@@ -66,13 +66,12 @@ case class Lexer(fileName: String,
                 throw new Exception(s"define <target> length cannot be 0 at ${las1.lineCol}")
               case x if x.contains(ESCAPE) =>
                 throw new Exception(s"define <target> cannot contain escape char at ${las1.lineCol}")
-              case x if !x.trim.startsWith("as") =>
+              case _ if !line.trim.startsWith("as") =>
                 throw new Exception(
                   s"""illegal define command
                      |(there should be an `as` between <target> and <replacement>)
                      | at ${args.generateLineCol}""".stripMargin)
               case _ =>
-                throw new Exception(s"unknown exception at ${las1.lineCol}")
             }
             var asPos = line.indexOf("as")
             line = line.substring(asPos + 2)
@@ -85,7 +84,6 @@ case class Lexer(fileName: String,
                      |(there should be an `as` between <target> and <replacement>)
                      | at ${args.generateLineCol}""".stripMargin)
               case _ =>
-                throw new Exception(s"unknown exception at ${las1.lineCol}")
             }
 
             args.currentCol += asPos + 2
@@ -121,16 +119,14 @@ case class Lexer(fileName: String,
                 throw new Exception(s"undef <target> length cannot be 0 at ${las1.lineCol}")
               case l if l.contains(ESCAPE) =>
                 throw new Exception(s"undef <target> cannot contain escape char at ${las1.lineCol}")
-              case l if l.trim.nonEmpty =>
-                throw new Exception(
-                  s"""illegal undef command
-                     |(there should be any characters after <target>)
-                     | at ${args.generateLineCol}""".stripMargin)
               case _ =>
+                if (line.trim.nonEmpty)
+                  throw new Exception(
+                    s"""illegal undef command
+                       |(there should be any characters after <target>)
+                       | at ${args.generateLineCol}""".stripMargin)
                 if (!args.defined.contains(target))
                   throw new Exception(s"$target is not defined at $lineStart")
-                else
-                  throw new Exception(s"unknown exception at ${las1.lineCol}")
             }
             args.defined -= target
             line = reader.readLine()
