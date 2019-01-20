@@ -1,8 +1,10 @@
 package latte
 
 import java.util.Stack
-import Parser._
-import CompilerUtil._
+
+import latte.CompilerUtil._
+import latte.Parser._
+
 case class Parser(root: ElementStartNode) {
   private var current: Node = root.linkNode
   private val parsedExps: Stack[Expression] = new Stack()
@@ -15,7 +17,6 @@ case class Parser(root: ElementStartNode) {
   private var isParsingTry = false
   private var isParsingMap = false
   private var isParsingOperatorLikeInvocation = false
-
 
 
   def addUsedVarNames(names: Set[String]): Unit =
@@ -97,21 +98,21 @@ case class Parser(root: ElementStartNode) {
   def isOneVariableOperatorPreMustCheckExps(content: String): Boolean =
     oneVarOperatorsPreWithoutCheckingExps.contains(content)
 
-  def isOneVariableOperatorPreWithoutCheckingExps(content:String):Boolean =
+  def isOneVariableOperatorPreWithoutCheckingExps(content: String): Boolean =
     oneVarOperatorsPreWithoutCheckingExps.contains(content)
 
 
-  def parseExpression():Unit = {
-    if(current == null) return
+  def parseExpression(): Unit = {
+    if (current == null) return
     current match {
-      case c:Element =>
+      case c: Element =>
         val content = c.content
         var doCheckParsedExps = true
         var enable = true
-        while(enable){
-          if(doCheckParsedExps){
-            if(parsedExps.empty()){
-              if(isOneVariableOperatorPreMustCheckExps(content)){
+        while (enable) {
+          if (doCheckParsedExps) {
+            if (parsedExps.empty()) {
+              if (isOneVariableOperatorPreMustCheckExps(content)) {
                 annosIsEmpty()
                 modifiersIsEmpty()
                 parseOneVarPreOperation()
@@ -119,44 +120,44 @@ case class Parser(root: ElementStartNode) {
               }
             }
             doCheckParsedExps = false
-          }else{
+          } else {
             content match {
               case x if isNumber(x) =>
                 annosIsEmpty()
                 modifiersIsEmpty()
-                val numberLiteral = NumberLiteral(content,current.lineCol)
+                val numberLiteral = NumberLiteral(content, current.lineCol)
                 parsedExps.push(numberLiteral)
                 nextNode(true)
                 parseExpression()
               case x if isBoolean(x) =>
                 annosIsEmpty()
                 modifiersIsEmpty()
-                val boolLiteral = BoolLiteral(content,current.lineCol)
+                val boolLiteral = BoolLiteral(content, current.lineCol)
                 parsedExps.push(boolLiteral)
                 nextNode(true)
                 parseExpression()
               case x if isString(x) =>
                 annosIsEmpty()
                 modifiersIsEmpty()
-                val stringLiteral = StringLiteral(content,current.lineCol)
+                val stringLiteral = StringLiteral(content, current.lineCol)
                 parsedExps.push(stringLiteral)
                 nextNode(true)
                 parseExpression()
-              case x if x == "type" =>
+              case "type" =>
                 annosIsEmpty()
                 modifiersIsEmpty()
                 val lineCol = current.lineCol
                 nextNode(false)
                 val access = parseClsForTypeSpec()
-                parsedExps.push(TypeOf(access,lineCol))
+                parsedExps.push(TypeOf(access, lineCol))
                 parseExpression()
-              case x if x == "null" =>
+              case "null" =>
                 annosIsEmpty()
                 modifiersIsEmpty()
                 parsedExps.push(Null(current.lineCol))
                 nextNode(true)
                 parseExpression()
-              case x if x == "." =>
+              case "." =>
                 annosIsEmpty()
                 modifiersIsEmpty()
                 parseAccess(true)
@@ -176,105 +177,195 @@ case class Parser(root: ElementStartNode) {
                 annosIsEmpty()
                 modifiersIsEmpty()
                 parseAssign()
-              case x if x == ":" =>
+              case ":" =>
                 annosIsEmpty()
                 modifiersIsEmpty()
-                if(isParsingMap)
+                if (isParsingMap)
                   return
                 else
                   parseTypeSpec()
-              case x if x == "[" =>
+              case "[" =>
                 annosIsEmpty()
                 modifiersIsEmpty()
-                if(parsedExps.empty() || (isParsingMap && parsedExps.size() <= 1))
+                if (parsedExps.empty() || (isParsingMap && parsedExps.size() <= 1))
                   parseArrayExp()
                 else
                   parseIndexAccess()
-              case x if x == "{" =>
+              case "{" =>
                 annosIsEmpty()
                 modifiersIsEmpty()
                 parseMap()
-              case x if x == "(" =>
+              case "(" =>
                 annosIsEmpty()
                 modifiersIsEmpty()
-                if(isLambda(current))
+                if (isLambda(current))
                   parseLambda()
-                else{
+                else {
                   nextNode(false)
                   current match {
-                    case c:Element =>
-                      expecting(")",c.previous,c)
-                      if(!parsedExps.empty() && parsedExps.peek().isInstanceOf[Access]){
+                    case c: Element =>
+                      expecting(")", c.previous, c)
+                      if (!parsedExps.empty() && parsedExps.peek().isInstanceOf[Access]) {
                         val access = parsedExps.pop().asInstanceOf[Access]
-                        val invocation = Invocation(access,List[Expression](),access.lineCol)
+                        val invocation = Invocation(access, List[Expression](), access.lineCol)
                         parsedExps.push(invocation)
-                      }else
+                      } else
                         throw new Exception(s")${current.lineCol}")
+                      nextNode(true)
+                      parseExpression()
+                    case c: ElementStartNode =>
+                      val startNode = c
+                      val statements: List[Statement] = parseElemStart(startNode, false, Set(), false, false)
+                      if (statements.nonEmpty) {
+                        if (!parsedExps.empty() && parsedExps.peek().isInstanceOf[Access]) {
+                          val access = parsedExps.pop().asInstanceOf[Access]
+                          val args = statements.map(_.asInstanceOf[Expression])
+                          val invocation = Invocation(access, args, current.lineCol)
+                          parsedExps.push(invocation)
+                        } else {
+                          statements.size match {
+                            case 1 =>
+                              statements.head match {
+                                case e: Expression =>
+                                  parsedExps.push(e)
+                                case r: Return =>
+                                  val procedure = Procedure(statements, startNode.lineCol)
+                                  parsedExps.push(procedure)
+                                case _ =>
+                                  throw new Exception(s"return statement in closure ${statements.head.toString}")
+                              }
+                            case _ =>
+                              val procedure = Procedure(statements, startNode.lineCol)
+                              parsedExps.push(procedure)
+                          }
+                        }
+                      } else
+                        throw new Exception(s"arguments ${startNode.toString}")
+                      nextNode(false)
+                      expecting(")", startNode, current)
+                      nextNode(true)
+                      parseExpression()
                   }
+
                 }
 
+              case "as" =>
+                annosIsEmpty()
+                if (parsedExps.empty())
+                  throw new Exception(s"unexpected expression as ${current.lineCol}")
+                else {
+                  val lineCol = current.lineCol
+                  val exp = parsedExps.pop()
+                  nextNode(true)
+                  val access = parseClsForTypeSpec()
+                  val asType = AsType(exp, access, lineCol)
+                  parsedExps.push(asType)
+                }
+              case "undefined" =>
+                annosIsEmpty()
+                parsedExps.push(UndefinedExp(current.lineCol))
+                nextNode(true)
+                parseExpression()
+              case _ =>
+                current match {
+                  case x: Element if isPackage(x) =>
+                    annosIsEmpty()
+                    modifiersIsEmpty()
+                    parsePackage(true)
+                  case x: Element if x.isValidName =>
+                    if (parsedExps.empty())
+                      parseVar()
+                    else
+                      parseOperatorLikeInvocation()
+                  case _ =>
+                    throw new Exception(s"unknown token $content ${current.lineCol}")
+                }
             }
           }
         }
+      case _: ElementStartNode =>
+        if (!expectingStartNode)
+          throw new Exception(s"unexpected new layer ${current.lineCol}")
+      case _ =>
     }
   }
 
-
-  def parseArrayExp():Unit = {
-
-  }
-
-  def parseIndexAccess():Unit = {
+  def parseOperatorLikeInvocation(): Unit = {
 
   }
 
-  def parseLambda():Unit = {
+  def parseVar(): Unit = {
 
   }
 
-  def parseMap():Unit = {
+  def parsePackage(boolean: Boolean): Unit = {
 
   }
 
-  def parseTypeSpec():Unit = {
+
+  def parseElemStart(startNode: ElementStartNode,
+                     bool: Boolean,
+                     set: Set[Nothing],
+                     bool1: Boolean,
+                     bool2: Boolean): List[Statement] = {
+    List()
+  }
+
+  def parseArrayExp(): Unit = {
 
   }
 
-  def parseAssign():Unit = {
+  def parseIndexAccess(): Unit = {
 
   }
 
-  def parseTwoVarOperation():Unit = {
+  def parseLambda(): Unit = {
 
   }
 
-  def parseOneVarPostOperation():Unit = {
+  def parseMap(): Unit = {
 
   }
 
-  def parseAccess(parseExp:Boolean):Unit = {
+  def parseTypeSpec(): Unit = {
 
   }
 
-  def parseClsForTypeSpec():Access = {
+  def parseAssign(): Unit = {
+
+  }
+
+  def parseTwoVarOperation(): Unit = {
+
+  }
+
+  def parseOneVarPostOperation(): Unit = {
+
+  }
+
+  def parseAccess(parseExp: Boolean): Unit = {
+
+  }
+
+  def parseClsForTypeSpec(): Access = {
     null
   }
 
 
   def parseOneVarPreOperation(): Unit = {
-//    val opNode = current.asInstanceOf[Element]
-//    val op = opNode.content
-//    unVarOps.push(op)
-//    val exp = nextExp(false)
+    //    val opNode = current.asInstanceOf[Element]
+    //    val op = opNode.content
+    //    unVarOps.push(op)
+    //    val exp = nextExp(false)
 
 
   }
 
 }
 
-object Parser{
-  private val oneVarOperatorsPreWithoutCheckingExps:Set[String] = Set("!","~")
-  private val oneVarOperatorsPreMustCheckExps:Set[String] = Set(
+object Parser {
+  private val oneVarOperatorsPreWithoutCheckingExps: Set[String] = Set("!", "~")
+  private val oneVarOperatorsPreMustCheckExps: Set[String] = Set(
     "++", "--", "!", "~", "+", "-"
   )
 }

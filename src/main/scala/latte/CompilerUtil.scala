@@ -125,12 +125,31 @@ object CompilerUtil {
     str == "=" || str == "/=" || str == "*=" || str == "+=" || str == "-=" || str == "%="
 
 
-  def expecting(token:String,previous:Node,got:Node): Unit = {
+  def expecting(token: String, previous: Node, got: Node): Unit = {
     got match {
-      case x:Element if !x.content.endsWith(token) =>
+      case x: Element if !x.content.endsWith(token) =>
       case _ =>
         throw new Exception(s"${previous.lineCol}")
     }
+  }
+
+  def isPackage(element: Element): Boolean = {
+    if (isValidName(element.content) && element.hasNext) {
+      element.next match {
+        case n: Element =>
+          if (n.content == "::" && n.hasNext) {
+            n.next match {
+              case nn: Element =>
+                return isValidName(nn.content)
+              case _ =>
+                return false
+            }
+          }
+        case _ =>
+          return false
+      }
+    }
+    false
   }
 
 

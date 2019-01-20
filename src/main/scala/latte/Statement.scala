@@ -90,18 +90,17 @@ case class NumberLiteral(literal: String,
                          lineCol: LineCol)
   extends Literal(Literal.NUMBER, literal, lineCol)
 
-case class BoolLiteral(literal:String,
+case class BoolLiteral(literal: String,
                        lineCol: LineCol)
   extends Literal(Literal.BOOL, literal, lineCol)
 
-case class StringLiteral(literal:String,
-                       lineCol: LineCol)
+case class StringLiteral(literal: String,
+                         lineCol: LineCol)
   extends Literal(Literal.STRING, literal, lineCol)
 
 case class TypeOf(access: Access,
-                  lineCol: LineCol) extends Expression{
+                  lineCol: LineCol) extends Expression {
   override def hashCode(): Int = access.hashCode()
-
 
 
   override def equals(obj: Any): Boolean = {
@@ -113,7 +112,7 @@ case class TypeOf(access: Access,
   override def toString: String = s"(type $access)"
 }
 
-case class Null(lineCol: LineCol) extends Expression{
+case class Null(lineCol: LineCol) extends Expression {
   override def hashCode(): Int = 0
 
   override def equals(obj: Any): Boolean = obj.isInstanceOf[Null]
@@ -123,14 +122,13 @@ case class Null(lineCol: LineCol) extends Expression{
 
 
 case class Invocation(access: Access,
-                      args:List[Expression],
-                      lineCol: LineCol) extends Expression{
+                      args: List[Expression],
+                      lineCol: LineCol) extends Expression {
   override def hashCode(): Int = {
     var result = if (access == null) 0 else access.hashCode
     result = 31 * result + args.hashCode()
     result
   }
-
 
 
   override def equals(obj: Any): Boolean = {
@@ -140,22 +138,55 @@ case class Invocation(access: Access,
   }
 
   override def toString: String = {
-    s"Invocation($access(${args.foldLeft("")(_+"."+_).substring(1)}))"
+    s"Invocation($access(${args.foldLeft("")(_ + "." + _).substring(1)}))"
   }
 }
 
+case class Procedure(statements: List[Statement],
+                     lineCol: LineCol) extends Expression {
+  override def hashCode(): Int =
+    if (statements != null)
+      statements.hashCode
+    else
+      0
+
+  override def equals(obj: Any): Boolean = {
+    if (obj == null || getClass != obj.getClass)
+      return false
+    statements == obj.asInstanceOf[Procedure].statements
+  }
+
+  override def toString: String = s"($statements)"
+}
 
 
+case class UndefinedExp(lineCol: LineCol) extends Expression {
+  override def hashCode(): Int = 0
+
+  override def equals(obj: Any): Boolean = {
+    obj.isInstanceOf[UndefinedExp]
+  }
+
+}
+
+case class AsType(exp: Expression,
+                  access: Access,
+                  lineCol: LineCol) extends Expression {
+  override def hashCode(): Int = {
+    var result = if (access == null) 0 else access.hashCode
+    result = 31 * result + exp.hashCode()
+    result
+  }
 
 
+  override def equals(obj: Any): Boolean = {
+    if (obj == null || getClass != obj.getClass)
+      return false
+    exp == obj.asInstanceOf[AsType].exp && access == obj.asInstanceOf[AsType].access
+  }
 
-
-
-
-
-
-
-
+  override def toString: String = s"return ($exp as $access)"
+}
 
 
 trait Pre extends Statement
@@ -176,4 +207,21 @@ case class Modifier(modifier: String,
   }
 
   override def toString: String = s"($modifier)"
+}
+
+case class Return(exp: Expression,
+                  lineCol: LineCol) extends Statement {
+  override def hashCode(): Int =
+    if (exp != null)
+      exp.hashCode
+    else
+      0
+
+  override def equals(obj: Any): Boolean = {
+    if (obj == null || getClass != obj.getClass)
+      return false
+    exp == obj.asInstanceOf[Return].exp
+  }
+
+  override def toString: String = s"($exp)"
 }
