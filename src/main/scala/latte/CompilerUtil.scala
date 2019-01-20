@@ -12,6 +12,11 @@ object CompilerUtil {
     "strictfp", "null"
   )
 
+  val oneVarOperatorsPreWithoutCheckingExps: Set[String] = Set("!", "~")
+  val oneVarOperatorsPreMustCheckExps: Set[String] = Set(
+    "++", "--", "!", "~", "+", "-"
+  )
+
   val modifiers: Set[String] = Set(
     "pub", "pro", "pri", "pkg",
     "abs", "val", "native", "sync", "transient", "volatile", "strictfp",

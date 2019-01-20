@@ -3,7 +3,6 @@ package latte
 import java.util.Stack
 
 import latte.CompilerUtil._
-import latte.Parser._
 
 case class Parser(root: ElementStartNode) {
   private var current: Node = root.linkNode
@@ -96,7 +95,7 @@ case class Parser(root: ElementStartNode) {
 
 
   def isOneVariableOperatorPreMustCheckExps(content: String): Boolean =
-    oneVarOperatorsPreWithoutCheckingExps.contains(content)
+    oneVarOperatorsPreMustCheckExps.contains(content)
 
   def isOneVariableOperatorPreWithoutCheckingExps(content: String): Boolean =
     oneVarOperatorsPreWithoutCheckingExps.contains(content)
@@ -363,9 +362,4 @@ case class Parser(root: ElementStartNode) {
 
 }
 
-object Parser {
-  private val oneVarOperatorsPreWithoutCheckingExps: Set[String] = Set("!", "~")
-  private val oneVarOperatorsPreMustCheckExps: Set[String] = Set(
-    "++", "--", "!", "~", "+", "-"
-  )
-}
+
