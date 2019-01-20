@@ -73,7 +73,7 @@ case class Lexer(fileName: String,
                      | at ${args.generateLineCol}""".stripMargin)
               case _ =>
             }
-            var asPos = line.indexOf("as")
+            val asPos = line.indexOf("as")
             line = line.substring(asPos + 2)
             line match {
               case x if x.isEmpty =>
