@@ -60,9 +60,9 @@ case class Assignment(assignTo: Access,
   override def toString: String = s"Assignment($assignTo $op $assignFrom)"
 }
 
-abstract class Literal(literalType: Int,
-                       literal: String,
-                       lineCol: LineCol) extends Expression {
+ abstract class Literal(val literalType: Int,
+                        val literal: String,
+                        val lineCol: LineCol) extends Expression {
   override def hashCode(): Int = {
     var result = literalType
     val h = if (literal == null) 0 else literal.hashCode
@@ -78,7 +78,9 @@ abstract class Literal(literalType: Int,
   }
 
   override def toString: String = literal
-}
+
+
+ }
 
 object Literal {
   val NUMBER = 0
@@ -86,16 +88,16 @@ object Literal {
   val BOOL = 2
 }
 
-case class NumberLiteral(literal: String,
-                         lineCol: LineCol)
+case class NumberLiteral(override val literal: String,
+                         override val lineCol: LineCol)
   extends Literal(Literal.NUMBER, literal, lineCol)
 
-case class BoolLiteral(literal: String,
-                       lineCol: LineCol)
+case class BoolLiteral(override val literal: String,
+                       override val lineCol: LineCol)
   extends Literal(Literal.BOOL, literal, lineCol)
 
-case class StringLiteral(literal: String,
-                         lineCol: LineCol)
+case class StringLiteral(override val literal: String,
+                         override val lineCol: LineCol)
   extends Literal(Literal.STRING, literal, lineCol)
 
 case class TypeOf(access: Access,

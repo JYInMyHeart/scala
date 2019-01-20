@@ -158,4 +158,28 @@ object CompilerUtil {
   }
 
 
+  def twoVarHigherOrEqual(a: String, b: String): Boolean = {
+    var indexA = findTwoVarPriority(a)
+    if (indexA == -1 && isValidName(a))
+      indexA = binOpPriority.length
+    else
+      throw new IllegalArgumentException(a + " is not valid two variable operator")
+    var indexB = findTwoVarPriority(b)
+    if (indexB == -1 && isValidName(b))
+      indexB = binOpPriority.length
+    else
+      throw new IllegalArgumentException(b + " is not valid two variable operator")
+    indexA <= indexB
+  }
+
+  def findTwoVarPriority(s: String): Int = {
+    for (i <- binOpPriority.indices)
+      for (j <- binOpPriority(i))
+        if (j == s)
+          return i
+    -1
+
+  }
+
+
 }

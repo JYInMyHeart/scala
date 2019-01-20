@@ -214,7 +214,7 @@ case class Parser(root: ElementStartNode) {
                       parseExpression()
                     case c: ElementStartNode =>
                       val startNode = c
-                      val statements: List[Statement] = parseElemStart(startNode, false, Set(), false, false)
+                      val statements: List[Statement] = parseElemStart(startNode, bool = false, Set(), bool1 = false, bool2 = false)
                       if (statements.nonEmpty) {
                         if (!parsedExps.empty() && parsedExps.peek().isInstanceOf[Access]) {
                           val access = parsedExps.pop().asInstanceOf[Access]
@@ -290,7 +290,72 @@ case class Parser(root: ElementStartNode) {
   }
 
   def parseOperatorLikeInvocation(): Unit = {
+    if (isParsingOperatorLikeInvocation) return
+    assert(!parsedExps.empty())
+    val expr = parsedExps.pop()
+    val op = current.asInstanceOf[Element].content
+    val opLineCol = current.lineCol
+    current.next match {
+      case e: Element =>
+        if (!isParsingMap || e.next.asInstanceOf[Element].content != ":") {
+          if (!binVarOps.empty()) {
+            val lastOp = binVarOps.pop()
+            if (twoVarHigherOrEqual(lastOp, op)) {
+              parsedExps.push(expr)
+              return
+            }
+            binVarOps.push(lastOp)
+          }
+          nextNode(true)
+          binVarOps.push(op)
+          var opArgs = List[Expression]()
+          opArgs :+= getExp(false)
+          while (current.isInstanceOf[EndingNode]
+            && current.asInstanceOf[EndingNode].nodeType == EndingNode.STRONG) {
+            val tmp = new Stack[String]()
+            while (!binVarOps.empty()) tmp.push(binVarOps.pop())
+            nextNode(false)
+            isParsingOperatorLikeInvocation = true
+            opArgs :+= getExp(false)
+            isParsingOperatorLikeInvocation = false
+            while (!tmp.empty()) binVarOps.push(tmp.pop())
+          }
+          val invocation = Invocation(
+            Access(expr, op, opLineCol),
+            opArgs,
+            opLineCol
+          )
+          parsedExps.push(invocation)
+        }
+      case _ =>
+        if (!binVarOps.empty()) {
+          binVarOps.pop()
+          parsedExps.push(expr)
+          return
+        }
+        nextNode(true)
+        val invocation = Invocation(
+          Access(expr, op, opLineCol),
+          List(),
+          opLineCol
+        )
+        parsedExps.push(invocation)
+    }
+    parseExpression()
+  }
 
+  def getExp(expectingStartNode:Boolean): Expression = {
+    if(expectingStartNode)
+      this.expectingStartNode = true
+    parseExpression()
+    if(expectingStartNode)
+      this.expectingStartNode = false
+    parsedExps.pop()
+  }
+
+  def nextExp(expectingStartNode:Boolean): Expression = {
+    nextNode(false)
+    getExp(expectingStartNode)
   }
 
   def parseVar(): Unit = {
