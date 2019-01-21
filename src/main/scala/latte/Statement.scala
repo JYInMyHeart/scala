@@ -5,8 +5,17 @@ trait Statement {
   def lineCol: LineCol
 }
 
+/**
+  * Expression
+  *
+  */
 trait Expression extends Statement
 
+
+/**
+  * Access
+  *
+  */
 case class Access(expression: Expression,
                   name: String,
                   lineCol: LineCol) extends Expression {
@@ -28,6 +37,11 @@ case class Access(expression: Expression,
   override def toString: String = s"($expression.$name)"
 }
 
+
+/**
+  * Annotation
+  *
+  */
 case class Anno(anno: Access,
                 args: List[Assignment],
                 lineCol: LineCol) extends Expression {
@@ -60,6 +74,11 @@ case class Assignment(assignTo: Access,
   override def toString: String = s"Assignment($assignTo $op $assignFrom)"
 }
 
+
+/**
+  * Literal
+  *
+  */
 abstract class Literal(val literalType: Int,
                        val literal: String,
                        val lineCol: LineCol) extends Expression {
@@ -88,18 +107,37 @@ object Literal {
   val BOOL = 2
 }
 
+
+/**
+  * numberLiteral
+  *
+  */
 case class NumberLiteral(override val literal: String,
                          override val lineCol: LineCol)
   extends Literal(Literal.NUMBER, literal, lineCol)
 
+/**
+  * boolLiteral
+  *
+  */
 case class BoolLiteral(override val literal: String,
                        override val lineCol: LineCol)
   extends Literal(Literal.BOOL, literal, lineCol)
 
+
+/**
+  * stringLiteral
+  *
+  */
 case class StringLiteral(override val literal: String,
                          override val lineCol: LineCol)
   extends Literal(Literal.STRING, literal, lineCol)
 
+
+/**
+  * type
+  *
+  */
 case class TypeOf(access: Access,
                   lineCol: LineCol) extends Expression {
   override def hashCode(): Int = access.hashCode()
@@ -114,6 +152,11 @@ case class TypeOf(access: Access,
   override def toString: String = s"(type $access)"
 }
 
+
+/**
+  * null
+  *
+  */
 case class Null(lineCol: LineCol) extends Expression {
   override def hashCode(): Int = 0
 
@@ -123,6 +166,10 @@ case class Null(lineCol: LineCol) extends Expression {
 }
 
 
+/**
+  * invocation
+  *
+  */
 case class Invocation(access: Access,
                       args: List[Expression],
                       lineCol: LineCol) extends Expression {
@@ -144,6 +191,11 @@ case class Invocation(access: Access,
   }
 }
 
+
+/**
+  * procedure
+  *
+  */
 case class Procedure(statements: List[Statement],
                      lineCol: LineCol) extends Expression {
   override def hashCode(): Int =
@@ -161,7 +213,10 @@ case class Procedure(statements: List[Statement],
   override def toString: String = s"($statements)"
 }
 
-
+/**
+  * undefined
+  *
+  */
 case class UndefinedExp(lineCol: LineCol) extends Expression {
   override def hashCode(): Int = 0
 
@@ -171,6 +226,10 @@ case class UndefinedExp(lineCol: LineCol) extends Expression {
 
 }
 
+/**
+  * as expression
+  *
+  */
 case class AsType(exp: Expression,
                   access: Access,
                   lineCol: LineCol) extends Expression {
@@ -190,6 +249,11 @@ case class AsType(exp: Expression,
   override def toString: String = s"return ($exp as $access)"
 }
 
+
+/**
+  * index
+  *
+  */
 case class Index(exp: Expression,
                  args: List[Expression],
                  lineCol: LineCol) extends Expression {
@@ -211,8 +275,36 @@ case class Index(exp: Expression,
 }
 
 
+case class PackageRef(pkg: String,
+                      lineCol: LineCol) extends Expression {
+  override def hashCode(): Int =
+    if (pkg != null)
+      pkg.hashCode
+    else
+      0
+
+  override def equals(obj: Any): Boolean = {
+    if (obj == null || getClass != obj.getClass)
+      return false
+    pkg == obj.asInstanceOf[PackageRef].pkg
+  }
+
+  override def toString: String = s"($pkg)"
+}
+
+
+case class MapExp(map:Map[Expression,Expression],
+                  lineCol:LineCol) extends Expression{
+  
+}
+
+
 trait Pre extends Statement
 
+/**
+  * modifier
+  *
+  */
 case class Modifier(modifier: String,
                     lineCol: LineCol) extends Pre {
 
@@ -231,6 +323,11 @@ case class Modifier(modifier: String,
   override def toString: String = s"($modifier)"
 }
 
+
+/**
+  * return
+  *
+  */
 case class Return(exp: Expression,
                   lineCol: LineCol) extends Statement {
   override def hashCode(): Int =
@@ -248,7 +345,10 @@ case class Return(exp: Expression,
   override def toString: String = s"($exp)"
 }
 
-
+/**
+  * Definition
+  *
+  */
 trait Definition extends Statement
 
 case class VariableDef(name: String,
@@ -278,4 +378,112 @@ case class VariableDef(name: String,
   override def toString: String =
     s"VariableDef(${annos.foldLeft("")(_ + " " + _)}${modifiers.foldLeft("")(_ + " " + _)})($name)" +
       s"${if (vType != null) s":$vType"}${if (init != null) s" = $init"}"
+}
+
+
+/**
+  * operation
+  *
+  */
+trait Operation extends Expression {
+  def operator(): String
+
+  def expressions(): List[Expression]
+
+  def invokeOn(): Int
+
+  def isUnary(): Boolean
+}
+
+/**
+  * UnaryOneVariableOperation
+  *
+  */
+case class UnaryOneVariableOperation(operator: String,
+                                     exp: Expression,
+                                     lineCol: LineCol) extends Operation {
+  override def expressions(): List[Expression] = List(exp)
+
+  override def invokeOn(): Int = 0
+
+  override def isUnary(): Boolean = true
+
+  override def hashCode(): Int = {
+    var result = if (operator != null) operator.hashCode() else 0
+    result = 31 * result + (if (exp != null) exp.hashCode() else 0)
+    result
+  }
+
+  override def equals(obj: Any): Boolean = {
+    if (obj == null || getClass != obj.getClass)
+      return false
+    operator == obj.asInstanceOf[UnaryOneVariableOperation].operator && exp == obj.asInstanceOf[UnaryOneVariableOperation].exp
+  }
+
+  override def toString: String =
+    s"($operator ${exp})"
+}
+
+/**
+  * OneVariableOperation
+  *
+  */
+case class OneVariableOperation(operator: String,
+                                exp: Expression,
+                                lineCol: LineCol) extends Operation {
+  override def expressions(): List[Expression] = List(exp)
+
+  override def invokeOn(): Int = 0
+
+  override def isUnary(): Boolean = false
+
+  override def hashCode(): Int = {
+    var result = if (operator != null) operator.hashCode() else 0
+    result = 31 * result + (if (exp != null) exp.hashCode() else 0)
+    result
+  }
+
+  override def equals(obj: Any): Boolean = {
+    if (obj == null || getClass != obj.getClass)
+      return false
+    operator == obj.asInstanceOf[UnaryOneVariableOperation].operator && exp == obj.asInstanceOf[UnaryOneVariableOperation].exp
+  }
+
+  override def toString: String =
+    s"($operator $exp)"
+}
+
+/**
+  * TwoVariableOperation
+  *
+  */
+case class TwoVariableOperation(operator: String,
+                                exp1: Expression,
+                                exp2: Expression,
+                                lineCol: LineCol) extends Operation {
+  override def expressions(): List[Expression] = List(exp1, exp2)
+
+  override def invokeOn(): Int = 0
+
+  override def isUnary(): Boolean = false
+
+  override def hashCode(): Int = {
+    var result = if (operator != null) operator.hashCode() else 0
+    result = 31 * result + (if (expressions() != null) expressions().hashCode() else 0)
+    result
+  }
+
+  override def equals(obj: Any): Boolean = {
+    if (obj == null || getClass != obj.getClass)
+      return false
+    obj match {
+      case TwoVariableOperation(o, e1, e2, _) =>
+        o == operator && e1 == exp1 && e2 == exp2
+      case _ =>
+        false
+    }
+  }
+
+  override def toString: String =
+    s"($operator $exp1 $operator $exp2)"
 }
