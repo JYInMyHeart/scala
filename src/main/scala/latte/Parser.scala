@@ -461,7 +461,7 @@ case class Parser(root: ElementStartNode) {
     Import(importDetails, lineCol)
   }
 
-  def checkMethodDef(e: Element) = ???
+  def checkMethodDef(e: Element):Int = ???
 
   def parseMethodDefType(): Statement = ???
 
