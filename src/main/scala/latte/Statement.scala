@@ -298,6 +298,11 @@ case class MapExp(map:Map[Expression,Expression],
   
 }
 
+case class ArrayExp(list:List[Expression],
+                  lineCol:LineCol) extends Expression{
+
+}
+
 
 trait Pre extends Statement
 
