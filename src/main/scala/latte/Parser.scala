@@ -451,7 +451,7 @@ case class Parser(root: ElementStartNode) {
         nextNode(true)
       }
       case _ => {
-        expecting("]", if (current.next == null) null else current.next.next,lineCol)
+        expecting("]", if (current.next == null) null else current.next.next,current)
         val stmts: List[Statement] = parseElemStart(
           current.asInstanceOf[ElementStartNode],
           true,
