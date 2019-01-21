@@ -64,7 +64,7 @@ case class Assignment(assignTo: Access,
     if (obj == null || getClass != obj.getClass)
       return false
     obj match {
-      case Assignment(at, o, af, l) =>
+      case Assignment(at, o, af, _) =>
         at == assignTo && af == assignFrom && op == o
       case _ =>
         false
@@ -485,20 +485,143 @@ case class IfStatement(ifs: List[IfPair],
   * For
   *
   */
-case class ForStatement(lineCol: LineCol) extends Statement
+case class ForStatement(name: String,
+                        exp: Expression,
+                        body: List[Statement],
+                        lineCol: LineCol) extends Statement {
 
-/**
-  * Do
-  *
-  */
-case class DoStatement(lineCol: LineCol) extends Statement
+  override def hashCode(): Int = {
+    var result = if (name == null) 0 else name.hashCode()
+    result = 31 * result + (if (exp == null) 0 else exp.hashCode())
+    result = 31 * result + (if (body == null) 0 else body.hashCode())
+    result
+  }
+
+  override def equals(obj: Any): Boolean = {
+    if (obj == null || getClass != obj.getClass)
+      return false
+    obj match {
+      case ForStatement(n, e, b, _) =>
+        n == name && e == exp && b == body
+      case _ =>
+        false
+    }
+  }
+
+  override def toString: String = {
+    s"(for $name @ $exp $body)"
+  }
+
+}
+
 
 /**
   * While
   *
   */
-case class WhileStatement(lineCol: LineCol) extends Statement
+case class WhileStatement(condition: Expression,
+                          statements: List[Statement],
+                          doWhile: Boolean,
+                          lineCol: LineCol) extends Statement {
+  override def hashCode(): Int = {
+    var result = if (condition == null) 0 else condition.hashCode()
+    result = 31 * result + (if (statements == null) 0 else statements.hashCode())
+    result = 31 * result + (if (!doWhile) 0 else 1)
+    result
+  }
 
+  override def equals(obj: Any): Boolean = {
+    if (obj == null || getClass != obj.getClass)
+      return false
+    obj match {
+      case WhileStatement(c, s, d, _) =>
+        d == doWhile && c == condition && s == statements
+      case _ =>
+        false
+    }
+  }
+
+  override def toString: String = {
+    if (doWhile)
+      s"(do $statements while $condition)"
+    else
+      s"(while $condition $statements)"
+  }
+}
+
+
+/**
+  * ImportDetails
+  *
+  */
+case class ImportDetail(pkg: PackageRef,
+                        access: Access,
+                        importAll: Boolean) {
+  override def hashCode(): Int = {
+    var result = if (pkg == null) 0 else pkg.hashCode()
+    result = 31 * result + (if (access == null) 0 else access.hashCode())
+    result = 31 * result + (if (!importAll) 0 else 1)
+    result
+  }
+
+  override def equals(obj: Any): Boolean = {
+    if (obj == null || getClass != obj.getClass)
+      return false
+    obj match {
+      case ImportDetail(p, a, _) =>
+        p == pkg && access == a
+      case _ =>
+        false
+    }
+  }
+
+  override def toString: String = {
+    if (pkg == null) {
+      if (importAll)
+        access.toString + "._"
+      else
+        access.toString
+    } else {
+      if (importAll)
+        pkg.toString + "._"
+      else
+        "invalid import"
+    }
+  }
+
+}
+
+/**
+  * Import
+  *
+  */
+case class Import(importDetails: List[ImportDetail],
+                  lineCol: LineCol) extends Pre {
+  override def hashCode(): Int = {
+    importDetails.hashCode()
+  }
+
+  override def equals(obj: Any): Boolean = {
+    if (obj == null || getClass != obj.getClass)
+      return false
+    obj match {
+      case Import(p, _) =>
+        p == importDetails
+      case _ =>
+        false
+    }
+  }
+
+  override def toString: String = {
+    s"(#> $importDetails)"
+  }
+}
+
+
+/**
+  * StaticScope
+  *
+  */
 case class StaticScope(statements: List[Statement],
                        lineCol: LineCol) extends Statement {
   override def hashCode(): Int = {
@@ -520,7 +643,10 @@ case class StaticScope(statements: List[Statement],
     s"Static($statements)"
 }
 
-
+/**
+  * ClassStatement
+  *
+  */
 case class ClassStatement(name: String,
                           modifiers: Set[Modifier],
                           params: List[VariableDef],
@@ -552,7 +678,8 @@ case class ClassStatement(name: String,
           && p == params
           && s == superWithInvocation
           && so == superWithOutInvocation
-          && stmt = statements)
+          && a == annos
+          && stmt == statements)
       case _ =>
         false
     }
