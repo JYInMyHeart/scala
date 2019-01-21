@@ -109,6 +109,7 @@ case class Parser(root: ElementStartNode) {
     list
   }
 
+
   def parseStatement(): Statement = {
     if (current == null) return null
     isParsingTry match {
@@ -235,7 +236,7 @@ case class Parser(root: ElementStartNode) {
                     parseMethodDefType()
                   case METHOD_DEF_EMPTY =>
                     parseMethodDefEmpty()
-                  case METHOD_DEF_MORMAL =>
+                  case METHOD_DEF_NORMAL =>
                     parseMethodDefNormal()
                   case METHOD_DEF_ONE_STMT =>
                     parseMethodDefOneStmt()
@@ -246,12 +247,10 @@ case class Parser(root: ElementStartNode) {
                         if (parsedExps.empty()) return null
                         return parsedExps.pop()
                       }
-
                     }
+                    null
                 }
               }
-
-
             }
           }
           case _ =>
@@ -264,9 +263,52 @@ case class Parser(root: ElementStartNode) {
 
   }
 
-  def parseIf():IfStatement = {
+  def parseIf(): IfStatement = {
     val lineCol = current.lineCol
+    //todo
+    null
   }
+
+  def parseFor(): ForStatement = {
+    null
+  }
+
+  def parseDo(): DoStatement = {
+    //todo
+    null
+  }
+
+  def parseWhile(): WhileStatement = {
+    //todo
+    null
+  }
+
+  def parseClass(): ClassStatement = {
+    //todo
+    null
+  }
+
+  def parseInterface(): Statement = ???
+
+  def parseTry(): Statement = ???
+
+  def parseThrow(): Statement = ???
+
+  def parseAnno(): Statement = ???
+
+  def parsePkgDeclare(): Statement = ???
+
+  def parsePkgImport(): Statement = ???
+
+  def checkMethodDef(e: Element) = ???
+
+  def parseMethodDefType(): Statement = ???
+
+  def parseMethodDefEmpty(): Statement = ???
+
+  def parseMethodDefNormal(): Statement = ???
+
+  def parseMethodDefOneStmt(): Statement = ???
 
   def isOneVariableOperatorPreMustCheckExps(content: String): Boolean =
     oneVarOperatorsPreMustCheckExps.contains(content)

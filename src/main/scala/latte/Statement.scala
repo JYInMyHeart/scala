@@ -419,19 +419,19 @@ case class Return(exp: Expression,
   * IfPair
   *
   */
-case class IfPair(condition:Expression,
-                  body:List[Statement],
-                  lineCol: LineCol){
+case class IfPair(condition: Expression,
+                  body: List[Statement],
+                  lineCol: LineCol) {
   override def hashCode(): Int = {
-    val result = if(condition == null) 0 else condition.hashCode()
-    31 * result + (if(body == null) 0 else body.hashCode())
+    val result = if (condition == null) 0 else condition.hashCode()
+    31 * result + (if (body == null) 0 else body.hashCode())
   }
 
   override def equals(obj: Any): Boolean = {
     if (obj == null || getClass != obj.getClass)
       return false
     obj match {
-      case IfPair(c,b,_) =>
+      case IfPair(c, b, _) =>
         c == condition && b == body
       case _ =>
         false
@@ -443,18 +443,18 @@ case class IfPair(condition:Expression,
   * If
   *
   */
-case class IfStatement(ifs:List[IfPair],
+case class IfStatement(ifs: List[IfPair],
                        lineCol: LineCol) extends Statement {
 
   override def hashCode(): Int = {
-    if(ifs == null) 0 else ifs.hashCode()
+    if (ifs == null) 0 else ifs.hashCode()
   }
 
   override def equals(obj: Any): Boolean = {
     if (obj == null || getClass != obj.getClass)
       return false
     obj match {
-      case IfStatement(i,_) =>
+      case IfStatement(i, _) =>
         i == ifs
       case _ =>
         false
@@ -464,12 +464,12 @@ case class IfStatement(ifs:List[IfPair],
   override def toString: String = {
     val sb = new StringBuilder("(")
     var isFirst = true
-    for(p <- ifs){
-      if(isFirst){
+    for (p <- ifs) {
+      if (isFirst) {
         isFirst = false
         sb.append("(if (").append(p.condition).append(p.body).append(")")
-      }else{
-        if(p.condition == null)
+      } else {
+        if (p.condition == null)
           sb.append("(else ").append(p.body).append(")")
         else
           sb.append("(elseif (").append(p.condition).append(")").append(p.body).append(")")
@@ -482,18 +482,63 @@ case class IfStatement(ifs:List[IfPair],
 }
 
 /**
-  * Try
+  * For
   *
   */
-case class Try(statements:List[Statement],
-               catches:List[Catch],
-               varName:String,
-               fin:List[Statement],
-               lineCol: LineCol) extends Statement{
+case class ForStatement(lineCol: LineCol) extends Statement
+
+/**
+  * Do
+  *
+  */
+case class DoStatement(lineCol: LineCol) extends Statement
+
+/**
+  * While
+  *
+  */
+case class WhileStatement(lineCol: LineCol) extends Statement
+
+case class StaticScope(statements: List[Statement],
+                       lineCol: LineCol) extends Statement {
   override def hashCode(): Int = {
-    var result = if(statements == null) 0 else statements.hashCode()
-    result = 31 * result + (if(catches == null) 0 else catches.hashCode())
-    result = 31 * result + (if(varName == null) 0 else varName.hashCode())
+    if (statements == null) 0 else statements.hashCode()
+  }
+
+  override def equals(obj: Any): Boolean = {
+    if (obj == null || getClass != obj.getClass)
+      return false
+    obj match {
+      case StaticScope(i, _) =>
+        i == statements
+      case _ =>
+        false
+    }
+  }
+
+  override def toString: String =
+    s"Static($statements)"
+}
+
+
+case class ClassStatement(name: String,
+                          modifiers: Set[Modifier],
+                          params: List[VariableDef],
+                          superWithInvocation: Invocation,
+                          superWithOutInvocation: List[Access],
+                          annos: Set[Anno],
+                          statements: List[Statement],
+                          lineCol: LineCol
+                         ) extends Statement {
+
+  override def hashCode(): Int = {
+    var result = if (name == null) 0 else name.hashCode()
+    result = 31 * result + (if (modifiers == null) 0 else modifiers.hashCode())
+    result = 31 * result + (if (params == null) 0 else params.hashCode())
+    result = 31 * result + (if (superWithInvocation == null) 0 else superWithInvocation.hashCode())
+    result = 31 * result + (if (superWithOutInvocation == null) 0 else superWithOutInvocation.hashCode())
+    result = 31 * result + (if (annos == null) 0 else annos.hashCode())
+    result = 31 * result + (if (statements == null) 0 else statements.hashCode())
     result
   }
 
@@ -501,7 +546,76 @@ case class Try(statements:List[Statement],
     if (obj == null || getClass != obj.getClass)
       return false
     obj match {
-      case Try(s,c,v,_,_) =>
+      case ClassStatement(n, m, p, s, so, a, stmt, _) =>
+        (n == name
+          && m == modifiers
+          && p == params
+          && s == superWithInvocation
+          && so == superWithOutInvocation
+          && stmt = statements)
+      case _ =>
+        false
+    }
+  }
+
+  override def toString: String = {
+    val sb = new StringBuilder("(")
+    var isFirst = true
+    for (a <- annos)
+      sb.append(a).append(" ")
+    for (a <- modifiers)
+      sb.append(a).append(" ")
+    sb.append(s"class $name(")
+    for (p <- params) {
+      if (isFirst) {
+        isFirst = false
+      } else {
+        sb.append(",")
+      }
+      sb.append(p)
+    }
+    sb.append(")")
+    if (superWithInvocation != null || superWithOutInvocation.nonEmpty)
+      sb.append(" : ")
+    isFirst = true
+    if (superWithInvocation != null) {
+      sb.append(superWithInvocation)
+      isFirst = false
+    }
+    for (a <- superWithOutInvocation) {
+      if (isFirst) {
+        isFirst = false
+      } else {
+        sb.append(",")
+      }
+      sb.append(a)
+    }
+    sb.append(" ").append(statements).append(")")
+    sb.toString()
+  }
+}
+
+/**
+  * Try
+  *
+  */
+case class Try(statements: List[Statement],
+               catches: List[Catch],
+               varName: String,
+               fin: List[Statement],
+               lineCol: LineCol) extends Statement {
+  override def hashCode(): Int = {
+    var result = if (statements == null) 0 else statements.hashCode()
+    result = 31 * result + (if (catches == null) 0 else catches.hashCode())
+    result = 31 * result + (if (varName == null) 0 else varName.hashCode())
+    result
+  }
+
+  override def equals(obj: Any): Boolean = {
+    if (obj == null || getClass != obj.getClass)
+      return false
+    obj match {
+      case Try(s, c, v, _, _) =>
         s == statements && c == catches && v == varName
       case _ =>
         false
@@ -516,19 +630,19 @@ case class Try(statements:List[Statement],
   * Catch
   *
   */
-case class Catch(exceptionTypes:List[Access],
-               statements:List[Statement],
-               lineCol: LineCol) extends Statement{
+case class Catch(exceptionTypes: List[Access],
+                 statements: List[Statement],
+                 lineCol: LineCol) extends Statement {
   override def hashCode(): Int = {
-    val result = if(exceptionTypes == null) 0 else exceptionTypes.hashCode()
-    31 * result + (if(statements == null) 0 else statements.hashCode())
+    val result = if (exceptionTypes == null) 0 else exceptionTypes.hashCode()
+    31 * result + (if (statements == null) 0 else statements.hashCode())
   }
 
   override def equals(obj: Any): Boolean = {
     if (obj == null || getClass != obj.getClass)
       return false
     obj match {
-      case Catch(e,s,_) =>
+      case Catch(e, s, _) =>
         e == exceptionTypes && s == statements
       case _ =>
         false
@@ -573,9 +687,6 @@ case class VariableDef(name: String,
     s"VariableDef(${annos.foldLeft("")(_ + " " + _)}${modifiers.foldLeft("")(_ + " " + _)})($name)" +
       s"${if (vType != null) s":$vType"}${if (init != null) s" = $init"}"
 }
-
-
-
 
 
 /**
