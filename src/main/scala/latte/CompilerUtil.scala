@@ -48,7 +48,17 @@ object CompilerUtil {
     Array("||", "or")
   )
 
+  val NOT_METHOD_DEF = 0
+  val METHOD_DEF_NORMAL = 1
+  val METHOD_DEF_TYPE = 2
+  val METHOD_DEF_EMPTY = 3
+  val METHOD_DEF_ONE_STMT = 4
+
   val twoVarOperators: Set[String] = binOpPriority.foldLeft(List[String]())(_ ::: _.toList).toSet
+
+  val primitives: Set[String] = Set(
+    "int", "double", "float", "short", "long", "byte", "char", "bool"
+  )
 
   def isNumber(str: String): Boolean =
     str.forall(Character.isDigit)
@@ -178,7 +188,21 @@ object CompilerUtil {
         if (j == s)
           return i
     -1
+  }
 
+  def isPrimitive(s: String): Boolean =
+    primitives.contains(s)
+
+  def modifierIsCompatible(str: String, modifiers: Set[Modifier]): Boolean = {
+    val isAccessMod = accessModifiers.contains(str)
+    for (m <- modifiers)
+      if (m.modifier == str
+        || (isAccessMod && accessModifiers.contains(m.modifier))
+        || (str == "val" && m.modifier == "abs"
+        || (str == "abs" && m.modifier == "val")))
+        return false
+
+    true
   }
 
 

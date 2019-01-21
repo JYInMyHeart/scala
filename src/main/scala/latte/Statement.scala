@@ -60,9 +60,9 @@ case class Assignment(assignTo: Access,
   override def toString: String = s"Assignment($assignTo $op $assignFrom)"
 }
 
- abstract class Literal(val literalType: Int,
-                        val literal: String,
-                        val lineCol: LineCol) extends Expression {
+abstract class Literal(val literalType: Int,
+                       val literal: String,
+                       val lineCol: LineCol) extends Expression {
   override def hashCode(): Int = {
     var result = literalType
     val h = if (literal == null) 0 else literal.hashCode
@@ -80,7 +80,7 @@ case class Assignment(assignTo: Access,
   override def toString: String = literal
 
 
- }
+}
 
 object Literal {
   val NUMBER = 0
@@ -190,6 +190,26 @@ case class AsType(exp: Expression,
   override def toString: String = s"return ($exp as $access)"
 }
 
+case class Index(exp: Expression,
+                 args: List[Expression],
+                 lineCol: LineCol) extends Expression {
+  override def hashCode(): Int = {
+    var result = if (exp == null) 0 else exp.hashCode
+    result = 31 * result + args.hashCode()
+    result
+  }
+
+
+  override def equals(obj: Any): Boolean = {
+    if (obj == null || getClass != obj.getClass)
+      return false
+    exp == obj.asInstanceOf[Index].exp && args == obj.asInstanceOf[Index].args
+  }
+
+  override def toString: String =
+    s"($exp[${args.foldLeft("")(_ + "." + _).substring(1)}])"
+}
+
 
 trait Pre extends Statement
 
@@ -226,4 +246,36 @@ case class Return(exp: Expression,
   }
 
   override def toString: String = s"($exp)"
+}
+
+
+trait Definition extends Statement
+
+case class VariableDef(name: String,
+                       modifiers: Set[Modifier],
+                       var vType: Access,
+                       var init: Expression,
+                       annos: Set[Anno],
+                       lineCol: LineCol
+                      ) extends Definition with Expression {
+  override def hashCode(): Int = {
+    var result = name.hashCode
+    result = 31 * result + (if (vType != null) vType.hashCode() else 0)
+    result = 31 * result + (if (init != null) init.hashCode() else 0)
+    result = 31 * result + modifiers.hashCode()
+    result = 31 * result + annos.hashCode()
+    result
+  }
+
+  override def equals(obj: Any): Boolean = {
+    if (obj == null || getClass != obj.getClass) return false
+    obj match {
+      case o: VariableDef =>
+        name == o.name && vType == o.vType && init == o.init && modifiers == o.modifiers && annos == o.annos
+    }
+  }
+
+  override def toString: String =
+    s"VariableDef(${annos.foldLeft("")(_ + " " + _)}${modifiers.foldLeft("")(_ + " " + _)})($name)" +
+      s"${if (vType != null) s":$vType"}${if (init != null) s" = $init"}"
 }

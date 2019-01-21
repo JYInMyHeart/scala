@@ -344,22 +344,46 @@ case class Parser(root: ElementStartNode) {
     parseExpression()
   }
 
-  def getExp(expectingStartNode:Boolean): Expression = {
-    if(expectingStartNode)
+  def getExp(expectingStartNode: Boolean): Expression = {
+    if (expectingStartNode)
       this.expectingStartNode = true
     parseExpression()
-    if(expectingStartNode)
+    if (expectingStartNode)
       this.expectingStartNode = false
     parsedExps.pop()
   }
 
-  def nextExp(expectingStartNode:Boolean): Expression = {
+  def nextExp(expectingStartNode: Boolean): Expression = {
     nextNode(false)
     getExp(expectingStartNode)
   }
 
   def parseVar(): Unit = {
+    val content = current.asInstanceOf[Element].content
+    if (modifiers.nonEmpty || annos.nonEmpty) {
+      if (usedVarNames.contains(content)) {
+        throw DuplicateVariableNameException(content, current.lineCol)
+      }
+      val vdef = VariableDef(content, modifiers, null, null, annos, current.lineCol)
+      annos = Set()
+      modifiers = Set()
+      usedVarNames += content
+      parsedExps.push(vdef)
+    } else {
+      val access = Access(null, content, current.lineCol)
+      parsedExps.push(access)
+    }
+    nextNode(true)
+    parseExpression()
+  }
 
+  def parseModifier() = {
+    val elem = current.asInstanceOf[Element]
+    val modifier = elem.content
+    if (modifierIsCompatible(modifier, modifiers))
+      modifiers += Modifier(modifier, current.lineCol)
+    else
+      throw UnexpectedTokenException("valid modifier", modifier, elem.lineCol)
   }
 
   def parsePackage(boolean: Boolean): Unit = {
@@ -392,11 +416,62 @@ case class Parser(root: ElementStartNode) {
   }
 
   def parseTypeSpec(): Unit = {
+    val lineCol = current.lineCol
+    assert(!parsedExps.empty())
+    val expr = parsedExps.pop()
+    expr match {
+      case v: Access =>
+        if (v.expression != null)
+          throw DuplicateVariableNameException(v.name, v.lineCol)
+        if (usedVarNames.contains(v.name))
+          throw UnexpectedTokenException("variable", v.toString, v.lineCol)
+        nextNode(false)
+        current match {
+          case _: Element =>
+            val a = parseClsForTypeSpec()
+            v.asInstanceOf[VariableDef].vType = a
+          case _ =>
+            throw UnexpectedTokenException("type", current.toString,
+              if (current == null) lineCol else current.lineCol)
+        }
+        parsedExps.push(expr)
+        parseExpression()
+    }
 
   }
 
   def parseAssign(): Unit = {
-
+    val op = current.asInstanceOf[Element].content
+    assert(!parsedExps.empty())
+    val expr = parsedExps.pop()
+    val lineCol = current.lineCol
+    expr match {
+      case e: Access =>
+        if (e.expression == null && !usedVarNames.contains(e.name)) {
+          val variableDef = VariableDef(e.name, modifiers, null, null, annos, e.lineCol)
+          annos = Set()
+          modifiers = Set()
+          usedVarNames += e.name
+          val expression = nextExp(false)
+          variableDef.init = expression
+          parsedExps.push(variableDef)
+        } else {
+          val expression = nextExp(false)
+          val assignment = Assignment(e, op, expression, lineCol)
+          parsedExps.push(assignment)
+        }
+      case e: Index =>
+        val expression = nextExp(false)
+        val assignment = Assignment(Access(e, null, e.lineCol), op, expression, lineCol)
+        parsedExps.push(assignment)
+      case v: VariableDef =>
+        val expression = nextExp(false)
+        v.init = expression
+        parsedExps.push(v)
+      case _ =>
+        throw UnexpectedTokenException("variable", expr.toString, current.lineCol)
+    }
+    parseExpression()
   }
 
   def parseTwoVarOperation(): Unit = {
@@ -412,7 +487,36 @@ case class Parser(root: ElementStartNode) {
   }
 
   def parseClsForTypeSpec(): Access = {
-    null
+    var access: Access = null
+    var arrayDepth = 0
+    while (current.asInstanceOf[Element].content == "[") {
+      nextNode(false)
+      expecting("]", current.previous, current)
+      nextNode(false)
+      arrayDepth += 1
+    }
+    if (isPackage(current.asInstanceOf[Element])) {
+      parsePackage(false)
+      while (current.isInstanceOf[Element]
+        && current.asInstanceOf[Element].content == ".") {
+        parseAccess(false)
+      }
+      access = parsedExps.pop().asInstanceOf[Access]
+    } else if (current.asInstanceOf[Element].isValidName
+      || isPrimitive(current.asInstanceOf[Element].content)) {
+      val accessTmp = Access(null, current.asInstanceOf[Element].content, current.lineCol)
+      parsedExps.push(accessTmp)
+      nextNode(true)
+      while (current.isInstanceOf[Element]
+        && current.asInstanceOf[Element].content == ".") {
+        parseAccess(false)
+      }
+      access = parsedExps.pop().asInstanceOf[Access]
+    } else
+      throw new Exception(s"unexpected type ${current.asInstanceOf[Element].content} at ${current.lineCol}")
+    for (_ <- 0 until arrayDepth)
+      access = Access(access, "[]", access.lineCol)
+    access
   }
 
 
