@@ -174,7 +174,7 @@ case class Invocation(access: Access,
                       args: List[Expression],
                       lineCol: LineCol) extends Expression {
   override def hashCode(): Int = {
-    var result = if (access == null) 0 else access.hashCode
+    var result = if (access == null) 0 else access.hashCode()
     result = 31 * result + args.hashCode()
     result
   }
@@ -234,7 +234,7 @@ case class AsType(exp: Expression,
                   access: Access,
                   lineCol: LineCol) extends Expression {
   override def hashCode(): Int = {
-    var result = if (access == null) 0 else access.hashCode
+    var result = if (access == null) 0 else access.hashCode()
     result = 31 * result + exp.hashCode()
     result
   }
@@ -292,17 +292,82 @@ case class PackageRef(pkg: String,
   override def toString: String = s"($pkg)"
 }
 
+/**
+  * MapExp
+  *
+  */
+case class MapExp(map: Map[Expression, Expression],
+                  lineCol: LineCol) extends Expression {
 
-case class MapExp(map:Map[Expression,Expression],
-                  lineCol:LineCol) extends Expression{
-  
+  override def hashCode(): Int = map.hashCode()
+
+  override def equals(obj: Any): Boolean = {
+    if (obj == null || getClass != obj.getClass)
+      return false
+    obj match {
+      case MapExp(l, _) =>
+        l == map
+      case _ =>
+        false
+    }
+  }
+
+  override def toString: String =
+    s"{${map.foldLeft("")(_ + "," + _).substring(1)}}"
 }
 
-case class ArrayExp(list:List[Expression],
-                  lineCol:LineCol) extends Expression{
+/**
+  * ArrayExp
+  *
+  */
+case class ArrayExp(list: List[Expression],
+                    lineCol: LineCol) extends Expression {
 
+  override def hashCode(): Int = list.hashCode()
+
+  override def equals(obj: Any): Boolean = {
+    if (obj == null || getClass != obj.getClass)
+      return false
+    obj match {
+      case ArrayExp(l, _) =>
+        l == list
+      case _ =>
+        false
+    }
+  }
+
+  override def toString: String =
+    s"[${list.foldLeft("")(_ + "," + _).substring(1)}]"
 }
 
+/**
+  * Lambda
+  *
+  */
+case class Lambda(params: List[VariableDef],
+                  statements: List[Statement],
+                  lineCol: LineCol) extends Expression {
+
+  override def hashCode(): Int = {
+    val result = if (params != null) params.hashCode else 0
+    31 * result + (if (statements != null) statements.hashCode() else 0)
+  }
+
+
+  override def equals(obj: Any): Boolean = {
+    if (obj == null || getClass != obj.getClass)
+      return false
+    obj match {
+      case Lambda(p, s, _) =>
+        p == params && statements == s
+      case _ =>
+        false
+    }
+  }
+
+  override def toString: String =
+    s"Lambda((${params.foldLeft("")(_ + "." + _).substring(1)})=>$statements)"
+}
 
 trait Pre extends Statement
 
@@ -351,6 +416,130 @@ case class Return(exp: Expression,
 }
 
 /**
+  * IfPair
+  *
+  */
+case class IfPair(condition:Expression,
+                  body:List[Statement],
+                  lineCol: LineCol){
+  override def hashCode(): Int = {
+    val result = if(condition == null) 0 else condition.hashCode()
+    31 * result + (if(body == null) 0 else body.hashCode())
+  }
+
+  override def equals(obj: Any): Boolean = {
+    if (obj == null || getClass != obj.getClass)
+      return false
+    obj match {
+      case IfPair(c,b,_) =>
+        c == condition && b == body
+      case _ =>
+        false
+    }
+  }
+}
+
+/**
+  * If
+  *
+  */
+case class IfStatement(ifs:List[IfPair],
+                       lineCol: LineCol) extends Statement {
+
+  override def hashCode(): Int = {
+    if(ifs == null) 0 else ifs.hashCode()
+  }
+
+  override def equals(obj: Any): Boolean = {
+    if (obj == null || getClass != obj.getClass)
+      return false
+    obj match {
+      case IfStatement(i,_) =>
+        i == ifs
+      case _ =>
+        false
+    }
+  }
+
+  override def toString: String = {
+    val sb = new StringBuilder("(")
+    var isFirst = true
+    for(p <- ifs){
+      if(isFirst){
+        isFirst = false
+        sb.append("(if (").append(p.condition).append(p.body).append(")")
+      }else{
+        if(p.condition == null)
+          sb.append("(else ").append(p.body).append(")")
+        else
+          sb.append("(elseif (").append(p.condition).append(")").append(p.body).append(")")
+      }
+    }
+    sb.append(")")
+    sb.toString()
+  }
+
+}
+
+/**
+  * Try
+  *
+  */
+case class Try(statements:List[Statement],
+               catches:List[Catch],
+               varName:String,
+               fin:List[Statement],
+               lineCol: LineCol) extends Statement{
+  override def hashCode(): Int = {
+    var result = if(statements == null) 0 else statements.hashCode()
+    result = 31 * result + (if(catches == null) 0 else catches.hashCode())
+    result = 31 * result + (if(varName == null) 0 else varName.hashCode())
+    result
+  }
+
+  override def equals(obj: Any): Boolean = {
+    if (obj == null || getClass != obj.getClass)
+      return false
+    obj match {
+      case Try(s,c,v,_,_) =>
+        s == statements && c == catches && v == varName
+      case _ =>
+        false
+    }
+  }
+
+  override def toString: String =
+    s"(try $statements catch $varName ($catches) finally $fin)"
+}
+
+/**
+  * Catch
+  *
+  */
+case class Catch(exceptionTypes:List[Access],
+               statements:List[Statement],
+               lineCol: LineCol) extends Statement{
+  override def hashCode(): Int = {
+    val result = if(exceptionTypes == null) 0 else exceptionTypes.hashCode()
+    31 * result + (if(statements == null) 0 else statements.hashCode())
+  }
+
+  override def equals(obj: Any): Boolean = {
+    if (obj == null || getClass != obj.getClass)
+      return false
+    obj match {
+      case Catch(e,s,_) =>
+        e == exceptionTypes && s == statements
+      case _ =>
+        false
+    }
+  }
+
+  override def toString: String =
+    s"$exceptionTypes $statements"
+}
+
+/**
   * Definition
   *
   */
@@ -384,6 +573,9 @@ case class VariableDef(name: String,
     s"VariableDef(${annos.foldLeft("")(_ + " " + _)}${modifiers.foldLeft("")(_ + " " + _)})($name)" +
       s"${if (vType != null) s":$vType"}${if (init != null) s" = $init"}"
 }
+
+
+
 
 
 /**
@@ -426,7 +618,7 @@ case class UnaryOneVariableOperation(operator: String,
   }
 
   override def toString: String =
-    s"($operator ${exp})"
+    s"($operator $exp)"
 }
 
 /**

@@ -205,5 +205,8 @@ object CompilerUtil {
     true
   }
 
+  def isModifier(str:String) =
+    modifiers.contains(str)
+
 
 }
