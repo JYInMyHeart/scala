@@ -250,6 +250,66 @@ case class AsType(exp: Expression,
 }
 
 
+case class MethodStatement(name: String,
+                           modifiers: Set[Modifier],
+                           returnType: Access,
+                           params: List[VariableDef],
+                           annos: Set[Anno],
+                           body: List[Statement],
+                           lineCol: LineCol) extends Definition {
+
+  override def hashCode(): Int = {
+    var result = if (name == null) 0 else name.hashCode()
+    result = 31 * result + (if (modifiers == null) 0 else modifiers.hashCode())
+    result = 31 * result + (if (params == null) 0 else params.hashCode())
+    result = 31 * result + (if (returnType == null) 0 else returnType.hashCode())
+    result = 31 * result + (if (annos == null) 0 else annos.hashCode())
+    result = 31 * result + (if (body == null) 0 else body.hashCode())
+    result
+  }
+
+  override def equals(obj: Any): Boolean = {
+    if (obj == null || getClass != obj.getClass)
+      return false
+    obj match {
+      case MethodStatement(n, m, r, p, a, b, _) =>
+        (n == name
+          && m == modifiers
+          && p == params
+          && r == returnType
+          && a == annos
+          && b == body)
+      case _ =>
+        false
+    }
+  }
+
+  override def toString: String = {
+    val sb = new StringBuilder("(")
+    var isFirst = true
+    for (a <- annos)
+      sb.append(a).append(" ")
+    for (a <- modifiers)
+      sb.append(a).append(" ")
+    sb.append(s"name $name(")
+    for (p <- params) {
+      if (isFirst) {
+        isFirst = false
+      } else {
+        sb.append(",")
+      }
+      sb.append(p)
+    }
+    sb.append(")")
+    if (returnType != null)
+      sb.append(":").append(returnType)
+
+    sb.append(" ").append(body).append(")")
+    sb.toString()
+  }
+}
+
+
 /**
   * index
   *
@@ -274,7 +334,10 @@ case class Index(exp: Expression,
     s"($exp[${args.foldLeft("")(_ + "." + _).substring(1)}])"
 }
 
-
+/**
+  * package
+  *
+  */
 case class PackageRef(pkg: String,
                       lineCol: LineCol) extends Expression {
   override def hashCode(): Int =
@@ -290,6 +353,27 @@ case class PackageRef(pkg: String,
   }
 
   override def toString: String = s"($pkg)"
+}
+
+/**
+  * packageDeclare
+  *
+  */
+case class PackageDeclare(pkg: PackageRef,
+                          lineCol: LineCol) extends Pre {
+  override def hashCode(): Int =
+    if (pkg != null)
+      pkg.hashCode()
+    else
+      0
+
+  override def equals(obj: Any): Boolean = {
+    if (obj == null || getClass != obj.getClass)
+      return false
+    pkg == obj.asInstanceOf[PackageDeclare].pkg
+  }
+
+  override def toString: String = s"(#$pkg)"
 }
 
 /**
@@ -780,6 +864,29 @@ case class Catch(exceptionTypes: List[Access],
     s"$exceptionTypes $statements"
 }
 
+
+/**
+  * throwable
+  *
+  */
+case class Throw(expression: Expression,
+                 lineCol: LineCol) extends Statement {
+  override def hashCode(): Int = {
+    expression.hashCode()
+  }
+
+  override def equals(obj: Any): Boolean = {
+    if (obj == null || getClass != obj.getClass) return false
+    obj match {
+      case o: Throw =>
+        expression == o.expression
+    }
+  }
+
+  override def toString: String =
+    s"(throw $expression)"
+}
+
 /**
   * Definition
   *
@@ -940,7 +1047,7 @@ case class OneVariableOperation(operator: String,
   override def equals(obj: Any): Boolean = {
     if (obj == null || getClass != obj.getClass)
       return false
-    operator == obj.asInstanceOf[UnaryOneVariableOperation].operator && exp == obj.asInstanceOf[UnaryOneVariableOperation].exp
+    operator == obj.asInstanceOf[OneVariableOperation].operator && exp == obj.asInstanceOf[OneVariableOperation].exp
   }
 
   override def toString: String =
@@ -979,5 +1086,5 @@ case class TwoVariableOperation(operator: String,
   }
 
   override def toString: String =
-    s"($operator $exp1 $operator $exp2)"
+    s"($exp1 $operator $exp2)"
 }

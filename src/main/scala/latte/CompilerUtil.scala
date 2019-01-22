@@ -142,7 +142,7 @@ object CompilerUtil {
             return false
         }
         true
-      case _ => true
+      case _ => false
     }
   }
 
@@ -202,7 +202,7 @@ object CompilerUtil {
 
   def expecting(token: String, previous: Node, got: Node): Unit = {
     got match {
-      case x: Element if !x.content.endsWith(token) =>
+      case x: Element if x.content.endsWith(token) =>
       case _ =>
         throw new Exception(s"${previous.lineCol}")
     }
@@ -229,17 +229,22 @@ object CompilerUtil {
 
   def twoVarHigherOrEqual(a: String, b: String): Boolean = {
     var indexA = findTwoVarPriority(a)
-    if (indexA == -1 && isValidName(a))
-      indexA = binOpPriority.length
-    else
-      throw new IllegalArgumentException(
-        a + " is not valid two variable operator")
+    if (indexA == -1) {
+      if (isValidName(a))
+        indexA = binOpPriority.length
+      else
+        throw new IllegalArgumentException(
+          a + " is not valid two variable operator")
+    }
+
     var indexB = findTwoVarPriority(b)
-    if (indexB == -1 && isValidName(b))
-      indexB = binOpPriority.length
-    else
-      throw new IllegalArgumentException(
-        b + " is not valid two variable operator")
+    if (indexB == -1) {
+      if (isValidName(b))
+        indexB = binOpPriority.length
+      else
+        throw new IllegalArgumentException(
+          b + " is not valid two variable operator")
+    }
     indexA <= indexB
   }
 
