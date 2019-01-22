@@ -401,17 +401,228 @@ case class Parser(root: ElementStartNode) {
   }
 
   def parseClass(): ClassStatement = {
-    //todo
-    null
+    val lineCol = current.lineCol
+    val set = modifiers
+    modifiers = Set()
+    var annos = this.annos
+    this.annos = Set()
+    nextNode(false)
+    current match {
+      case e: Element => {
+        val name = e.content
+        if (e.isValidName) {
+          var params: List[VariableDef] = List()
+          var newParamNames: Set[String] = Set()
+          nextNode(true)
+          current match {
+            case e1: Element => {
+              val p = e1.content
+              p match {
+                case "(" => {
+                  nextNode(false)
+                  current match {
+                    case e2: ElementStartNode => {
+                      val processor = Parser(e2)
+                      var list = processor.parse
+                      var mustHaveInit = false
+                      list.foreach {
+                        case stmt: Access => {
+                          if (mustHaveInit)
+                            throw new SyntaxException("parameter with init", stmt.lineCol)
+                          if (stmt.expression != null)
+                            throw UnexpectedTokenException("param def", stmt.toString, stmt.lineCol)
+                          else {
+                            val v = VariableDef(stmt.name, Set(), null, null, annos, current.lineCol)
+                            annos = Set()
+                            params :+= v
+                            newParamNames += name
+                          }
+                        }
+                        case stmt: VariableDef => {
+                          if (stmt.init == null) {
+                            if (mustHaveInit)
+                              throw new SyntaxException("parameter with init", stmt.lineCol)
+                            else
+                              mustHaveInit = true
+                          }
+                          params :+= stmt
+                          newParamNames += stmt.name
+
+                        }
+                        case stmt =>
+                          throw UnexpectedTokenException("param def", stmt.toString, stmt.lineCol)
+                      }
+                    }
+                      nextNode(false)
+                      current match {
+                        case e: Element => {
+                          val rightP = e.content
+                          if (rightP == ")")
+                            nextNode(true)
+                          else
+                            throw UnexpectedTokenException(")", rightP, current.lineCol)
+                        }
+                        case _ =>
+                          throw UnexpectedTokenException(")", current.toString, current.lineCol)
+                      }
+                    case e: Element => {
+                      expecting(")", e.previous, e)
+                      params = List()
+                      nextNode(true)
+                    }
+                    case _ =>
+                      throw UnexpectedTokenException(")", current.toString, current.lineCol)
+                  }
+                }
+                case ":" =>
+                case _ =>
+                  throw UnexpectedTokenException("or", p, current.lineCol)
+              }
+            }
+
+          }
+          var invocation: Invocation = null
+          var accesses = List[Access]()
+          var stmts = List[Statement]()
+          current match {
+            case e: Element => {
+              expecting(":", e.previous, e)
+              nextNode(false)
+              var enable = true
+              while (enable) {
+                current match {
+                  case e: Element => {
+                    if (e.isValidName) {
+                      val v = getExp(true)
+                      v match {
+                        case access: Access => {
+                          accesses :+= access
+                        }
+                        case a: Invocation => {
+                          if (invocation == null)
+                            invocation = a
+                          else
+                            throw new SyntaxException("multiple inheritance is not allowed", a.lineCol)
+                        }
+                        case _ =>
+                          throw UnexpectedTokenException("super class or interfaces", v.toString, v.lineCol)
+                      }
+                      if (current.isInstanceOf[EndingNode]
+                        && current.asInstanceOf[EndingNode].nodeType == EndingNode.STRONG)
+                        nextNode(true)
+                      else
+                        enable = false
+                    } else
+                      enable = false
+                  }
+
+                }
+              }
+            }
+            case e: ElementStartNode => {
+              stmts = parseElemStart(
+                e,
+                addUsedNames = true,
+                newParamNames,
+                parseMap = false,
+                parseTry = false
+              )
+            }
+            case _ =>
+          }
+          ClassStatement(
+            name,
+            set,
+            params,
+            invocation,
+            accesses,
+            annos,
+            stmts,
+            lineCol
+          )
+        } else
+          throw UnexpectedTokenException("valid class name", name, current.lineCol)
+      }
+      case _ =>
+        throw UnexpectedTokenException("class name", current.toString, current.lineCol)
+    }
   }
 
-  def parseInterface(): Statement = {
-    //todo
-    null
+  def parseInterface(): InterfaceStatement = {
+    val lineCol = current.lineCol
+    val set = modifiers
+    modifiers = Set()
+    var annos = this.annos
+    this.annos = Set()
+    nextNode(false)
+    current match {
+      case e: Element => {
+        val name = e.content
+        if (e.isValidName) {
+          var accesses: List[Access] = List()
+          var stmts: List[Statement] = List()
+          nextNode(true)
+          current match {
+            case e1: Element => {
+              expecting(":", current.previous, current)
+              nextNode(false)
+              var enable = true
+              while (enable) {
+                current match {
+                  case e: Element => {
+                    if (e.isValidName) {
+                      val v = getExp(true)
+                      v match {
+                        case access: Access => {
+                          accesses :+= access
+                        }
+                        case _ =>
+                          throw UnexpectedTokenException("super interface", v.toString, v.lineCol)
+                      }
+                      current match {
+                        case node: EndingNode if node.nodeType == EndingNode.STRONG =>
+                          nextNode(true)
+                        case _ =>
+                          enable = false
+                      }
+                    } else
+                      enable = false
+                  }
+
+                }
+              }
+            }
+            case e: ElementStartNode => {
+              stmts = parseElemStart(
+                e,
+                addUsedNames = true,
+                Set(),
+                parseMap = false,
+                parseTry = false
+              )
+              nextNode(true)
+            }
+          }
+          val interfaceStmt = InterfaceStatement(
+            name,
+            set,
+            accesses,
+            annos,
+            stmts,
+            lineCol
+          )
+          annos = Set()
+          interfaceStmt
+        } else
+          throw UnexpectedTokenException("valid interface name", current.toString, current.lineCol)
+      }
+      case _ =>
+        throw UnexpectedTokenException("interface name", current.toString, current.lineCol)
+    }
   }
 
   def parseTry(): Statement = {
-    //todo
+    val lineCol = current.lineCol
     null
   }
 
@@ -461,7 +672,6 @@ case class Parser(root: ElementStartNode) {
     Import(importDetails, lineCol)
   }
 
-  
 
   def parseMethodDefType(): Statement = ???
 

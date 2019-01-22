@@ -817,6 +817,65 @@ case class VariableDef(name: String,
 
 
 /**
+  * interface
+  *
+  */
+case class InterfaceStatement(name: String,
+                              modifiers: Set[Modifier],
+                              superInterfaces: List[Access],
+                              annos: Set[Anno],
+                              statements: List[Statement],
+                              lineCol: LineCol
+                             ) extends Statement {
+
+  override def hashCode(): Int = {
+    var result = if (name == null) 0 else name.hashCode()
+    result = 31 * result + (if (modifiers == null) 0 else modifiers.hashCode())
+    result = 31 * result + (if (superInterfaces == null) 0 else superInterfaces.hashCode())
+    result = 31 * result + (if (annos == null) 0 else annos.hashCode())
+    result = 31 * result + (if (statements == null) 0 else statements.hashCode())
+    result
+  }
+
+  override def equals(obj: Any): Boolean = {
+    if (obj == null || getClass != obj.getClass)
+      return false
+    obj match {
+      case InterfaceStatement(n, m, so, a, stmt, _) =>
+        (n == name
+          && m == modifiers
+          && so == superInterfaces
+          && a == annos
+          && stmt == statements)
+      case _ =>
+        false
+    }
+  }
+
+  override def toString: String = {
+    val sb = new StringBuilder("(")
+    var isFirst = true
+    for (a <- annos)
+      sb.append(a).append(" ")
+    for (a <- modifiers)
+      sb.append(a).append(" ")
+    sb.append(s"interface $name(")
+    sb.append(")")
+    for (a <- superInterfaces) {
+      if (isFirst) {
+        isFirst = false
+      } else {
+        sb.append(",")
+      }
+      sb.append(a)
+    }
+    sb.append(" ").append(statements).append(")")
+    sb.toString()
+  }
+}
+
+
+/**
   * operation
   *
   */

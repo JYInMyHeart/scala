@@ -134,7 +134,7 @@ object CompilerUtil {
 
   def isJavaValidName(str: String): Boolean = {
     str match {
-      case x if x.isEmpty            => false
+      case x if x.isEmpty => false
       case x if javaKeys.contains(x) => false
       case x if isValidNameStartChar(x.charAt(0)) =>
         for (i <- 1 until x.length) {
@@ -258,9 +258,9 @@ object CompilerUtil {
     val isAccessMod = accessModifiers.contains(str)
     for (m <- modifiers)
       if (m.modifier == str
-          || (isAccessMod && accessModifiers.contains(m.modifier))
-          || (str == "val" && m.modifier == "abs"
-          || (str == "abs" && m.modifier == "val")))
+        || (isAccessMod && accessModifiers.contains(m.modifier))
+        || (str == "val" && m.modifier == "abs"
+        || (str == "abs" && m.modifier == "val")))
         return false
 
     true
@@ -292,7 +292,7 @@ object CompilerUtil {
                 }
               }
               case nn2: Element => {
-                if (nn2.conteng == ")") {
+                if (nn2.content == ")") {
                   nodeAfterRightPar = getNextNode(n2)
                 }
               }
@@ -302,24 +302,24 @@ object CompilerUtil {
         }
         case _ =>
       }
-      if(nodeAfterRightPar != null){
+      if (nodeAfterRightPar != null) {
         nodeAfterRightPar match {
-          case n:ElementStartNode =>{
+          case n: ElementStartNode => {
             return METHOD_DEF_NORMAL
           }
-          case n:Element =>{
+          case n: Element => {
             val s = n.content
             s match {
-              csae ":" => {
+              case ":" => {
                 return METHOD_DEF_TYPE
               }
               case "=" => {
                 val nn = getNextNode(nodeAfterRightPar)
                 nn match {
-                  case e:Element => {
-                    if(e.conteng == "..."){
+                  case e: Element => {
+                    if (e.content == "...") {
                       return METHOD_DEF_EMPTY
-                    }else{
+                    } else {
                       return METHOD_DEF_ONE_STMT
                     }
                   }
@@ -330,6 +330,6 @@ object CompilerUtil {
         }
       }
     }
-    return NOT_METHOD_DEF
+    NOT_METHOD_DEF
   }
 }
