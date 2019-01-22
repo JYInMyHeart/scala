@@ -1,0 +1,591 @@
+[2019-01-22 10:00:27,984] INFO org.github.dragos.vscode.Main$ - Starting server in d:\gitTest\webapps\scala
+[2019-01-22 10:00:27,984] INFO org.github.dragos.vscode.Main$ - Starting server in d:\gitTest\webapps\scala
+[2019-01-22 10:00:27,998] INFO org.github.dragos.vscode.Main$ - Classpath: c:\Users\root\.vscode\extensions\dragos.scala-lsp-0.2.3\coursier
+[2019-01-22 10:00:27,998] INFO org.github.dragos.vscode.Main$ - Classpath: c:\Users\root\.vscode\extensions\dragos.scala-lsp-0.2.3\coursier
+[2019-01-22 10:00:28,111] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 1183
+[2019-01-22 10:00:28,111] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 1183
+[2019-01-22 10:00:28,123] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":0,"method":"initialize","params":{"processId":25124,"rootPath":"d:\\gitTest\\webapps\\scala","rootUri":"file:///d%3A/gitTest/webapps/scala","capabilities":{"workspace":{"applyEdit":true,"didChangeConfiguration":{"dynamicRegistration":false},"didChangeWatchedFiles":{"dynamicRegistration":false},"symbol":{"dynamicRegistration":true},"executeCommand":{"dynamicRegistration":true}},"textDocument":{"synchronization":{"dynamicRegistration":true,"willSave":true,"willSaveWaitUntil":true,"didSave":true},"completion":{"dynamicRegistration":true,"completionItem":{"snippetSupport":true}},"hover":{"dynamicRegistration":true},"signatureHelp":{"dynamicRegistration":true},"references":{"dynamicRegistration":true},"documentHighlight":{"dynamicRegistration":true},"documentSymbol":{"dynamicRegistration":true},"formatting":{"dynamicRegistration":true},"rangeFormatting":{"dynamicRegistration":true},"onTypeFormatting":{"dynamicRegistration":true},"definition":{"dynamicRegistration":true},"codeAction":{"dynamicRegistration":true},"codeLens":{"dynamicRegistration":true},"documentLink":{"dynamicRegistration":true},"rename":{"dynamicRegistration":true}}},"trace":"off"}}
+[2019-01-22 10:00:28,123] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":0,"method":"initialize","params":{"processId":25124,"rootPath":"d:\\gitTest\\webapps\\scala","rootUri":"file:///d%3A/gitTest/webapps/scala","capabilities":{"workspace":{"applyEdit":true,"didChangeConfiguration":{"dynamicRegistration":false},"didChangeWatchedFiles":{"dynamicRegistration":false},"symbol":{"dynamicRegistration":true},"executeCommand":{"dynamicRegistration":true}},"textDocument":{"synchronization":{"dynamicRegistration":true,"willSave":true,"willSaveWaitUntil":true,"didSave":true},"completion":{"dynamicRegistration":true,"completionItem":{"snippetSupport":true}},"hover":{"dynamicRegistration":true},"signatureHelp":{"dynamicRegistration":true},"references":{"dynamicRegistration":true},"documentHighlight":{"dynamicRegistration":true},"documentSymbol":{"dynamicRegistration":true},"formatting":{"dynamicRegistration":true},"rangeFormatting":{"dynamicRegistration":true},"onTypeFormatting":{"dynamicRegistration":true},"definition":{"dynamicRegistration":true},"codeAction":{"dynamicRegistration":true},"codeLens":{"dynamicRegistration":true},"documentLink":{"dynamicRegistration":true},"rename":{"dynamicRegistration":true}}},"trace":"off"}}
+[2019-01-22 10:00:28,933] INFO org.github.dragos.vscode.EnsimeLanguageServer - Initialized with 25124, d:\gitTest\webapps\scala, ClientCapabilities()
+[2019-01-22 10:00:28,933] INFO org.github.dragos.vscode.EnsimeLanguageServer - Initialized with 25124, d:\gitTest\webapps\scala, ClientCapabilities()
+[2019-01-22 10:00:28,937] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - ensime.config = "D:/gitTest/webapps/scala/.ensime" 
+[2019-01-22 10:00:28,937] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - ensime.config = "D:/gitTest/webapps/scala/.ensime" 
+[2019-01-22 10:00:29,555] INFO akka.event.slf4j.Slf4jLogger - Slf4jLogger started
+[2019-01-22 10:00:30,284] ERROR org.github.dragos.vscode.EnsimeLanguageServer - initializeEnsime Error: E:\Program Files\Java\jdk1.8.0_151: 设备未就绪。
+
+[2019-01-22 10:00:30,284] ERROR org.github.dragos.vscode.EnsimeLanguageServer - initializeEnsime Error: E:\Program Files\Java\jdk1.8.0_151: 设备未就绪。
+
+[2019-01-22 10:00:30,334] DEBUG langserver.core.MessageWriter - Content-Length: 163
+
+
+
+{"jsonrpc":"2.0","method":"window/showMessage","params":{"tpe":1,"message":"Error parsing .ensime: E:\\Program Files\\Java\\jdk1.8.0_151: 设备未就绪。\r\n"}}
+[2019-01-22 10:00:30,334] DEBUG langserver.core.MessageWriter - Content-Length: 163
+
+
+
+{"jsonrpc":"2.0","method":"window/showMessage","params":{"tpe":1,"message":"Error parsing .ensime: E:\\Program Files\\Java\\jdk1.8.0_151: 设备未就绪。\r\n"}}
+[2019-01-22 10:00:30,335] DEBUG langserver.core.MessageWriter - payload: {"jsonrpc":"2.0","method":"window/showMessage","params":{"tpe":1,"message":"Error parsing .ensime: E:\\Program Files\\Java\\jdk1.8.0_151: 设备未就绪。\r\n"}}
+[2019-01-22 10:00:30,335] DEBUG langserver.core.MessageWriter - payload: {"jsonrpc":"2.0","method":"window/showMessage","params":{"tpe":1,"message":"Error parsing .ensime: E:\\Program Files\\Java\\jdk1.8.0_151: 设备未就绪。\r\n"}}
+[2019-01-22 10:00:30,477] DEBUG langserver.core.MessageWriter - Content-Length: 441
+
+
+
+{"jsonrpc":"2.0","result":{"capabilities":{"textDocumentSync":1,"hoverProvider":true,"completionProvider":{"resolveProvider":false,"triggerCharacters":["."]},"definitionProvider":true,"referencesProvider":false,"documentHighlightProvider":false,"documentSymbolProvider":true,"workspaceSymbolProvider":false,"codeActionProvider":false,"documentFormattingProvider":false,"documentRangeFormattingProvider":false,"renameProvider":false}},"id":0}
+[2019-01-22 10:00:30,477] DEBUG langserver.core.MessageWriter - Content-Length: 441
+
+
+
+{"jsonrpc":"2.0","result":{"capabilities":{"textDocumentSync":1,"hoverProvider":true,"completionProvider":{"resolveProvider":false,"triggerCharacters":["."]},"definitionProvider":true,"referencesProvider":false,"documentHighlightProvider":false,"documentSymbolProvider":true,"workspaceSymbolProvider":false,"codeActionProvider":false,"documentFormattingProvider":false,"documentRangeFormattingProvider":false,"renameProvider":false}},"id":0}
+[2019-01-22 10:00:30,478] DEBUG langserver.core.MessageWriter - payload: {"jsonrpc":"2.0","result":{"capabilities":{"textDocumentSync":1,"hoverProvider":true,"completionProvider":{"resolveProvider":false,"triggerCharacters":["."]},"definitionProvider":true,"referencesProvider":false,"documentHighlightProvider":false,"documentSymbolProvider":true,"workspaceSymbolProvider":false,"codeActionProvider":false,"documentFormattingProvider":false,"documentRangeFormattingProvider":false,"renameProvider":false}},"id":0}
+[2019-01-22 10:00:30,478] DEBUG langserver.core.MessageWriter - payload: {"jsonrpc":"2.0","result":{"capabilities":{"textDocumentSync":1,"hoverProvider":true,"completionProvider":{"resolveProvider":false,"triggerCharacters":["."]},"definitionProvider":true,"referencesProvider":false,"documentHighlightProvider":false,"documentSymbolProvider":true,"workspaceSymbolProvider":false,"codeActionProvider":false,"documentFormattingProvider":false,"documentRangeFormattingProvider":false,"renameProvider":false}},"id":0}
+[2019-01-22 10:00:30,478] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 52
+[2019-01-22 10:00:30,478] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 52
+[2019-01-22 10:00:30,483] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"initialized","params":{}}
+[2019-01-22 10:00:30,483] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"initialized","params":{}}
+[2019-01-22 10:00:30,491] ERROR org.github.dragos.vscode.EnsimeLanguageServer - Unknown notification Initialized()
+[2019-01-22 10:00:30,491] ERROR org.github.dragos.vscode.EnsimeLanguageServer - Unknown notification Initialized()
+[2019-01-22 10:00:30,492] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 1616
+[2019-01-22 10:00:30,492] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 1616
+[2019-01-22 10:00:30,493] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"textDocument/didOpen","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala","languageId":"scala","version":1,"text":"package latte\r\n\r\nclass CompileException(val message: String, val throwable: Throwable)\r\n  extends Exception(message, throwable) {\r\n  def this(throwable: Throwable) = this(null, throwable)\r\n\r\n  def this(message: String) = this(message, null)\r\n\r\n}\r\n\r\nclass SyntaxException(val msg: String, val lineCol: LineCol)\r\n  extends CompileException(\r\n    s\"${if (msg == null) \"syntax exception\" else msg}${\r\n      if (lineCol == LineCol.SYNTHETIC) \"\"\r\n      else\r\n        s\" at (${lineCol.fileName},${lineCol.line},${lineCol.column})\"\r\n    }\") {\r\n  def this(lineCol: LineCol) =\r\n    this(null, lineCol)\r\n\r\n}\r\n\r\ncase class DuplicateVariableNameException(name: String,\r\n                                          override val lineCol: LineCol)\r\n  extends SyntaxException(name, lineCol)\r\n\r\ncase class UnexpectedTokenException(expected: String,\r\n                                    got: String,\r\n                                    override val lineCol: LineCol)\r\n  extends SyntaxException(\r\n    s\"expecting $expected,but got $got\",\r\n    lineCol\r\n  ) {\r\n  def this(token: String, lineCol: LineCol) =\r\n    this(token, null, lineCol)\r\n}\r\n\r\n\r\ncase class LtBug(msg: String,\r\n                 t: Throwable) extends Error(msg, t) {\r\n  def this(t: Throwable) =\r\n    this(null, t)\r\n\r\n  def this(s: String) =\r\n    this(s, null)\r\n\r\n}"}}}
+[2019-01-22 10:00:30,493] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"textDocument/didOpen","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala","languageId":"scala","version":1,"text":"package latte\r\n\r\nclass CompileException(val message: String, val throwable: Throwable)\r\n  extends Exception(message, throwable) {\r\n  def this(throwable: Throwable) = this(null, throwable)\r\n\r\n  def this(message: String) = this(message, null)\r\n\r\n}\r\n\r\nclass SyntaxException(val msg: String, val lineCol: LineCol)\r\n  extends CompileException(\r\n    s\"${if (msg == null) \"syntax exception\" else msg}${\r\n      if (lineCol == LineCol.SYNTHETIC) \"\"\r\n      else\r\n        s\" at (${lineCol.fileName},${lineCol.line},${lineCol.column})\"\r\n    }\") {\r\n  def this(lineCol: LineCol) =\r\n    this(null, lineCol)\r\n\r\n}\r\n\r\ncase class DuplicateVariableNameException(name: String,\r\n                                          override val lineCol: LineCol)\r\n  extends SyntaxException(name, lineCol)\r\n\r\ncase class UnexpectedTokenException(expected: String,\r\n                                    got: String,\r\n                                    override val lineCol: LineCol)\r\n  extends SyntaxException(\r\n    s\"expecting $expected,but got $got\",\r\n    lineCol\r\n  ) {\r\n  def this(token: String, lineCol: LineCol) =\r\n    this(token, null, lineCol)\r\n}\r\n\r\n\r\ncase class LtBug(msg: String,\r\n                 t: Throwable) extends Error(msg, t) {\r\n  def this(t: Throwable) =\r\n    this(null, t)\r\n\r\n  def this(s: String) =\r\n    this(s, null)\r\n\r\n}"}}}
+[2019-01-22 10:00:51,292] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 212
+[2019-01-22 10:00:51,292] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 212
+[2019-01-22 10:00:51,293] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":1,"method":"textDocument/definition","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":33,"character":40}}}
+[2019-01-22 10:00:51,293] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":1,"method":"textDocument/definition","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":33,"character":40}}}
+[2019-01-22 10:00:51,296] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got goto definition request at (33, 40).
+[2019-01-22 10:00:51,296] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got goto definition request at (33, 40).
+[2019-01-22 10:00:51,323] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - Goto Definition future completed: succes? false
+[2019-01-22 10:00:51,323] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - Goto Definition future completed: succes? false
+[2019-01-22 10:00:51,442] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 207
+[2019-01-22 10:00:51,442] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 207
+[2019-01-22 10:00:51,442] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":2,"method":"textDocument/hover","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":33,"character":39}}}
+[2019-01-22 10:00:51,442] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":2,"method":"textDocument/hover","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":33,"character":39}}}
+[2019-01-22 10:00:51,444] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got hover request at (33, 39).
+[2019-01-22 10:00:51,444] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got hover request at (33, 39).
+[2019-01-22 10:00:51,447] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - DocUriAtPointReq future completed: succes? false
+[2019-01-22 10:00:51,447] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - DocUriAtPointReq future completed: succes? false
+[2019-01-22 10:00:51,448] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - TypeAtPointReq future completed: succes? false
+[2019-01-22 10:00:51,448] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - TypeAtPointReq future completed: succes? false
+[2019-01-22 10:00:51,492] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 62
+[2019-01-22 10:00:51,492] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 62
+[2019-01-22 10:00:51,492] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":2}}
+[2019-01-22 10:00:51,492] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":2}}
+[2019-01-22 10:00:51,494] ERROR org.github.dragos.vscode.EnsimeLanguageServer - Unknown notification CancelRequest(2)
+[2019-01-22 10:00:51,494] ERROR org.github.dragos.vscode.EnsimeLanguageServer - Unknown notification CancelRequest(2)
+[2019-01-22 10:00:51,643] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 207
+[2019-01-22 10:00:51,643] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 207
+[2019-01-22 10:00:51,644] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":3,"method":"textDocument/hover","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":33,"character":38}}}
+[2019-01-22 10:00:51,644] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":3,"method":"textDocument/hover","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":33,"character":38}}}
+[2019-01-22 10:00:51,647] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got hover request at (33, 38).
+[2019-01-22 10:00:51,647] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got hover request at (33, 38).
+[2019-01-22 10:00:51,648] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - DocUriAtPointReq future completed: succes? false
+[2019-01-22 10:00:51,648] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - DocUriAtPointReq future completed: succes? false
+[2019-01-22 10:00:51,648] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - TypeAtPointReq future completed: succes? false
+[2019-01-22 10:00:51,648] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - TypeAtPointReq future completed: succes? false
+[2019-01-22 10:00:54,217] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 62
+[2019-01-22 10:00:54,217] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 62
+[2019-01-22 10:00:54,217] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":3}}
+[2019-01-22 10:00:54,217] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":3}}
+[2019-01-22 10:00:54,219] ERROR org.github.dragos.vscode.EnsimeLanguageServer - Unknown notification CancelRequest(3)
+[2019-01-22 10:00:54,219] ERROR org.github.dragos.vscode.EnsimeLanguageServer - Unknown notification CancelRequest(3)
+[2019-01-22 10:01:04,716] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 207
+[2019-01-22 10:01:04,716] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 207
+[2019-01-22 10:01:04,717] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":4,"method":"textDocument/hover","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":33,"character":30}}}
+[2019-01-22 10:01:04,717] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":4,"method":"textDocument/hover","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":33,"character":30}}}
+[2019-01-22 10:01:04,722] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got hover request at (33, 30).
+[2019-01-22 10:01:04,722] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got hover request at (33, 30).
+[2019-01-22 10:01:04,722] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - TypeAtPointReq future completed: succes? false
+[2019-01-22 10:01:04,722] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - TypeAtPointReq future completed: succes? false
+[2019-01-22 10:01:04,722] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - DocUriAtPointReq future completed: succes? false
+[2019-01-22 10:01:04,722] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - DocUriAtPointReq future completed: succes? false
+[2019-01-22 10:01:05,090] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 62
+[2019-01-22 10:01:05,090] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 62
+[2019-01-22 10:01:05,091] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":4}}
+[2019-01-22 10:01:05,091] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":4}}
+[2019-01-22 10:01:05,092] ERROR org.github.dragos.vscode.EnsimeLanguageServer - Unknown notification CancelRequest(4)
+[2019-01-22 10:01:05,092] ERROR org.github.dragos.vscode.EnsimeLanguageServer - Unknown notification CancelRequest(4)
+[2019-01-22 10:01:06,150] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 207
+[2019-01-22 10:01:06,150] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 207
+[2019-01-22 10:01:06,150] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":5,"method":"textDocument/hover","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":30,"character":22}}}
+[2019-01-22 10:01:06,150] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":5,"method":"textDocument/hover","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":30,"character":22}}}
+[2019-01-22 10:01:06,153] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got hover request at (30, 22).
+[2019-01-22 10:01:06,153] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got hover request at (30, 22).
+[2019-01-22 10:01:06,153] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - DocUriAtPointReq future completed: succes? false
+[2019-01-22 10:01:06,153] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - DocUriAtPointReq future completed: succes? false
+[2019-01-22 10:01:06,153] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - TypeAtPointReq future completed: succes? false
+[2019-01-22 10:01:06,153] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - TypeAtPointReq future completed: succes? false
+[2019-01-22 10:01:06,526] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 62
+[2019-01-22 10:01:06,526] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 62
+[2019-01-22 10:01:06,527] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":5}}
+[2019-01-22 10:01:06,527] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":5}}
+[2019-01-22 10:01:06,528] ERROR org.github.dragos.vscode.EnsimeLanguageServer - Unknown notification CancelRequest(5)
+[2019-01-22 10:01:06,528] ERROR org.github.dragos.vscode.EnsimeLanguageServer - Unknown notification CancelRequest(5)
+[2019-01-22 10:01:07,383] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 207
+[2019-01-22 10:01:07,383] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 207
+[2019-01-22 10:01:07,383] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":6,"method":"textDocument/hover","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":28,"character":58}}}
+[2019-01-22 10:01:07,383] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":6,"method":"textDocument/hover","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":28,"character":58}}}
+[2019-01-22 10:01:07,384] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got hover request at (28, 58).
+[2019-01-22 10:01:07,384] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got hover request at (28, 58).
+[2019-01-22 10:01:07,385] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - DocUriAtPointReq future completed: succes? false
+[2019-01-22 10:01:07,385] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - DocUriAtPointReq future completed: succes? false
+[2019-01-22 10:01:07,386] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - TypeAtPointReq future completed: succes? false
+[2019-01-22 10:01:07,386] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - TypeAtPointReq future completed: succes? false
+[2019-01-22 10:01:08,582] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 62
+[2019-01-22 10:01:08,582] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 62
+[2019-01-22 10:01:08,582] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":6}}
+[2019-01-22 10:01:08,582] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":6}}
+[2019-01-22 10:01:08,583] ERROR org.github.dragos.vscode.EnsimeLanguageServer - Unknown notification CancelRequest(6)
+[2019-01-22 10:01:08,583] ERROR org.github.dragos.vscode.EnsimeLanguageServer - Unknown notification CancelRequest(6)
+[2019-01-22 10:01:08,733] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 207
+[2019-01-22 10:01:08,733] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 207
+[2019-01-22 10:01:08,733] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":7,"method":"textDocument/hover","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":28,"character":59}}}
+[2019-01-22 10:01:08,733] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":7,"method":"textDocument/hover","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":28,"character":59}}}
+[2019-01-22 10:01:08,736] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got hover request at (28, 59).
+[2019-01-22 10:01:08,736] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got hover request at (28, 59).
+[2019-01-22 10:01:08,736] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - DocUriAtPointReq future completed: succes? false
+[2019-01-22 10:01:08,736] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - DocUriAtPointReq future completed: succes? false
+[2019-01-22 10:01:08,737] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - TypeAtPointReq future completed: succes? false
+[2019-01-22 10:01:08,737] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - TypeAtPointReq future completed: succes? false
+[2019-01-22 10:01:08,784] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 62
+[2019-01-22 10:01:08,784] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 62
+[2019-01-22 10:01:08,784] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":7}}
+[2019-01-22 10:01:08,784] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":7}}
+[2019-01-22 10:01:08,785] ERROR org.github.dragos.vscode.EnsimeLanguageServer - Unknown notification CancelRequest(7)
+[2019-01-22 10:01:08,785] ERROR org.github.dragos.vscode.EnsimeLanguageServer - Unknown notification CancelRequest(7)
+[2019-01-22 10:01:11,799] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 62
+[2019-01-22 10:01:11,799] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 62
+[2019-01-22 10:01:11,800] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":1}}
+[2019-01-22 10:01:11,800] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":1}}
+[2019-01-22 10:01:11,803] ERROR org.github.dragos.vscode.EnsimeLanguageServer - Unknown notification CancelRequest(1)
+[2019-01-22 10:01:11,803] ERROR org.github.dragos.vscode.EnsimeLanguageServer - Unknown notification CancelRequest(1)
+[2019-01-22 10:01:11,803] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 212
+[2019-01-22 10:01:11,803] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 212
+[2019-01-22 10:01:11,803] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":8,"method":"textDocument/definition","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":28,"character":61}}}
+[2019-01-22 10:01:11,803] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":8,"method":"textDocument/definition","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":28,"character":61}}}
+[2019-01-22 10:01:11,804] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got goto definition request at (28, 61).
+[2019-01-22 10:01:11,804] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got goto definition request at (28, 61).
+[2019-01-22 10:01:11,805] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - Goto Definition future completed: succes? false
+[2019-01-22 10:01:11,805] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - Goto Definition future completed: succes? false
+[2019-01-22 10:01:11,953] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 207
+[2019-01-22 10:01:11,953] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 207
+[2019-01-22 10:01:11,955] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":9,"method":"textDocument/hover","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":28,"character":60}}}
+[2019-01-22 10:01:11,955] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":9,"method":"textDocument/hover","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":28,"character":60}}}
+[2019-01-22 10:01:11,956] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got hover request at (28, 60).
+[2019-01-22 10:01:11,956] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got hover request at (28, 60).
+[2019-01-22 10:01:11,957] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - DocUriAtPointReq future completed: succes? false
+[2019-01-22 10:01:11,957] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - DocUriAtPointReq future completed: succes? false
+[2019-01-22 10:01:11,957] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - TypeAtPointReq future completed: succes? false
+[2019-01-22 10:01:11,957] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - TypeAtPointReq future completed: succes? false
+[2019-01-22 10:01:12,218] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 62
+[2019-01-22 10:01:12,218] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 62
+[2019-01-22 10:01:12,218] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":9}}
+[2019-01-22 10:01:12,218] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":9}}
+[2019-01-22 10:01:12,219] ERROR org.github.dragos.vscode.EnsimeLanguageServer - Unknown notification CancelRequest(9)
+[2019-01-22 10:01:12,219] ERROR org.github.dragos.vscode.EnsimeLanguageServer - Unknown notification CancelRequest(9)
+[2019-01-22 10:01:12,371] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 208
+[2019-01-22 10:01:12,371] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 208
+[2019-01-22 10:01:12,372] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":10,"method":"textDocument/hover","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":28,"character":59}}}
+[2019-01-22 10:01:12,372] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":10,"method":"textDocument/hover","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":28,"character":59}}}
+[2019-01-22 10:01:12,374] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got hover request at (28, 59).
+[2019-01-22 10:01:12,374] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got hover request at (28, 59).
+[2019-01-22 10:01:12,375] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - DocUriAtPointReq future completed: succes? false
+[2019-01-22 10:01:12,375] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - DocUriAtPointReq future completed: succes? false
+[2019-01-22 10:01:12,376] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - TypeAtPointReq future completed: succes? false
+[2019-01-22 10:01:12,376] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - TypeAtPointReq future completed: succes? false
+[2019-01-22 10:01:50,080] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 63
+[2019-01-22 10:01:50,080] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 63
+[2019-01-22 10:01:50,081] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":10}}
+[2019-01-22 10:01:50,081] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":10}}
+[2019-01-22 10:01:50,083] ERROR org.github.dragos.vscode.EnsimeLanguageServer - Unknown notification CancelRequest(10)
+[2019-01-22 10:01:50,083] ERROR org.github.dragos.vscode.EnsimeLanguageServer - Unknown notification CancelRequest(10)
+[2019-01-22 10:03:15,468] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 208
+[2019-01-22 10:03:15,468] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 208
+[2019-01-22 10:03:15,468] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":11,"method":"textDocument/hover","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":27,"character":36}}}
+[2019-01-22 10:03:15,468] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":11,"method":"textDocument/hover","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":27,"character":36}}}
+[2019-01-22 10:03:15,470] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got hover request at (27, 36).
+[2019-01-22 10:03:15,470] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got hover request at (27, 36).
+[2019-01-22 10:03:15,471] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - DocUriAtPointReq future completed: succes? false
+[2019-01-22 10:03:15,471] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - DocUriAtPointReq future completed: succes? false
+[2019-01-22 10:03:15,471] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - TypeAtPointReq future completed: succes? false
+[2019-01-22 10:03:15,471] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - TypeAtPointReq future completed: succes? false
+[2019-01-22 10:03:15,540] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 63
+[2019-01-22 10:03:15,540] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 63
+[2019-01-22 10:03:15,540] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":11}}
+[2019-01-22 10:03:15,540] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":11}}
+[2019-01-22 10:03:15,541] ERROR org.github.dragos.vscode.EnsimeLanguageServer - Unknown notification CancelRequest(11)
+[2019-01-22 10:03:15,541] ERROR org.github.dragos.vscode.EnsimeLanguageServer - Unknown notification CancelRequest(11)
+[2019-01-22 10:03:16,968] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 62
+[2019-01-22 10:03:16,968] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 62
+[2019-01-22 10:03:16,969] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":8}}
+[2019-01-22 10:03:16,969] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":8}}
+[2019-01-22 10:03:16,970] ERROR org.github.dragos.vscode.EnsimeLanguageServer - Unknown notification CancelRequest(8)
+[2019-01-22 10:03:16,970] ERROR org.github.dragos.vscode.EnsimeLanguageServer - Unknown notification CancelRequest(8)
+[2019-01-22 10:03:16,971] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 213
+[2019-01-22 10:03:16,971] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 213
+[2019-01-22 10:03:16,971] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":12,"method":"textDocument/definition","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":23,"character":67}}}
+[2019-01-22 10:03:16,971] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":12,"method":"textDocument/definition","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":23,"character":67}}}
+[2019-01-22 10:03:16,972] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got goto definition request at (23, 67).
+[2019-01-22 10:03:16,972] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got goto definition request at (23, 67).
+[2019-01-22 10:03:16,972] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - Goto Definition future completed: succes? false
+[2019-01-22 10:03:16,972] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - Goto Definition future completed: succes? false
+[2019-01-22 10:03:17,192] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 208
+[2019-01-22 10:03:17,192] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 208
+[2019-01-22 10:03:17,192] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":13,"method":"textDocument/hover","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":23,"character":68}}}
+[2019-01-22 10:03:17,192] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":13,"method":"textDocument/hover","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":23,"character":68}}}
+[2019-01-22 10:03:17,195] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got hover request at (23, 68).
+[2019-01-22 10:03:17,195] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got hover request at (23, 68).
+[2019-01-22 10:03:17,195] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - DocUriAtPointReq future completed: succes? false
+[2019-01-22 10:03:17,195] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - DocUriAtPointReq future completed: succes? false
+[2019-01-22 10:03:17,195] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - TypeAtPointReq future completed: succes? false
+[2019-01-22 10:03:17,195] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - TypeAtPointReq future completed: succes? false
+[2019-01-22 10:03:17,239] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 63
+[2019-01-22 10:03:17,239] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 63
+[2019-01-22 10:03:17,240] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":13}}
+[2019-01-22 10:03:17,240] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":13}}
+[2019-01-22 10:03:17,241] ERROR org.github.dragos.vscode.EnsimeLanguageServer - Unknown notification CancelRequest(13)
+[2019-01-22 10:03:17,241] ERROR org.github.dragos.vscode.EnsimeLanguageServer - Unknown notification CancelRequest(13)
+[2019-01-22 10:03:17,394] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 208
+[2019-01-22 10:03:17,394] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 208
+[2019-01-22 10:03:17,395] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":14,"method":"textDocument/hover","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":23,"character":67}}}
+[2019-01-22 10:03:17,395] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":14,"method":"textDocument/hover","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":23,"character":67}}}
+[2019-01-22 10:03:17,397] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got hover request at (23, 67).
+[2019-01-22 10:03:17,397] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got hover request at (23, 67).
+[2019-01-22 10:03:17,398] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - DocUriAtPointReq future completed: succes? false
+[2019-01-22 10:03:17,398] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - DocUriAtPointReq future completed: succes? false
+[2019-01-22 10:03:17,398] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - TypeAtPointReq future completed: succes? false
+[2019-01-22 10:03:17,398] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - TypeAtPointReq future completed: succes? false
+[2019-01-22 10:03:17,760] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 63
+[2019-01-22 10:03:17,760] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 63
+[2019-01-22 10:03:17,761] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":14}}
+[2019-01-22 10:03:17,761] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":14}}
+[2019-01-22 10:03:17,762] ERROR org.github.dragos.vscode.EnsimeLanguageServer - Unknown notification CancelRequest(14)
+[2019-01-22 10:03:17,762] ERROR org.github.dragos.vscode.EnsimeLanguageServer - Unknown notification CancelRequest(14)
+[2019-01-22 10:03:18,032] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 213
+[2019-01-22 10:03:18,032] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 213
+[2019-01-22 10:03:18,033] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":15,"method":"textDocument/definition","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":23,"character":67}}}
+[2019-01-22 10:03:18,033] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":15,"method":"textDocument/definition","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":23,"character":67}}}
+[2019-01-22 10:03:18,034] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got goto definition request at (23, 67).
+[2019-01-22 10:03:18,034] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got goto definition request at (23, 67).
+[2019-01-22 10:03:18,035] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - Goto Definition future completed: succes? false
+[2019-01-22 10:03:18,035] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - Goto Definition future completed: succes? false
+[2019-01-22 10:03:53,114] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 208
+[2019-01-22 10:03:53,114] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 208
+[2019-01-22 10:03:53,115] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":16,"method":"textDocument/hover","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":30,"character":13}}}
+[2019-01-22 10:03:53,115] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":16,"method":"textDocument/hover","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":30,"character":13}}}
+[2019-01-22 10:03:53,116] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got hover request at (30, 13).
+[2019-01-22 10:03:53,116] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got hover request at (30, 13).
+[2019-01-22 10:03:53,117] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - TypeAtPointReq future completed: succes? false
+[2019-01-22 10:03:53,117] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - DocUriAtPointReq future completed: succes? false
+[2019-01-22 10:03:53,117] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - TypeAtPointReq future completed: succes? false
+[2019-01-22 10:03:53,117] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - DocUriAtPointReq future completed: succes? false
+[2019-01-22 10:03:53,179] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 63
+[2019-01-22 10:03:53,179] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 63
+[2019-01-22 10:03:53,180] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":12}}
+[2019-01-22 10:03:53,180] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":12}}
+[2019-01-22 10:03:53,183] ERROR org.github.dragos.vscode.EnsimeLanguageServer - Unknown notification CancelRequest(12)
+[2019-01-22 10:03:53,183] ERROR org.github.dragos.vscode.EnsimeLanguageServer - Unknown notification CancelRequest(12)
+[2019-01-22 10:03:53,184] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 213
+[2019-01-22 10:03:53,184] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 213
+[2019-01-22 10:03:53,184] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":17,"method":"textDocument/definition","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":30,"character":14}}}
+[2019-01-22 10:03:53,184] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":17,"method":"textDocument/definition","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":30,"character":14}}}
+[2019-01-22 10:03:53,186] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got goto definition request at (30, 14).
+[2019-01-22 10:03:53,186] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got goto definition request at (30, 14).
+[2019-01-22 10:03:53,188] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - Goto Definition future completed: succes? false
+[2019-01-22 10:03:53,188] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - Goto Definition future completed: succes? false
+[2019-01-22 10:03:53,302] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 63
+[2019-01-22 10:03:53,302] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 63
+[2019-01-22 10:03:53,302] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":16}}
+[2019-01-22 10:03:53,302] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":16}}
+[2019-01-22 10:03:53,304] ERROR org.github.dragos.vscode.EnsimeLanguageServer - Unknown notification CancelRequest(16)
+[2019-01-22 10:03:53,304] ERROR org.github.dragos.vscode.EnsimeLanguageServer - Unknown notification CancelRequest(16)
+[2019-01-22 10:03:53,460] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 208
+[2019-01-22 10:03:53,460] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 208
+[2019-01-22 10:03:53,462] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":18,"method":"textDocument/hover","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":30,"character":12}}}
+[2019-01-22 10:03:53,462] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":18,"method":"textDocument/hover","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":30,"character":12}}}
+[2019-01-22 10:03:53,463] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got hover request at (30, 12).
+[2019-01-22 10:03:53,463] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got hover request at (30, 12).
+[2019-01-22 10:03:53,464] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - DocUriAtPointReq future completed: succes? false
+[2019-01-22 10:03:53,464] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - DocUriAtPointReq future completed: succes? false
+[2019-01-22 10:03:53,464] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - TypeAtPointReq future completed: succes? false
+[2019-01-22 10:03:53,464] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - TypeAtPointReq future completed: succes? false
+[2019-01-22 10:03:53,487] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 63
+[2019-01-22 10:03:53,487] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 63
+[2019-01-22 10:03:53,488] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":18}}
+[2019-01-22 10:03:53,488] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":18}}
+[2019-01-22 10:03:53,490] ERROR org.github.dragos.vscode.EnsimeLanguageServer - Unknown notification CancelRequest(18)
+[2019-01-22 10:03:53,490] ERROR org.github.dragos.vscode.EnsimeLanguageServer - Unknown notification CancelRequest(18)
+[2019-01-22 10:03:53,689] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 213
+[2019-01-22 10:03:53,689] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 213
+[2019-01-22 10:03:53,689] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":19,"method":"textDocument/definition","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":30,"character":11}}}
+[2019-01-22 10:03:53,689] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":19,"method":"textDocument/definition","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":30,"character":11}}}
+[2019-01-22 10:03:53,691] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got goto definition request at (30, 11).
+[2019-01-22 10:03:53,691] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got goto definition request at (30, 11).
+[2019-01-22 10:03:53,692] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - Goto Definition future completed: succes? false
+[2019-01-22 10:03:53,692] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - Goto Definition future completed: succes? false
+[2019-01-22 10:03:55,396] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 63
+[2019-01-22 10:03:55,396] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 63
+[2019-01-22 10:03:55,397] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":17}}
+[2019-01-22 10:03:55,397] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":17}}
+[2019-01-22 10:03:55,399] ERROR org.github.dragos.vscode.EnsimeLanguageServer - Unknown notification CancelRequest(17)
+[2019-01-22 10:03:55,399] ERROR org.github.dragos.vscode.EnsimeLanguageServer - Unknown notification CancelRequest(17)
+[2019-01-22 10:03:55,399] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 213
+[2019-01-22 10:03:55,399] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 213
+[2019-01-22 10:03:55,399] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":20,"method":"textDocument/definition","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":30,"character":11}}}
+[2019-01-22 10:03:55,399] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":20,"method":"textDocument/definition","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":30,"character":11}}}
+[2019-01-22 10:03:55,400] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got goto definition request at (30, 11).
+[2019-01-22 10:03:55,400] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got goto definition request at (30, 11).
+[2019-01-22 10:03:55,401] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - Goto Definition future completed: succes? false
+[2019-01-22 10:03:55,401] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - Goto Definition future completed: succes? false
+[2019-01-22 10:03:56,051] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 208
+[2019-01-22 10:03:56,051] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 208
+[2019-01-22 10:03:56,052] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":21,"method":"textDocument/hover","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":33,"character":39}}}
+[2019-01-22 10:03:56,052] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":21,"method":"textDocument/hover","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":33,"character":39}}}
+[2019-01-22 10:03:56,053] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got hover request at (33, 39).
+[2019-01-22 10:03:56,053] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got hover request at (33, 39).
+[2019-01-22 10:03:56,054] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - DocUriAtPointReq future completed: succes? false
+[2019-01-22 10:03:56,054] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - TypeAtPointReq future completed: succes? false
+[2019-01-22 10:03:56,054] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - TypeAtPointReq future completed: succes? false
+[2019-01-22 10:03:56,054] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - DocUriAtPointReq future completed: succes? false
+[2019-01-22 10:03:56,102] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 63
+[2019-01-22 10:03:56,102] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 63
+[2019-01-22 10:03:56,104] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":21}}
+[2019-01-22 10:03:56,104] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":21}}
+[2019-01-22 10:03:56,105] ERROR org.github.dragos.vscode.EnsimeLanguageServer - Unknown notification CancelRequest(21)
+[2019-01-22 10:03:56,105] ERROR org.github.dragos.vscode.EnsimeLanguageServer - Unknown notification CancelRequest(21)
+[2019-01-22 10:07:14,499] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 63
+[2019-01-22 10:07:14,499] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 63
+[2019-01-22 10:07:14,505] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":20}}
+[2019-01-22 10:07:14,505] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":20}}
+[2019-01-22 10:07:14,506] ERROR org.github.dragos.vscode.EnsimeLanguageServer - Unknown notification CancelRequest(20)
+[2019-01-22 10:07:14,506] ERROR org.github.dragos.vscode.EnsimeLanguageServer - Unknown notification CancelRequest(20)
+[2019-01-22 10:07:14,557] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 213
+[2019-01-22 10:07:14,557] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 213
+[2019-01-22 10:07:14,558] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":22,"method":"textDocument/definition","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":39,"character":43}}}
+[2019-01-22 10:07:14,558] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":22,"method":"textDocument/definition","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":39,"character":43}}}
+[2019-01-22 10:07:14,560] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 208
+[2019-01-22 10:07:14,560] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got goto definition request at (39, 43).
+[2019-01-22 10:07:14,560] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got goto definition request at (39, 43).
+[2019-01-22 10:07:14,560] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 208
+[2019-01-22 10:07:14,563] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":23,"method":"textDocument/hover","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":39,"character":42}}}
+[2019-01-22 10:07:14,563] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":23,"method":"textDocument/hover","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":39,"character":42}}}
+[2019-01-22 10:07:14,564] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - Goto Definition future completed: succes? false
+[2019-01-22 10:07:14,564] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - Goto Definition future completed: succes? false
+[2019-01-22 10:07:14,564] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 63
+[2019-01-22 10:07:14,564] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 63
+[2019-01-22 10:07:14,564] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got hover request at (39, 42).
+[2019-01-22 10:07:14,564] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got hover request at (39, 42).
+[2019-01-22 10:07:14,566] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":23}}
+[2019-01-22 10:07:14,566] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":23}}
+[2019-01-22 10:07:14,568] ERROR org.github.dragos.vscode.EnsimeLanguageServer - Unknown notification CancelRequest(23)
+[2019-01-22 10:07:14,568] ERROR org.github.dragos.vscode.EnsimeLanguageServer - Unknown notification CancelRequest(23)
+[2019-01-22 10:07:14,569] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 213
+[2019-01-22 10:07:14,569] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 213
+[2019-01-22 10:07:14,569] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":24,"method":"textDocument/definition","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":39,"character":41}}}
+[2019-01-22 10:07:14,569] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":24,"method":"textDocument/definition","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":39,"character":41}}}
+[2019-01-22 10:07:14,570] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - DocUriAtPointReq future completed: succes? false
+[2019-01-22 10:07:14,570] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - DocUriAtPointReq future completed: succes? false
+[2019-01-22 10:07:14,570] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - TypeAtPointReq future completed: succes? false
+[2019-01-22 10:07:14,570] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - TypeAtPointReq future completed: succes? false
+[2019-01-22 10:07:14,571] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got goto definition request at (39, 41).
+[2019-01-22 10:07:14,571] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got goto definition request at (39, 41).
+[2019-01-22 10:07:14,573] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - Goto Definition future completed: succes? false
+[2019-01-22 10:07:14,573] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - Goto Definition future completed: succes? false
+[2019-01-22 10:07:18,833] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 179
+[2019-01-22 10:07:18,833] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 179
+[2019-01-22 10:07:18,834] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":25,"method":"textDocument/documentSymbol","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"}}}
+[2019-01-22 10:07:18,834] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":25,"method":"textDocument/documentSymbol","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"}}}
+[2019-01-22 10:07:18,836] DEBUG langserver.core.MessageWriter - Content-Length: 37
+
+
+
+{"jsonrpc":"2.0","result":[],"id":25}
+[2019-01-22 10:07:18,836] DEBUG langserver.core.MessageWriter - Content-Length: 37
+
+
+
+{"jsonrpc":"2.0","result":[],"id":25}
+[2019-01-22 10:07:18,836] DEBUG langserver.core.MessageWriter - payload: {"jsonrpc":"2.0","result":[],"id":25}
+[2019-01-22 10:07:18,836] DEBUG langserver.core.MessageWriter - payload: {"jsonrpc":"2.0","result":[],"id":25}
+[2019-01-22 10:07:20,687] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 63
+[2019-01-22 10:07:20,687] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 63
+[2019-01-22 10:07:20,696] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":22}}
+[2019-01-22 10:07:20,696] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":22}}
+[2019-01-22 10:07:20,705] ERROR org.github.dragos.vscode.EnsimeLanguageServer - Unknown notification CancelRequest(22)
+[2019-01-22 10:07:20,705] ERROR org.github.dragos.vscode.EnsimeLanguageServer - Unknown notification CancelRequest(22)
+[2019-01-22 10:07:20,705] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 213
+[2019-01-22 10:07:20,705] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 213
+[2019-01-22 10:07:20,706] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":26,"method":"textDocument/definition","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":39,"character":40}}}
+[2019-01-22 10:07:20,706] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":26,"method":"textDocument/definition","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":39,"character":40}}}
+[2019-01-22 10:07:20,740] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got goto definition request at (39, 40).
+[2019-01-22 10:07:20,740] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got goto definition request at (39, 40).
+[2019-01-22 10:07:20,747] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - Goto Definition future completed: succes? false
+[2019-01-22 10:07:20,747] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - Goto Definition future completed: succes? false
+[2019-01-22 10:07:20,844] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 208
+[2019-01-22 10:07:20,844] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 208
+[2019-01-22 10:07:20,845] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":27,"method":"textDocument/hover","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":39,"character":41}}}
+[2019-01-22 10:07:20,845] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":27,"method":"textDocument/hover","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":39,"character":41}}}
+[2019-01-22 10:07:20,851] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got hover request at (39, 41).
+[2019-01-22 10:07:20,851] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got hover request at (39, 41).
+[2019-01-22 10:07:20,856] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - DocUriAtPointReq future completed: succes? false
+[2019-01-22 10:07:20,856] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - DocUriAtPointReq future completed: succes? false
+[2019-01-22 10:07:20,856] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - TypeAtPointReq future completed: succes? false
+[2019-01-22 10:07:20,856] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - TypeAtPointReq future completed: succes? false
+[2019-01-22 10:07:21,139] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 63
+[2019-01-22 10:07:21,139] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 63
+[2019-01-22 10:07:21,140] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":27}}
+[2019-01-22 10:07:21,140] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":27}}
+[2019-01-22 10:07:21,141] ERROR org.github.dragos.vscode.EnsimeLanguageServer - Unknown notification CancelRequest(27)
+[2019-01-22 10:07:21,141] ERROR org.github.dragos.vscode.EnsimeLanguageServer - Unknown notification CancelRequest(27)
+[2019-01-22 10:07:21,226] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 213
+[2019-01-22 10:07:21,226] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 213
+[2019-01-22 10:07:21,227] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":28,"method":"textDocument/definition","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":39,"character":41}}}
+[2019-01-22 10:07:21,227] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":28,"method":"textDocument/definition","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":39,"character":41}}}
+[2019-01-22 10:07:21,240] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got goto definition request at (39, 41).
+[2019-01-22 10:07:21,240] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got goto definition request at (39, 41).
+[2019-01-22 10:07:21,241] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - Goto Definition future completed: succes? false
+[2019-01-22 10:07:21,241] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - Goto Definition future completed: succes? false
+[2019-01-22 10:07:21,617] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 208
+[2019-01-22 10:07:21,617] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 208
+[2019-01-22 10:07:21,619] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":29,"method":"textDocument/hover","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":39,"character":41}}}
+[2019-01-22 10:07:21,619] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":29,"method":"textDocument/hover","params":{"textDocument":{"uri":"file:///d%3A/gitTest/webapps/scala/src/main/scala/latte/CompileException.scala"},"position":{"line":39,"character":41}}}
+[2019-01-22 10:07:21,621] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got hover request at (39, 41).
+[2019-01-22 10:07:21,621] INFO org.github.dragos.vscode.EnsimeLanguageServer - Got hover request at (39, 41).
+[2019-01-22 10:07:21,623] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - DocUriAtPointReq future completed: succes? false
+[2019-01-22 10:07:21,623] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - DocUriAtPointReq future completed: succes? false
+[2019-01-22 10:07:21,623] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - TypeAtPointReq future completed: succes? false
+[2019-01-22 10:07:21,623] DEBUG org.github.dragos.vscode.EnsimeLanguageServer - TypeAtPointReq future completed: succes? false
+[2019-01-22 10:07:21,826] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 63
+[2019-01-22 10:07:21,826] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 63
+[2019-01-22 10:07:21,827] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":29}}
+[2019-01-22 10:07:21,827] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":29}}
+[2019-01-22 10:07:21,827] ERROR org.github.dragos.vscode.EnsimeLanguageServer - Unknown notification CancelRequest(29)
+[2019-01-22 10:07:21,827] ERROR org.github.dragos.vscode.EnsimeLanguageServer - Unknown notification CancelRequest(29)
+[2019-01-22 10:08:19,407] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 59
+[2019-01-22 10:08:19,407] DEBUG langserver.core.MessageReader - Received headers:
+Content-Length: 59
+[2019-01-22 10:08:19,408] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":30,"method":"shutdown","params":null}
+[2019-01-22 10:08:19,408] DEBUG langserver.core.Connection - Received {"jsonrpc":"2.0","id":30,"method":"shutdown","params":null}
+[2019-01-22 10:08:19,933] DEBUG langserver.core.MessageWriter - Content-Length: 199
+
+
+
+{"jsonrpc":"2.0","error":{"code":-32602,"message":"Invalid params","data":{"meaning":"Invalid method parameter(s).","error":{"obj":[{"msg":["command parameters must be given"],"args":[]}]}}},"id":30}
+[2019-01-22 10:08:19,933] DEBUG langserver.core.MessageWriter - Content-Length: 199
+
+
+
+{"jsonrpc":"2.0","error":{"code":-32602,"message":"Invalid params","data":{"meaning":"Invalid method parameter(s).","error":{"obj":[{"msg":["command parameters must be given"],"args":[]}]}}},"id":30}
+[2019-01-22 10:08:19,933] DEBUG langserver.core.MessageWriter - payload: {"jsonrpc":"2.0","error":{"code":-32602,"message":"Invalid params","data":{"meaning":"Invalid method parameter(s).","error":{"obj":[{"msg":["command parameters must be given"],"args":[]}]}}},"id":30}
+[2019-01-22 10:08:19,933] DEBUG langserver.core.MessageWriter - payload: {"jsonrpc":"2.0","error":{"code":-32602,"message":"Invalid params","data":{"meaning":"Invalid method parameter(s).","error":{"obj":[{"msg":["command parameters must be given"],"args":[]}]}}},"id":30}

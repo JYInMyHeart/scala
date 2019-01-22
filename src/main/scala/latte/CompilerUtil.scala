@@ -3,32 +3,87 @@ package latte
 object CompilerUtil {
 
   val javaKeys: Set[String] = Set(
-    "abstract", "assert", "boolean", "break", "byte", "case",
-    "catch", "char", "class", "const", "continue", "default",
-    "do", "double", "else", "enum", "extends", "final", "finally",
-    "float", "for", "if", "implements", "import", "instanceof",
-    "int", "interface", "long", "native", "new", "package",
-    "private", "protected", "public", "return", "short", "static",
-    "strictfp", "null"
+    "abstract",
+    "assert",
+    "boolean",
+    "break",
+    "byte",
+    "case",
+    "catch",
+    "char",
+    "class",
+    "const",
+    "continue",
+    "default",
+    "do",
+    "double",
+    "else",
+    "enum",
+    "extends",
+    "final",
+    "finally",
+    "float",
+    "for",
+    "if",
+    "implements",
+    "import",
+    "instanceof",
+    "int",
+    "interface",
+    "long",
+    "native",
+    "new",
+    "package",
+    "private",
+    "protected",
+    "public",
+    "return",
+    "short",
+    "static",
+    "strictfp",
+    "null"
   )
 
   val oneVarOperatorsPreWithoutCheckingExps: Set[String] = Set("!", "~")
   val oneVarOperatorsPreMustCheckExps: Set[String] = Set(
-    "++", "--", "!", "~", "+", "-"
+    "++",
+    "--",
+    "!",
+    "~",
+    "+",
+    "-"
   )
 
   val modifiers: Set[String] = Set(
-    "pub", "pro", "pri", "pkg",
-    "abs", "val", "native", "sync", "transient", "volatile", "strictfp",
+    "pub",
+    "pro",
+    "pri",
+    "pkg",
+    "abs",
+    "val",
+    "native",
+    "sync",
+    "transient",
+    "volatile",
+    "strictfp",
     "data"
   )
 
   val accessModifiers: Set[String] = Set(
-    "pub", "pro", "pri", "pkg"
+    "pub",
+    "pro",
+    "pri",
+    "pkg"
   )
 
   val keys: Set[String] = Set(
-    "is", "bool", "yes", "no", "type", "as", "undefined"
+    "is",
+    "bool",
+    "yes",
+    "no",
+    "type",
+    "as",
+    "undefined"
   ) ++ modifiers ++ javaKeys
 
   val oneVarOperatorsPost: Set[String] = Set("++", "--")
@@ -54,10 +109,18 @@ object CompilerUtil {
   val METHOD_DEF_EMPTY = 3
   val METHOD_DEF_ONE_STMT = 4
 
-  val twoVarOperators: Set[String] = binOpPriority.foldLeft(List[String]())(_ ::: _.toList).toSet
+  val twoVarOperators: Set[String] =
+    binOpPriority.foldLeft(List[String]())(_ ::: _.toList).toSet
 
   val primitives: Set[String] = Set(
-    "int", "double", "float", "short", "long", "byte", "char", "bool"
+    "int",
+    "double",
+    "float",
+    "short",
+    "long",
+    "byte",
+    "char",
+    "bool"
   )
 
   def isNumber(str: String): Boolean =
@@ -79,7 +142,7 @@ object CompilerUtil {
             return false
         }
         true
-      case _ => true
+      case _ => false
     }
   }
 
@@ -92,10 +155,9 @@ object CompilerUtil {
   def isBoolean(str: String): Boolean =
     str == "true" || str == "false"
 
-
   def isString(str: String): Boolean =
-    (str.startsWith("\"") && str.endsWith("\"")) || (str.startsWith("\'") && str.endsWith("\'"))
-
+    (str.startsWith("\"") && str.endsWith("\"")) || (str.startsWith("\'") && str
+      .endsWith("\'"))
 
   def isOneVariableOperatorPost(str: String): Boolean =
     oneVarOperatorsPost.contains(str)
@@ -135,14 +197,12 @@ object CompilerUtil {
     false
   }
 
-
   def isAssign(str: String): Boolean =
     str == "=" || str == "/=" || str == "*=" || str == "+=" || str == "-=" || str == "%="
 
-
   def expecting(token: String, previous: Node, got: Node): Unit = {
     got match {
-      case x: Element if !x.content.endsWith(token) =>
+      case x: Element if x.content.endsWith(token) =>
       case _ =>
         throw new Exception(s"${previous.lineCol}")
     }
@@ -167,18 +227,24 @@ object CompilerUtil {
     false
   }
 
-
   def twoVarHigherOrEqual(a: String, b: String): Boolean = {
     var indexA = findTwoVarPriority(a)
-    if (indexA == -1 && isValidName(a))
-      indexA = binOpPriority.length
-    else
-      throw new IllegalArgumentException(a + " is not valid two variable operator")
+    if (indexA == -1) {
+      if (isValidName(a))
+        indexA = binOpPriority.length
+      else
+        throw new IllegalArgumentException(
+          a + " is not valid two variable operator")
+    }
+
     var indexB = findTwoVarPriority(b)
-    if (indexB == -1 && isValidName(b))
-      indexB = binOpPriority.length
-    else
-      throw new IllegalArgumentException(b + " is not valid two variable operator")
+    if (indexB == -1) {
+      if (isValidName(b))
+        indexB = binOpPriority.length
+      else
+        throw new IllegalArgumentException(
+          b + " is not valid two variable operator")
+    }
     indexA <= indexB
   }
 
@@ -205,8 +271,70 @@ object CompilerUtil {
     true
   }
 
-  def isModifier(str:String) =
+  def isModifier(str: String) =
     modifiers.contains(str)
 
-
+  def checkMethodDef(elem: Element): Int = {
+    val content = elem.content
+    if (isValidName(content)) {
+      var nodeAfterRightPar: Node = null
+      val n1 = getNextNode(elem)
+      n1 match {
+        case n: Element => {
+          val p = n.content
+          if (p == "(") {
+            val n2 = getNextNode(n1)
+            n2 match {
+              case nn2: ElementStartNode => {
+                val n3 = getNextNode(n2)
+                n3 match {
+                  case e: Element => {
+                    if (e.content == ")") {
+                      nodeAfterRightPar = getNextNode(n3)
+                    }
+                  }
+                  case _ =>
+                }
+              }
+              case nn2: Element => {
+                if (nn2.content == ")") {
+                  nodeAfterRightPar = getNextNode(n2)
+                }
+              }
+              case _ =>
+            }
+          }
+        }
+        case _ =>
+      }
+      if (nodeAfterRightPar != null) {
+        nodeAfterRightPar match {
+          case n: ElementStartNode => {
+            return METHOD_DEF_NORMAL
+          }
+          case n: Element => {
+            val s = n.content
+            s match {
+              case ":" => {
+                return METHOD_DEF_TYPE
+              }
+              case "=" => {
+                val nn = getNextNode(nodeAfterRightPar)
+                nn match {
+                  case e: Element => {
+                    if (e.content == "...") {
+                      return METHOD_DEF_EMPTY
+                    } else {
+                      return METHOD_DEF_ONE_STMT
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    NOT_METHOD_DEF
+  }
 }
