@@ -4,8 +4,8 @@ import java.util.Stack
 
 import latte.CompilerUtil._
 
-import scala.collection.mutable
-import scala.collection.mutable.ListBuffer
+import scala.collection.mutable.{HashSet, ListBuffer}
+import scala.util.control.Breaks._
 
 case class Parser(root: ElementStartNode) {
   private var current: Node = root.linkNode
@@ -115,152 +115,150 @@ case class Parser(root: ElementStartNode) {
 
   def parseStatement(): Statement = {
     if (current == null) return null
-    isParsingTry match {
-      case true => {
-        annosIsEmpty()
-        modifiersIsEmpty()
-        val lineCol = current.lineCol
-        var exceptionTypes = List[Access]()
-        while (current.isInstanceOf[Element]) {
-          val exp = getExp(true)
-          exp match {
-            case access: Access =>
-              exceptionTypes :+= access
-            case _ =>
-              throw UnexpectedTokenException("exception type", exp.toString, exp.lineCol)
-          }
-          current match {
-            case node: EndingNode if node.nodeType == EndingNode.STRONG => nextNode(true)
-            case _ =>
-          }
+    if (isParsingTry) {
+      annosIsEmpty()
+      modifiersIsEmpty()
+      val lineCol = current.lineCol
+      var exceptionTypes = List[Access]()
+      while (current.isInstanceOf[Element]) {
+        val exp = getExp(true)
+        exp match {
+          case access: Access =>
+            exceptionTypes :+= access
+          case _ =>
+            throw UnexpectedTokenException("exception type", exp.toString, exp.lineCol)
         }
         current match {
-          case node: ElementStartNode =>
-            Catch(
-              exceptionTypes,
-              parseElemStart(
-                node,
-                addUsedNames = true,
-                Set(),
-                parseMap = false,
-                parseTry = false),
-              lineCol)
-          case _ => throw new UnexpectedTokenException(current.toString(), current.lineCol)
+          case node: EndingNode if node.nodeType == EndingNode.STRONG => nextNode(true)
+          case _ =>
         }
       }
-      case false => {
-        current match {
-          case e: Element => {
-            val content = e.content
-            content match {
-              case c if isModifier(c) && e.isValidName =>
-                parseModifier()
-                null
-              case "if" =>
-                annosIsEmpty()
-                modifiersIsEmpty()
-                parseIf()
-              case "for" =>
-                annosIsEmpty()
-                modifiersIsEmpty()
-                parseFor()
-              case "do" =>
-                annosIsEmpty()
-                modifiersIsEmpty()
-                parseDo()
-              case "while" =>
-                annosIsEmpty()
-                modifiersIsEmpty()
-                parseWhile()
-              case "static" => {
-                annosIsEmpty()
-                modifiersIsEmpty()
+      current match {
+        case node: ElementStartNode =>
+          Catch(
+            exceptionTypes,
+            parseElemStart(
+              node,
+              addUsedNames = true,
+              Set(),
+              parseMap = false,
+              parseTry = false),
+            lineCol)
+        case _ => throw new UnexpectedTokenException(current.toString(), current.lineCol)
+      }
+    } else {
+      current match {
+        case e: Element => {
+          val content = e.content
+          content match {
+            case c if isModifier(c) && !e.isValidName =>
+              parseModifier()
+              null
+            case "if" =>
+              annosIsEmpty()
+              modifiersIsEmpty()
+              parseIf()
+            case "for" =>
+              annosIsEmpty()
+              modifiersIsEmpty()
+              parseFor()
+            case "do" =>
+              annosIsEmpty()
+              modifiersIsEmpty()
+              parseDo()
+            case "while" =>
+              annosIsEmpty()
+              modifiersIsEmpty()
+              parseWhile()
+            case "static" => {
+              annosIsEmpty()
+              modifiersIsEmpty()
 
-                val lineCol = e.lineCol
-                e.next match {
-                  case ee: ElementStartNode =>
-                    nextNode(false)
-                    StaticScope(
-                      parseElemStart(
-                        ee,
-                        addUsedNames = false,
-                        Set(),
-                        parseMap = false,
-                        parseTry = false
-                      ),
-                      lineCol
-                    )
-                  case ee: Element =>
-                    nextNode(false)
-                    val stmt = parseStatement()
-                    if (stmt == null)
-                      throw UnexpectedTokenException("a valid statement", ee.toString, ee.lineCol)
-                    StaticScope(List(stmt), lineCol)
-                  case _ =>
-                    null
-                }
+              val lineCol = e.lineCol
+              e.next match {
+                case ee: ElementStartNode =>
+                  nextNode(false)
+                  StaticScope(
+                    parseElemStart(
+                      ee,
+                      addUsedNames = false,
+                      Set(),
+                      parseMap = false,
+                      parseTry = false
+                    ),
+                    lineCol
+                  )
+                case ee: Element =>
+                  nextNode(false)
+                  val stmt = parseStatement()
+                  if (stmt == null)
+                    throw UnexpectedTokenException("a valid statement", ee.toString, ee.lineCol)
+                  StaticScope(List(stmt), lineCol)
+                case _ =>
+                  null
               }
-              case "class" =>
-                parseClass()
-              case "interface" =>
-                parseInterface()
-              case "try" =>
-                annosIsEmpty()
-                modifiersIsEmpty()
-                parseTry()
-              case "throw" =>
-                annosIsEmpty()
-                modifiersIsEmpty()
-                parseThrow()
-              case "@" =>
-                modifiersIsEmpty()
-                parseAnno()
-                null
-              case "<" =>
-                annosIsEmpty()
-                modifiersIsEmpty()
-                val lineCol = e.lineCol
-                e.next match {
-                  case _: Element =>
-                    Return(null, lineCol)
-                  case _ =>
-                    Return(nextExp(false), lineCol)
-                }
-              case "#" =>
-                modifiersIsEmpty()
-                parsePkgDeclare()
-              case "#>" =>
-                annosIsEmpty()
-                modifiersIsEmpty()
-                parsePkgImport()
-              case _ => {
-                val defMethodType = checkMethodDef(e)
-                defMethodType match {
-                  case METHOD_DEF_TYPE =>
-                    parseMethodDefType()
-                  case METHOD_DEF_EMPTY =>
-                    parseMethodDefEmpty()
-                  case METHOD_DEF_NORMAL =>
-                    parseMethodDefNormal()
-                  case METHOD_DEF_ONE_STMT =>
-                    parseMethodDefOneStmt()
-                  case _ =>
-                    while (true) {
-                      parseExpression()
-                      if (e == null || !current.isInstanceOf[Element]) {
-                        if (parsedExps.empty()) return null
-                        return parsedExps.pop()
-                      }
+            }
+            case "class" =>
+              parseClass()
+            case "interface" =>
+              parseInterface()
+            case "try" =>
+              annosIsEmpty()
+              modifiersIsEmpty()
+              parseTry()
+            case "throw" =>
+              annosIsEmpty()
+              modifiersIsEmpty()
+              parseThrow()
+            case "@" =>
+              modifiersIsEmpty()
+              parseAnno()
+              null
+            case "<" =>
+              annosIsEmpty()
+              modifiersIsEmpty()
+              val lineCol = e.lineCol
+              e.next match {
+                case _: Element =>
+                  val expression = nextExp(false)
+                  Return(expression, lineCol)
+                case _ =>
+                  Return(null, lineCol)
+              }
+            case "#" =>
+              modifiersIsEmpty()
+              parsePkgDeclare()
+            case "#>" =>
+              annosIsEmpty()
+              modifiersIsEmpty()
+              parsePkgImport()
+            case _ => {
+              val defMethodType = checkMethodDef(e)
+              defMethodType match {
+                case METHOD_DEF_TYPE =>
+                  parseMethodDefType()
+                case METHOD_DEF_EMPTY =>
+                  parseMethodDefEmpty()
+                case METHOD_DEF_NORMAL =>
+                  parseMethodDefNormal()
+                case METHOD_DEF_ONE_STMT =>
+                  parseMethodDefOneStmt()
+                case _ =>
+                  while (true) {
+                    parseExpression()
+                    if (e == null || !current.isInstanceOf[Element]) {
+                      if (parsedExps.empty()) return null
+                      return parsedExps.pop()
                     }
-                    null
-                }
+                  }
+                  null
               }
             }
           }
-          case _ =>
-            nextNode(true)
-            parseStatement()
         }
+        case _ =>
+          nextNode(true)
+          parseStatement()
       }
     }
 
@@ -271,50 +269,56 @@ case class Parser(root: ElementStartNode) {
     val lineCol = current.lineCol
     var pairs = List[IfPair]()
     var isLast = false
-    var enable = true
-    while (enable && (current.isInstanceOf[Element]
-      || current.isInstanceOf[EndingNode])) {
+    while (current.isInstanceOf[Element]
+      || current.isInstanceOf[EndingNode]) {
       val ifPairLineCol = current.lineCol
       var condition: Expression = null
       var list: List[Statement] = List()
+      if (current.isInstanceOf[EndingNode]
+        && current.next.isInstanceOf[Element]) {
+        val content = current.next.asInstanceOf[Element].content
+        if (content == "elseif" || content == "else")
+          nextNode(false)
+        else {
+          break
+        }
+      }
+
+
+      val content = current.asInstanceOf[Element].content
+
+      if (content != "if" && content != "elseif" && content != "else") {
+        break
+      }
+      if (current.asInstanceOf[Element].content == "else")
+        nextNode(true)
+      else
+        nextNode(false)
+
+      if (content == "if" || content == "elseif") {
+        if (isLast) {
+          throw new SyntaxException(
+            s"if-else had already reached else but got $content instead",
+            current.lineCol)
+        }
+        condition = getExp(true)
+      }
+
+
       current match {
-        case e: EndingNode => {
-          e.next match {
-            case ee: Element => {
-              val content = ee.content
-              if (content == "elseif" || content == "else")
-                nextNode(false)
-              else {
-                enable = false
-              }
-            }
-            case _ =>
-          }
-        }
-        case e: Element => {
-          if (e.content == "else")
-            nextNode(true)
-          else
-            nextNode(false)
-          if (e.content == "if" || e.content == "elseif") {
-            if (isLast)
-              throw new SyntaxException(
-                s"if-else had already reached else but got ${e.content} instead",
-                current.lineCol)
-            condition = getExp(true)
-          }
-        }
-        case e: ElementStartNode => {
+        case node: ElementStartNode =>
+
           list = parseElemStart(
-            e,
+            node,
             addUsedNames = true,
             Set(),
             parseMap = false,
             parseTry = false
           )
-        }
         case _ =>
       }
+
+
       if (condition == null)
         isLast = true
       val pair = IfPair(
@@ -322,9 +326,12 @@ case class Parser(root: ElementStartNode) {
         if (list == null) List() else list,
         ifPairLineCol)
       pairs :+= pair
+
       nextNode(true)
       binVarOps.clear()
     }
+
+
     if (current != null)
       current = current.next
     IfStatement(pairs, lineCol)
@@ -351,6 +358,7 @@ case class Parser(root: ElementStartNode) {
         processor.addUsedVarNames(set)
         statements = processor.parse
       }
+
       case _ =>
     }
     ForStatement(
@@ -365,7 +373,7 @@ case class Parser(root: ElementStartNode) {
     nextNode(true)
     current match {
       case e: ElementStartNode => {
-        var statements = parseElemStart(
+        val statements = parseElemStart(
           e,
           addUsedNames = true,
           Set(),
@@ -375,7 +383,7 @@ case class Parser(root: ElementStartNode) {
         nextNode(false)
         expecting("while", current.previous, current)
         val condition = nextExp(true)
-        WhileStatement(condition, statements, true, lineCol)
+        WhileStatement(condition, statements, doWhile = true, lineCol)
       }
       case _ => {
         throw UnexpectedTokenException("while", current.toString, current.lineCol)
@@ -840,7 +848,7 @@ case class Parser(root: ElementStartNode) {
     this.annos = Set()
 
     val variableList = ListBuffer[VariableDef]()
-    var names = mutable.HashSet[String]()
+    var names = HashSet[String]()
     parseMethodDefVariables(variableList, names)
     nextNode(false)
     nextNode(false)
@@ -904,7 +912,7 @@ case class Parser(root: ElementStartNode) {
   }
 
   def parseMethodDefVariables(variableList: ListBuffer[VariableDef],
-                              names: mutable.HashSet[String]): Unit = {
+                              names: HashSet[String]): Unit = {
     nextNode(false)
     expecting("(", current.previous, current)
     nextNode(false)
@@ -928,20 +936,22 @@ case class Parser(root: ElementStartNode) {
               )
               annos = Set()
               variableList += variable
+              names += s.name
             }
             case v: VariableDef => {
-              if (v.init == null && mustHaveInit)
-                throw new SyntaxException("parameter with init value", v.lineCol)
-              else
-                mustHaveInit = true
+              if (v.init == null)
+                if (mustHaveInit)
+                  throw new SyntaxException("parameter with init value", v.lineCol)
+                else
+                  mustHaveInit = true
               variableList += v
               names += v.name
             }
             case s =>
               throw UnexpectedTokenException("parameter", s.toString, s.lineCol)
           }
-          nextNode(false)
         }
+        nextNode(false)
       }
       case _ =>
     }
@@ -955,7 +965,7 @@ case class Parser(root: ElementStartNode) {
     this.annos = Set()
 
     var variableList = ListBuffer[VariableDef]()
-    var names = mutable.HashSet[String]()
+    var names = HashSet[String]()
     parseMethodDefVariables(variableList, names)
     nextNode(false)
     nextNode(false)
@@ -980,7 +990,7 @@ case class Parser(root: ElementStartNode) {
     this.annos = Set()
 
     val variableList = ListBuffer[VariableDef]()
-    var names = mutable.HashSet[String]()
+    var names = HashSet[String]()
     parseMethodDefVariables(variableList, names)
     nextNode(false)
     val processor = Parser(current.asInstanceOf[ElementStartNode])
@@ -1008,7 +1018,7 @@ case class Parser(root: ElementStartNode) {
     this.annos = Set()
 
     val variableList = ListBuffer[VariableDef]()
-    val names = mutable.HashSet[String]()
+    val names = HashSet[String]()
     parseMethodDefVariables(variableList, names)
     nextNode(false)
     nextNode(false)
@@ -1149,7 +1159,9 @@ case class Parser(root: ElementStartNode) {
                           Invocation(access, List[Expression](), access.lineCol)
                         parsedExps.push(invocation)
                       } else
-                        throw new Exception(s")${current.lineCol}")
+                        throw new Exception(s")${
+                          current.lineCol
+                        }")
                       nextNode(true)
                       parseExpression()
                     case c: ElementStartNode =>
@@ -1177,7 +1189,9 @@ case class Parser(root: ElementStartNode) {
                                   parsedExps.push(procedure)
                                 case _ =>
                                   throw new Exception(
-                                    s"return statement in closure ${statements.head.toString}")
+                                    s"return statement in closure ${
+                                      statements.head.toString
+                                    }")
                               }
                             case _ =>
                               val procedure =
@@ -1186,7 +1200,9 @@ case class Parser(root: ElementStartNode) {
                           }
                         }
                       } else
-                        throw new Exception(s"arguments ${startNode.toString}")
+                        throw new Exception(s"arguments ${
+                          startNode.toString
+                        }")
                       nextNode(false)
                       expecting(")", startNode, current)
                       nextNode(true)
@@ -1199,7 +1215,9 @@ case class Parser(root: ElementStartNode) {
                 annosIsEmpty()
                 if (parsedExps.empty())
                   throw new Exception(
-                    s"unexpected expression as ${current.lineCol}")
+                    s"unexpected expression as ${
+                      current.lineCol
+                    }")
                 else {
                   val lineCol = current.lineCol
                   val exp = parsedExps.pop()
@@ -1226,7 +1244,9 @@ case class Parser(root: ElementStartNode) {
                       parseOperatorLikeInvocation()
                   case _ =>
                     throw new Exception(
-                      s"unknown token $content ${current.lineCol}")
+                      s"unknown token $content ${
+                        current.lineCol
+                      }")
                 }
             }
             enable = false
@@ -1234,7 +1254,10 @@ case class Parser(root: ElementStartNode) {
         }
       case _: ElementStartNode =>
         if (!expectingStartNode)
-          throw new Exception(s"unexpected new layer ${current.lineCol}")
+          throw new Exception(s"unexpected new layer ${
+            current.lineCol
+          }")
+      case _ =>
     }
   }
 
@@ -1393,7 +1416,7 @@ case class Parser(root: ElementStartNode) {
         expecting("]", if (current.next == null) null else current.next.next, current)
         val stmts: List[Statement] = parseElemStart(
           current.asInstanceOf[ElementStartNode],
-          true,
+          addUsedNames = true,
           Set(),
           parseMap = false,
           parseTry = false)
@@ -1438,7 +1461,7 @@ case class Parser(root: ElementStartNode) {
     var set = Set[String]()
     current match {
       case e: ElementStartNode =>
-        var list = parseElemStart(
+        val list = parseElemStart(
           e,
           addUsedNames = false,
           Set(), parseMap = false,
@@ -1459,6 +1482,7 @@ case class Parser(root: ElementStartNode) {
             throw UnexpectedTokenException("variable", x.toString, x.lineCol)
         }
         nextNode(false)
+      case _ =>
     }
     nextNode(false)
     nextNode(false)
@@ -1521,27 +1545,34 @@ case class Parser(root: ElementStartNode) {
   def parseTypeSpec(): Unit = {
     val lineCol = current.lineCol
     assert(!parsedExps.empty())
-    val expr = parsedExps.pop()
+    var expr = parsedExps.pop()
     expr match {
       case v: Access =>
         if (v.expression != null)
-          throw DuplicateVariableNameException(v.name, v.lineCol)
-        if (usedVarNames.contains(v.name))
-          throw UnexpectedTokenException("variable", v.toString, v.lineCol)
-        nextNode(false)
-        current match {
-          case _: Element =>
-            val a = parseClsForTypeSpec()
-            v.asInstanceOf[VariableDef].vType = a
-          case _ =>
-            throw UnexpectedTokenException(
-              "type",
-              current.toString,
-              if (current == null) lineCol else current.lineCol)
-        }
-        parsedExps.push(expr)
-        parseExpression()
+          throw UnexpectedTokenException("variable definition", v.toString, v.lineCol)
+        val name = v.name
+        if (usedVarNames.contains(name))
+          throw DuplicateVariableNameException(name, v.lineCol)
+        val nv = VariableDef(name, modifiers, null, null, annos, v.lineCol)
+        annos = Set()
+        usedVarNames += name
+        modifiers = Set()
+        expr = nv
+      case _ =>
     }
+    nextNode(false)
+    current match {
+      case _: Element =>
+        val a = parseClsForTypeSpec()
+        expr.asInstanceOf[VariableDef].vType = a
+      case _ =>
+        throw UnexpectedTokenException(
+          "type",
+          current.toString,
+          if (current == null) lineCol else current.lineCol)
+    }
+    parsedExps.push(expr)
+    parseExpression()
   }
 
   def parseAssign(): Unit = {
@@ -1656,7 +1687,11 @@ case class Parser(root: ElementStartNode) {
       access = parsedExps.pop().asInstanceOf[Access]
     } else
       throw new Exception(
-        s"unexpected type ${current.asInstanceOf[Element].content} at ${current.lineCol}")
+        s"unexpected type ${
+          current.asInstanceOf[Element].content
+        } at ${
+          current.lineCol
+        }")
     for (_ <- 0 until arrayDepth)
       access = Access(access, "[]", access.lineCol)
     access
