@@ -179,19 +179,25 @@ object CompilerUtil {
         if (e.content == "(") {
           var n = getNextNode(e)
           n match {
+            case _: ElementStartNode =>
+              n = getNextNode(n)
+            case _ =>
+          }
+
+          n match {
             case x: Element =>
               if (x.content == ")") {
                 n = getNextNode(n)
                 n match {
-                  case y: Element =>
-                    if (y.content == "->")
-                      return true
+                  case y: Element if y.content == "->" =>
+                    return true
                   case _ =>
                 }
               }
-            case _: ElementStartNode =>
-              n = getNextNode(n)
+
+            case _ =>
           }
+
         }
     }
     false
