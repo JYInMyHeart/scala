@@ -1083,8 +1083,679 @@ class ParserTest extends UnitSpec {
   }
 
 
+  "testClass_Arg_SuperInvocation" should "nice" in {
+    val statements = parse("class C(arg):Type(arg),Type2\n    a=2")
+    assert(statements.size == 1)
+    val s = statements.head
+    val c = ClassStatement(
+      "C",
+      Set(),
+      List(
+        VariableDef("arg",
+          Set(),
+          null,
+          null,
+          Set(),
+          LineCol.SYNTHETIC)
+      ),
+      Invocation(
+        Access(null, "Type", LineCol.SYNTHETIC),
+        List(
+          Access(null, "arg", LineCol.SYNTHETIC)
+        ),
+        LineCol.SYNTHETIC
+
+      ),
+      List(
+        Access(null, "Type2", LineCol.SYNTHETIC)
+      ),
+      Set(),
+      List(VariableDef("a",
+        Set(),
+        null,
+        NumberLiteral("2", LineCol.SYNTHETIC),
+        Set(),
+        LineCol.SYNTHETIC)),
+      LineCol.SYNTHETIC
+    )
+    assert(s == c)
+  }
 
 
+  "testClass_Arg_SuperInvocation_Modifiers" should "nice" in {
+    val statements = parse("abs class C(arg):Type(arg),Type2\n    a=2")
+    assert(statements.size == 1)
+    val s = statements.head
+    val c = ClassStatement(
+      "C",
+      Set(Modifier(
+        "abs",
+        LineCol.SYNTHETIC
+      )),
+      List(
+        VariableDef("arg",
+          Set(),
+          null,
+          null,
+          Set(),
+          LineCol.SYNTHETIC)
+      ),
+      Invocation(
+        Access(null, "Type", LineCol.SYNTHETIC),
+        List(
+          Access(null, "arg", LineCol.SYNTHETIC)
+        ),
+        LineCol.SYNTHETIC
+
+      ),
+      List(
+        Access(null, "Type2", LineCol.SYNTHETIC)
+      ),
+      Set(),
+      List(VariableDef("a",
+        Set(),
+        null,
+        NumberLiteral("2", LineCol.SYNTHETIC),
+        Set(),
+        LineCol.SYNTHETIC)),
+      LineCol.SYNTHETIC
+    )
+    assert(s == c)
+  }
+
+  "testInterface_simple" should "nice" in {
+    val statements = parse("interface A")
+    assert(statements.size == 1)
+    val s = statements.head
+
+    val i = InterfaceStatement(
+      "A",
+      Set(),
+      List(),
+      Set(),
+      List(),
+      LineCol.SYNTHETIC
+    )
+    assert(s == i)
+  }
+
+  "testInterface_super_interfaces" should "nice" in {
+    val statements = parse("interface A:B,C")
+    assert(statements.size == 1)
+    val s = statements.head
+
+    val i = InterfaceStatement(
+      "A",
+      Set(),
+      List(
+        Access(null, "B", LineCol.SYNTHETIC),
+        Access(null, "C", LineCol.SYNTHETIC)
+      ),
+      Set(),
+      List(),
+      LineCol.SYNTHETIC
+    )
+    assert(s == i)
+  }
+
+
+  "testInterface_super_interfaces_stmt" should "nice" in {
+    val statements = parse("interface A:B,C\n    method()=...")
+    assert(statements.size == 1)
+    val s = statements.head
+
+    val i = InterfaceStatement(
+      "A",
+      Set(),
+      List(
+        Access(null, "B", LineCol.SYNTHETIC),
+        Access(null, "C", LineCol.SYNTHETIC)
+      ),
+      Set(),
+      List(
+        MethodStatement(
+          "method",
+          Set(),
+          null,
+          List(),
+          Set(),
+          List(),
+          LineCol.SYNTHETIC
+        )
+      ),
+      LineCol.SYNTHETIC
+    )
+    assert(s == i)
+  }
+
+  "testTryAll" should "nice" in {
+    val statements = parse(""
+      + "try\n"
+      + "    a=1\n"
+      + "catch e\n"
+      + "    Exception,Throwable\n"
+      + "        a=2\n"
+      + "    RuntimeException\n"
+      + "        a=3\n"
+      + "finally\n"
+      + "    a=4")
+    assert(statements.size == 1)
+    val s = statements.head
+
+    val v1 = VariableDef("a",
+      Set(),
+      null,
+      NumberLiteral("1", LineCol.SYNTHETIC),
+      Set(),
+      LineCol.SYNTHETIC)
+    val v2 = VariableDef("a",
+      Set(),
+      null,
+      NumberLiteral("2", LineCol.SYNTHETIC),
+      Set(),
+      LineCol.SYNTHETIC)
+    val v3 = VariableDef("a",
+      Set(),
+      null,
+      NumberLiteral("3", LineCol.SYNTHETIC),
+      Set(),
+      LineCol.SYNTHETIC)
+    val v4 = VariableDef("a",
+      Set(),
+      null,
+      NumberLiteral("4", LineCol.SYNTHETIC),
+      Set(),
+      LineCol.SYNTHETIC)
+
+    val t = Try(
+      List(v1),
+      List(
+        Catch(
+          List(
+            Access(null, "Exception", LineCol.SYNTHETIC),
+            Access(null, "Throwable", LineCol.SYNTHETIC)
+          ),
+          List(v2),
+          LineCol.SYNTHETIC
+        ),
+        Catch(
+          List(
+            Access(null, "RuntimeException", LineCol.SYNTHETIC),
+          ),
+          List(v3),
+          LineCol.SYNTHETIC
+        )
+      ),
+      "e",
+      List(v4),
+      LineCol.SYNTHETIC
+    )
+    assert(s == t)
+  }
+
+  "testTryOneCatch" should "nice" in {
+    val statements = parse(""
+      + "try\n"
+      + "    a=1\n"
+      + "catch e\n"
+      + "    RuntimeException\n"
+      + "        a = 3"
+    )
+    assert(statements.size == 1)
+    val s = statements.head
+
+    val v1 = VariableDef("a",
+      Set(),
+      null,
+      NumberLiteral("1", LineCol.SYNTHETIC),
+      Set(),
+      LineCol.SYNTHETIC)
+    val v2 = VariableDef("a",
+      Set(),
+      null,
+      NumberLiteral("3", LineCol.SYNTHETIC),
+      Set(),
+      LineCol.SYNTHETIC)
+
+    val t = Try(
+      List(v1),
+      List(
+        Catch(
+          List(
+            Access(null, "RuntimeException", LineCol.SYNTHETIC),
+          ),
+          List(v2),
+          LineCol.SYNTHETIC
+        )
+      ),
+      "e",
+      List(),
+      LineCol.SYNTHETIC
+    )
+    assert(s == t)
+  }
+
+
+  "testTryOneCatchNoProcess" should "nice" in {
+    val statements = parse(""
+      + "try\n"
+      + "    a=1\n"
+      + "catch e\n"
+      + "    RuntimeException\n"
+    )
+    assert(statements.size == 1)
+    val s = statements.head
+
+    val v1 = VariableDef("a",
+      Set(),
+      null,
+      NumberLiteral("1", LineCol.SYNTHETIC),
+      Set(),
+      LineCol.SYNTHETIC)
+
+
+    val t = Try(
+      List(v1),
+      List(
+        Catch(
+          List(
+            Access(null, "RuntimeException", LineCol.SYNTHETIC),
+          ),
+          List(),
+          LineCol.SYNTHETIC
+        )
+      ),
+      "e",
+      List(),
+      LineCol.SYNTHETIC
+    )
+    assert(s == t)
+  }
+
+
+  "testTryTwoCatchOneProcess" should "nice" in {
+    val statements = parse(""
+      + "try\n"
+      + "    a=1\n"
+      + "catch e\n"
+      + "    Exception,Throwable\n"
+      + "    RuntimeException\n"
+      + "        a = 3"
+    )
+    assert(statements.size == 1)
+    val s = statements.head
+
+    val v1 = VariableDef("a",
+      Set(),
+      null,
+      NumberLiteral("1", LineCol.SYNTHETIC),
+      Set(),
+      LineCol.SYNTHETIC)
+    val v2 = VariableDef("a",
+      Set(),
+      null,
+      NumberLiteral("3", LineCol.SYNTHETIC),
+      Set(),
+      LineCol.SYNTHETIC)
+
+    val t = Try(
+      List(v1),
+      List(
+        Catch(
+          List(
+            Access(null, "Exception", LineCol.SYNTHETIC),
+            Access(null, "Throwable", LineCol.SYNTHETIC)
+          ),
+          List(),
+          LineCol.SYNTHETIC
+        ),
+        Catch(
+          List(
+            Access(null, "RuntimeException", LineCol.SYNTHETIC),
+          ),
+          List(v2),
+          LineCol.SYNTHETIC
+        )
+      ),
+      "e",
+      List(),
+      LineCol.SYNTHETIC
+    )
+    assert(s == t)
+  }
+
+
+  "testTryFinally" should "nice" in {
+    val statements = parse(""
+      + "try\n"
+      + "    a=1\n"
+      + "finally\n"
+      + "    a=4")
+    assert(statements.size == 1)
+    val s = statements.head
+
+    val v1 = VariableDef("a",
+      Set(),
+      null,
+      NumberLiteral("1", LineCol.SYNTHETIC),
+      Set(),
+      LineCol.SYNTHETIC)
+    val v4 = VariableDef("a",
+      Set(),
+      null,
+      NumberLiteral("4", LineCol.SYNTHETIC),
+      Set(),
+      LineCol.SYNTHETIC)
+
+    val t = Try(
+      List(v1),
+      List(),
+      "",
+      List(v4),
+      LineCol.SYNTHETIC
+    )
+    assert(s == t)
+  }
+
+
+  "testThrow" should "nice" in {
+    val statements = parse("throw e")
+    assert(statements.size == 1)
+    val s = statements.head
+
+    val t = Throw(
+      Access(null, "e", LineCol.SYNTHETIC),
+      LineCol.SYNTHETIC
+    )
+    assert(s == t)
+  }
+
+
+  "testAnnoVariable" should "nice" in {
+    val statements = parse("@Anno(abc=1)\ni=2")
+    assert(statements.size == 1)
+    val s = statements.head
+
+    val t = VariableDef("i",
+      Set(),
+      null,
+      NumberLiteral("2", LineCol.SYNTHETIC),
+      Set(
+        Anno(
+          Access(null, "Anno", LineCol.SYNTHETIC),
+          List(Assignment(
+            Access(null, "abc", LineCol.SYNTHETIC),
+            "=",
+            NumberLiteral("1", LineCol.SYNTHETIC),
+            LineCol.SYNTHETIC
+          )),
+          LineCol.SYNTHETIC
+        )
+      ),
+      LineCol.SYNTHETIC)
+    assert(s == t)
+  }
+
+
+  "testAnnoInterface" should "nice" in {
+    val statements = parse("@Anno(abc=1)\ninterface I")
+    assert(statements.size == 1)
+    val s = statements.head
+
+    val t = InterfaceStatement("I",
+      Set(),
+      List(),
+      Set(
+        Anno(
+          Access(null, "Anno", LineCol.SYNTHETIC),
+          List(Assignment(
+            Access(null, "abc", LineCol.SYNTHETIC),
+            "=",
+            NumberLiteral("1", LineCol.SYNTHETIC),
+            LineCol.SYNTHETIC
+          )),
+          LineCol.SYNTHETIC
+        )
+      ),
+      List(),
+      LineCol.SYNTHETIC)
+    assert(s == t)
+  }
+
+
+  "testAnnoClass" should "nice" in {
+    val statements = parse("@Anno\nclass I")
+    assert(statements.size == 1)
+    val s = statements.head
+
+    val t = ClassStatement("I",
+      Set(),
+      List(),
+      null,
+      List(),
+      Set(
+        Anno(
+          Access(null, "Anno", LineCol.SYNTHETIC),
+          List(),
+          LineCol.SYNTHETIC
+        )
+      ),
+      List(),
+      LineCol.SYNTHETIC)
+    assert(s == t)
+  }
+
+  "testAnnoMethod" should "nice" in {
+    val statements = parse("@Anno\nmethod()=...")
+    assert(statements.size == 1)
+    val s = statements.head
+
+    val t = MethodStatement("method",
+      Set(),
+      null,
+      List(),
+      Set(
+        Anno(
+          Access(null, "Anno", LineCol.SYNTHETIC),
+          List(),
+          LineCol.SYNTHETIC
+        )
+      ),
+      List(),
+      LineCol.SYNTHETIC)
+    assert(s == t)
+  }
+
+  "testArrayExp" should "nice" in {
+    val statements = parse("[1,2]")
+    assert(statements.size == 1)
+    val s = statements.head
+
+    val arr = ArrayExp(
+      List(
+        NumberLiteral("1", LineCol.SYNTHETIC),
+        NumberLiteral("2", LineCol.SYNTHETIC)
+      ),
+      LineCol.SYNTHETIC
+    )
+    assert(arr == s)
+  }
+
+
+  "testArrayExp0" should "nice" in {
+    val statements = parse("[]")
+    assert(statements.size == 1)
+    val s = statements.head
+
+    val arr = ArrayExp(
+      List(),
+      LineCol.SYNTHETIC
+    )
+    assert(arr == s)
+  }
+
+  "testIndexAccess1" should "nice" in {
+    val statements = parse("array[1]")
+    assert(statements.size == 1)
+    val s = statements.head
+
+    val arr = Index(
+      Access(null, "array", LineCol.SYNTHETIC),
+      List(NumberLiteral("1", LineCol.SYNTHETIC)),
+      LineCol.SYNTHETIC
+    )
+    assert(arr == s)
+  }
+
+  "testIndexAccess12" should "nice" in {
+    val statements = parse("array[1,2]")
+    assert(statements.size == 1)
+    val s = statements.head
+
+    val arr = Index(
+      Access(null, "array", LineCol.SYNTHETIC),
+      List(
+        NumberLiteral("1", LineCol.SYNTHETIC),
+        NumberLiteral("2", LineCol.SYNTHETIC)
+      ),
+      LineCol.SYNTHETIC
+    )
+    assert(arr == s)
+  }
+
+  "testIndexAccess0" should "nice" in {
+    val statements = parse("array[]")
+    assert(statements.size == 1)
+    val s = statements.head
+
+    val arr = Index(
+      Access(null, "array", LineCol.SYNTHETIC),
+      List(),
+      LineCol.SYNTHETIC
+    )
+    assert(arr == s)
+  }
+
+  "testMap" should "nice" in {
+    val statements = parse("{a:b}")
+    assert(statements.size == 1)
+    val s = statements.head
+
+    val m = MapExp(
+      Map[Expression, Expression](
+        Access(null, "a", LineCol.SYNTHETIC) -> Access(null, "b", LineCol.SYNTHETIC)
+      ),
+      LineCol.SYNTHETIC
+    )
+    assert(s == m)
+  }
+
+  "testMap2" should "nice" in {
+    val statements = parse("{a:b,c:d}")
+    assert(statements.size == 1)
+    val s = statements.head
+
+    val m = MapExp(
+      Map[Expression, Expression](
+        Access(null, "a", LineCol.SYNTHETIC) -> Access(null, "b", LineCol.SYNTHETIC),
+        Access(null, "c", LineCol.SYNTHETIC) -> Access(null, "d", LineCol.SYNTHETIC)
+      ),
+      LineCol.SYNTHETIC
+    )
+    assert(s == m)
+  }
+
+  "testMapInMap" should "nice" in {
+    val statements = parse("{a:{b:c}}")
+    assert(statements.size == 1)
+    val s = statements.head
+
+    val m = MapExp(
+      Map[Expression, Expression](
+        Access(null, "a", LineCol.SYNTHETIC) ->
+          MapExp(
+            Map[Expression, Expression](
+              Access(null, "b", LineCol.SYNTHETIC) -> Access(null, "c", LineCol.SYNTHETIC),
+            ), LineCol.SYNTHETIC)
+      ),
+      LineCol.SYNTHETIC
+    )
+    assert(s == m)
+  }
+
+  "testMapAssign" should "nice" in {
+    val statements = parse("map = {a:b}")
+    assert(statements.size == 1)
+    val s = statements.head
+
+    val m = MapExp(
+      Map[Expression, Expression](
+        Access(null, "a", LineCol.SYNTHETIC) -> Access(null, "b", LineCol.SYNTHETIC)
+      ),
+      LineCol.SYNTHETIC
+    )
+
+    val ass = VariableDef(
+      "map",
+      Set(),
+      null,
+      m,
+      Set(),
+      LineCol.SYNTHETIC
+    )
+    assert(s == ass)
+  }
+
+
+  "testMapInMapAssign" should "nice" in {
+    val statements = parse("map = {a:{b:c}}")
+    assert(statements.size == 1)
+    val s = statements.head
+
+    val m = MapExp(
+      Map[Expression, Expression](
+        Access(null, "a", LineCol.SYNTHETIC) ->
+          MapExp(
+            Map[Expression, Expression](
+              Access(null, "b", LineCol.SYNTHETIC) -> Access(null, "c", LineCol.SYNTHETIC),
+            ), LineCol.SYNTHETIC)
+      ),
+      LineCol.SYNTHETIC
+    )
+
+    val ass = VariableDef(
+      "map",
+      Set(),
+      null,
+      m,
+      Set(),
+      LineCol.SYNTHETIC
+    )
+    assert(s == ass)
+  }
+
+  "testMapInMapPretty" should "nice" in {
+    val statements = parse(""
+      + "{\n"
+      + "    a:{\n"
+      + "        b:c\n"
+      + "    }\n"
+      + "}")
+    assert(statements.size == 1)
+    val s = statements.head
+
+    val m = MapExp(
+      Map[Expression, Expression](
+        Access(null, "a", LineCol.SYNTHETIC) ->
+          MapExp(
+            Map[Expression, Expression](
+              Access(null, "b", LineCol.SYNTHETIC) -> Access(null, "c", LineCol.SYNTHETIC),
+            ), LineCol.SYNTHETIC)
+      ),
+      LineCol.SYNTHETIC
+    )
+    assert(s == m)
+  }
 
 
 }

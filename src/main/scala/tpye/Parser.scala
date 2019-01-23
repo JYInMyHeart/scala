@@ -61,7 +61,7 @@ object Parser {
           case _ => repl(exp)
         }
       } catch {
-        case e => println(e)
+        case e:Throwable => println(e)
       }
     }
   }

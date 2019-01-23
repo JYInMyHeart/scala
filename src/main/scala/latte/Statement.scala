@@ -45,7 +45,26 @@ case class Access(expression: Expression,
 case class Anno(anno: Access,
                 args: List[Assignment],
                 lineCol: LineCol) extends Expression {
+  override def hashCode(): Int = {
+    var result = anno.hashCode()
+    result = 31 * result + args.hashCode
+    result
+  }
 
+
+  override def equals(obj: Any): Boolean = {
+    if (obj == null || getClass != obj.getClass)
+      return false
+    obj match {
+      case Anno(at, o, _) =>
+        at == anno && o == args
+      case _ =>
+        false
+    }
+  }
+
+  override def toString: String =
+    s"@$anno(${args.foldLeft("")(_ + "," + _)})"
 }
 
 case class Assignment(assignTo: Access,

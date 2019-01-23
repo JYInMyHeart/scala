@@ -208,9 +208,13 @@ object CompilerUtil {
 
   def expecting(token: String, previous: Node, got: Node): Unit = {
     got match {
-      case x: Element if x.content.endsWith(token) =>
+      case null =>
+        throw new Exception(s"unexpected end ${previous.lineCol}")
+      case x if !x.isInstanceOf[Element] =>
+        throw UnexpectedTokenException(token,x.getClass.getSimpleName,x.lineCol)
+      case x:Element if !x.content.endsWith(token) =>
+        throw UnexpectedTokenException(token,x.content,x.lineCol)
       case _ =>
-        throw new Exception(s"${previous.lineCol}")
     }
   }
 
