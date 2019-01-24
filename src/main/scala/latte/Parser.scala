@@ -33,8 +33,8 @@ case class Parser(root: ElementStartNode) {
           && a.lineCol.column == lineCol.column)
           lineCol = a.lineCol
       }
-      throw new Exception(
-        s"annotations are not presented at correct position at $lineCol")
+      throw new SyntaxException(
+        s"annotations are not presented at correct position", lineCol)
     }
   }
 
@@ -48,8 +48,7 @@ case class Parser(root: ElementStartNode) {
           && a.lineCol.column == lineCol.column)
           lineCol = a.lineCol
       }
-      throw new Exception(
-        s"modifiers are not presented at correct position at $lineCol")
+      throw new SyntaxException(s"modifiers are not presented at correct position", lineCol)
     }
   }
 
@@ -72,14 +71,15 @@ case class Parser(root: ElementStartNode) {
 
   def parse: List[Statement] = {
     var list: List[Statement] = List()
-    var enable = true
-    while (enable) {
-      if (isParsingMap) {
-        annosIsEmpty()
-        modifiersIsEmpty()
-        if (current == null)
-          enable = false
-        else {
+    val loop = new Breaks
+    loop.breakable {
+      while (true) {
+        if (isParsingMap) {
+          annosIsEmpty()
+          modifiersIsEmpty()
+          if (current == null)
+            loop.break
+
           parseExpression()
           val key = parsedExps.pop()
           nextNode(false)
@@ -88,25 +88,27 @@ case class Parser(root: ElementStartNode) {
           list :+= key
           list :+= value
           nextNode(true)
+          assert(unVarOps.empty())
           binVarOps.clear()
-        }
-      } else {
-        val stmt = parseStatement()
-        if (current == null && stmt == null)
-          return list
-        else if (!parsedExps.empty()) {
-          val sb = new StringBuilder()
-          parsedExps.forEach { x =>
-            sb.append(s"${x.toString} at ${x.lineCol.fileName}(${x.lineCol.line},${x.lineCol.column})\n")
+
+        } else {
+          val stmt = parseStatement()
+          if (current == null && stmt == null)
+            loop.break
+          else if (!parsedExps.empty()) {
+            val sb = new StringBuilder()
+            parsedExps.forEach { x =>
+              sb.append(s"${x.toString} at ${x.lineCol.fileName}(${x.lineCol.line},${x.lineCol.column})\n")
+            }
+            val msg = s"parsed expression stack should be empty, but got\n $sb and got statement $stmt"
+            throw new LtBug(msg)
           }
-          val msg = s"parsed expression stack should be empty, but got\n $sb and got statement $stmt"
-          throw new LtBug(msg)
+          assert(unVarOps.empty())
+          binVarOps.clear()
+          if (stmt != null)
+            list :+= stmt
+          nextNode(true)
         }
-        assert(unVarOps.empty())
-        binVarOps.clear()
-        if (stmt != null)
-          list :+= stmt
-        nextNode(true)
       }
     }
     list
@@ -209,6 +211,8 @@ case class Parser(root: ElementStartNode) {
               parseClass()
             case "interface" =>
               parseInterface()
+            case "..." =>
+              Pass(current.lineCol)
             case "try" =>
               annosIsEmpty()
               modifiersIsEmpty()
@@ -343,7 +347,7 @@ case class Parser(root: ElementStartNode) {
 
 
     if (current != null)
-      current = current.next
+      current = current.previous
     IfStatement(pairs, lineCol)
   }
 
@@ -814,16 +818,19 @@ case class Parser(root: ElementStartNode) {
           case elem: Element => {
             val sb = new StringBuilder()
             var isName = true
-            while (elem != null
-              && (elem.content == "::"
-              || elem.isValidName)) {
-              val s = elem.content
+            var element: Element = elem
+            while (element != null
+              && element.isInstanceOf[Element]
+              && (element.content == "::"
+              || element.isValidName)) {
+              val s = element.content
               if (!isName && s != "::")
-                throw UnexpectedTokenException("::", s, elem.lineCol)
+                throw UnexpectedTokenException("::", s, element.lineCol)
               isName = !isName
               sb.append(s)
-              pkgNode = pkgNode.next
+              element = element.next.asInstanceOf[Element]
             }
+            pkgNode = element
             PackageDeclare(PackageRef(sb.toString(), lineCol), lineCol)
           }
           case _ =>
@@ -965,11 +972,12 @@ case class Parser(root: ElementStartNode) {
               names += s.name
             }
             case v: VariableDef => {
-              if (v.init == null)
+              if (v.init == null) {
                 if (mustHaveInit)
                   throw new SyntaxException("parameter with init value", v.lineCol)
-                else
-                  mustHaveInit = true
+              }
+              else
+                mustHaveInit = true
               variableList += v
               names += v.name
             }
@@ -1294,8 +1302,8 @@ case class Parser(root: ElementStartNode) {
     val op = current.asInstanceOf[Element].content
     val opLineCol = current.lineCol
     current.next match {
-      case e: Element =>
-        if (!isParsingMap || e.next.asInstanceOf[Element].content != ":") {
+      case e: Element if !isParsingMap || e.asInstanceOf[Element].content != ":" =>
+         {
           if (!binVarOps.empty()) {
             val lastOp = binVarOps.pop()
             if (twoVarHigherOrEqual(lastOp, op)) {

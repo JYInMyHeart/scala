@@ -34,7 +34,7 @@ case class Access(expression: Expression,
     expression == obj.asInstanceOf[Access].expression
   }
 
-  override def toString: String = s"($expression.$name)"
+  override def toString: String = s"(${if (expression == null) "" else expression}.$name)"
 }
 
 
@@ -202,11 +202,11 @@ case class Invocation(access: Access,
   override def equals(obj: Any): Boolean = {
     if (obj == null || getClass != obj.getClass)
       return false
-    access == obj.asInstanceOf[Invocation].access
+    access == obj.asInstanceOf[Invocation].access && args == obj.asInstanceOf[Invocation].args
   }
 
   override def toString: String = {
-    s"Invocation($access(${args.foldLeft("")(_ + "." + _).substring(1)}))"
+    s"Invocation($access(${args.foldLeft("")(_ + "." + _)}))"
   }
 }
 
@@ -720,6 +720,23 @@ case class Import(importDetails: List[ImportDetail],
   }
 }
 
+
+/**
+  * pass
+  *
+  */
+case class Pass(lineCol: LineCol) extends Statement {
+  override def hashCode(): Int = 0
+
+
+  override def equals(obj: Any): Boolean =
+    obj.isInstanceOf[Pass]
+
+
+  override def toString: String = {
+    s"(...)"
+  }
+}
 
 /**
   * StaticScope

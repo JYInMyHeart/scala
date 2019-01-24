@@ -133,56 +133,57 @@ case class Lexer(fileName: String,
             args.currentCol = 0
           }
         case _ =>
-          var anotherLine = line
-          if (anotherLine.trim.startsWith(COMMENT)) {
-            anotherLine = reader.readLine()
-          } else {
-            val COMMENT_index = line.indexOf(COMMENT)
-            if (COMMENT_index != -1) {
-              var pre = line.substring(0, COMMENT_index)
-              val post = line.substring(COMMENT_index)
-              for (entry <- args.defined)
-                pre = pre.replace(entry._1, entry._2)
-              line = pre + post
-            } else {
-              for (entry <- args.defined)
-                line = line.replace(entry._1, entry._2)
-            }
-            var spaces = 0
-            spaces = line.takeWhile(_ == ' ').length
+      }
+      var anotherLine = line
+      if (anotherLine.trim.startsWith(COMMENT)) {
+        anotherLine = reader.readLine()
+      } else {
+        val COMMENT_index = line.indexOf(COMMENT)
+        if (COMMENT_index != -1) {
+          var pre = line.substring(0, COMMENT_index)
+          val post = line.substring(COMMENT_index)
+          for (entry <- args.defined)
+            pre = pre.replace(entry._1, entry._2)
+          line = pre + post
+        } else {
+          for (entry <- args.defined)
+            line = line.replace(entry._1, entry._2)
+        }
+        var spaces = 0
+        spaces = line.takeWhile(_ == ' ').length
 
 
-            if (rootIndent == -1) {
-              rootIndent = spaces
-              spaces = 0
-            } else
-              spaces -= rootIndent
+        if (rootIndent == -1) {
+          rootIndent = spaces
+          spaces = 0
+        } else
+          spaces -= rootIndent
 
-            if (spaces % indent != 0)
+        if (spaces % indent != 0)
+          throw new Exception("indent error")
+
+        line = line.trim
+        args.currentCol = spaces + 1 + rootIndent
+
+        if (line.isEmpty)
+          line = reader.readLine()
+        else {
+          if (args.startNodeStack.lastElement().indent != spaces) {
+            if (args.startNodeStack.lastElement().indent > spaces)
+              redirectToStartNodeByIndent(args, spaces + indent)
+            else if (args.startNodeStack.lastElement().indent == spaces - indent)
+              createStartNode(args)
+            else
               throw new Exception("indent error")
-
-            line = line.trim
-            args.currentCol = spaces + 1 + rootIndent
-
-            if (line.isEmpty)
-              line = reader.readLine()
-            else {
-              if (args.startNodeStack.lastElement().indent != spaces) {
-                if (args.startNodeStack.lastElement().indent > spaces)
-                  redirectToStartNodeByIndent(args, spaces + indent)
-                else if (args.startNodeStack.lastElement().indent == spaces - indent)
-                  createStartNode(args)
-                else
-                  throw new Exception("indent error")
-              }
-              parse(line, args)
-
-              if (args.previous.isInstanceOf[Element]) {
-                args.previous = new EndingNode(EndingNode.WEAK, args)
-              }
-              line = reader.readLine()
-            }
           }
+          parse(line, args)
+
+          if (args.previous.isInstanceOf[Element]) {
+            args.previous = new EndingNode(EndingNode.WEAK, args)
+          }
+          line = reader.readLine()
+        }
+
       }
     }
   }

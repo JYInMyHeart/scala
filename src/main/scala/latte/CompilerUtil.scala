@@ -194,10 +194,8 @@ object CompilerUtil {
                   case _ =>
                 }
               }
-
             case _ =>
           }
-
         }
     }
     false

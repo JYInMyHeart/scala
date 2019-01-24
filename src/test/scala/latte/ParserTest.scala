@@ -1032,7 +1032,8 @@ class ParserTest extends UnitSpec {
             )
           ),
           LineCol.SYNTHETIC
-        )
+        ),
+        NumberLiteral("1", LineCol.SYNTHETIC)
       ),
       LineCol.SYNTHETIC
     )
@@ -1756,6 +1757,624 @@ class ParserTest extends UnitSpec {
     )
     assert(s == m)
   }
+
+  "testPkgDeclare1" should "nice" in {
+    val statements = parse("# jes")
+    assert(statements.size == 1)
+    val s = statements.head
+
+    val p = PackageDeclare(
+      PackageRef("jes", LineCol.SYNTHETIC),
+      LineCol.SYNTHETIC
+    )
+    assert(s == p)
+  }
+
+
+  "testPkgDeclare2" should "nice" in {
+    val statements = parse("# jes::lang::util")
+    assert(statements.size == 1)
+    val s = statements.head
+
+    val p = PackageDeclare(
+      PackageRef("jes::lang::util", LineCol.SYNTHETIC),
+      LineCol.SYNTHETIC
+    )
+    assert(s == p)
+  }
+
+  "testImportPackageAll" should "nice" in {
+    val statements = parse("#> jes::lang::_")
+    assert(statements.size == 1)
+    val s = statements.head
+
+    val p = Import(
+      List(ImportDetail
+      (
+        PackageRef("jes::lang", LineCol.SYNTHETIC),
+        null,
+        importAll = true
+      )
+      ),
+      LineCol.SYNTHETIC
+    )
+    assert(s == p)
+  }
+
+
+  "testImportClass" should "nice" in {
+    val statements = parse("#> jes::lang::Cls")
+    assert(statements.size == 1)
+    val s = statements.head
+
+    val p = Import(
+      List(ImportDetail
+      (
+        null,
+        Access(
+          PackageRef("jes::lang", LineCol.SYNTHETIC),
+          "Cls",
+          LineCol.SYNTHETIC
+        ),
+        importAll = false
+      )
+      ),
+      LineCol.SYNTHETIC
+    )
+    assert(s == p)
+  }
+
+
+  "testImportClassAll" should "nice" in {
+    val statements = parse("#> jes::lang::Cls._")
+    assert(statements.size == 1)
+    val s = statements.head
+
+    val p = Import(
+      List(ImportDetail
+      (
+        null,
+        Access(
+          PackageRef("jes::lang", LineCol.SYNTHETIC),
+          "Cls",
+          LineCol.SYNTHETIC
+        ),
+        importAll = true
+      )
+      ),
+      LineCol.SYNTHETIC
+    )
+    assert(s == p)
+  }
+
+
+  "testImportInnerClass" should "nice" in {
+    val statements = parse("#> jes::lang::Cls.Inner")
+    assert(statements.size == 1)
+    val s = statements.head
+
+    val p = Import(
+      List(ImportDetail
+      (
+        null,
+        Access(
+          Access(
+            PackageRef("jes::lang", LineCol.SYNTHETIC),
+            "Cls",
+            LineCol.SYNTHETIC
+          ),
+          "Inner",
+          LineCol.SYNTHETIC
+        ),
+        importAll = false
+      )
+      ),
+      LineCol.SYNTHETIC
+    )
+    assert(s == p)
+  }
+
+
+  "testImportInnerClassAll" should "nice" in {
+    val statements = parse("#> jes::lang::Cls.Inner._")
+    assert(statements.size == 1)
+    val s = statements.head
+
+    val p = Import(
+      List(ImportDetail
+      (
+        null,
+        Access(
+          Access(
+            PackageRef("jes::lang", LineCol.SYNTHETIC),
+            "Cls",
+            LineCol.SYNTHETIC
+          ),
+          "Inner",
+          LineCol.SYNTHETIC
+        ),
+        importAll = true
+      )
+      ),
+      LineCol.SYNTHETIC
+    )
+    assert(s == p)
+  }
+
+
+  "testImportClassAllNoPKG" should "nice" in {
+    val statements = parse("#> Cls._")
+    assert(statements.size == 1)
+    val s = statements.head
+
+    val p = Import(
+      List(ImportDetail
+      (
+        null,
+        Access(
+          null,
+          "Cls",
+          LineCol.SYNTHETIC
+        ),
+        importAll = true
+      )
+      ),
+      LineCol.SYNTHETIC
+    )
+    assert(s == p)
+  }
+
+
+  "testImportInnerClassAllNoPKG" should "nice" in {
+    val statements = parse("#> Cls.Inner._")
+    assert(statements.size == 1)
+    val s = statements.head
+
+    val p = Import(
+      List(ImportDetail
+      (
+        null,
+        Access(
+          Access(
+            null,
+            "Cls",
+            LineCol.SYNTHETIC
+          ),
+          "Inner",
+          LineCol.SYNTHETIC
+        ),
+        importAll = true
+      )
+      ),
+      LineCol.SYNTHETIC
+    )
+    assert(s == p)
+  }
+
+
+  "testImportInnerClassNoPKG" should "nice" in {
+    val statements = parse("#> Cls.Inner")
+    assert(statements.size == 1)
+    val s = statements.head
+
+    val p = Import(
+      List(ImportDetail
+      (
+        null,
+        Access(
+          Access(
+            null,
+            "Cls",
+            LineCol.SYNTHETIC
+          ),
+          "Inner",
+          LineCol.SYNTHETIC
+        ),
+        importAll = false
+      )
+      ),
+      LineCol.SYNTHETIC
+    )
+    assert(s == p)
+  }
+
+
+  "testWhile" should "nice" in {
+    val statements = parse("" +
+      "while true\n" +
+      "    1")
+    assert(statements.size == 1)
+    val s = statements.head
+
+    val w = WhileStatement(
+      BoolLiteral("true", LineCol.SYNTHETIC),
+      List(NumberLiteral("1", LineCol.SYNTHETIC)),
+      doWhile = false,
+      LineCol.SYNTHETIC
+    )
+
+    assert(w == s)
+  }
+
+  "testDoWhile" should "nice" in {
+    val statements = parse("" +
+      "do\n" +
+      "    1\n" +
+      "while true")
+    assert(statements.size == 1)
+    val s = statements.head
+
+    val w = WhileStatement(
+      BoolLiteral("true", LineCol.SYNTHETIC),
+      List(NumberLiteral("1", LineCol.SYNTHETIC)),
+      doWhile = true,
+      LineCol.SYNTHETIC
+    )
+
+    assert(w == s)
+  }
+
+
+  "testAnnoArray" should "nice" in {
+    val statements = parse("" +
+      "@Anno(a=[1,2])\n" +
+      "i=2")
+    assert(statements.size == 1)
+    val s = statements.head
+
+    val v = VariableDef(
+      "i",
+      Set(),
+      null,
+      NumberLiteral("2", LineCol.SYNTHETIC),
+      Set(
+        Anno(
+          Access(null, "Anno", LineCol.SYNTHETIC),
+          List(
+            Assignment(
+              Access(null, "a", LineCol.SYNTHETIC),
+              "=",
+              ArrayExp(
+                List(NumberLiteral("1", LineCol.SYNTHETIC),
+                  NumberLiteral("2", LineCol.SYNTHETIC)),
+                LineCol.SYNTHETIC
+              ),
+              LineCol.SYNTHETIC
+            )
+          ),
+          LineCol.SYNTHETIC
+        )
+      ),
+      LineCol.SYNTHETIC
+    )
+    assert(v == s)
+  }
+
+  "testAnnoNoAssign" should "nice" in {
+    val statements = parse("" +
+      "@Anno([1,2])\n" +
+      "i=2")
+    assert(statements.size == 1)
+    val s = statements.head
+
+    val v = VariableDef(
+      "i",
+      Set(),
+      null,
+      NumberLiteral("2", LineCol.SYNTHETIC),
+      Set(
+        Anno(
+          Access(null, "Anno", LineCol.SYNTHETIC),
+          List(
+            Assignment(
+              Access(null, "value", LineCol.SYNTHETIC),
+              "=",
+              ArrayExp(
+                List(NumberLiteral("1", LineCol.SYNTHETIC),
+                  NumberLiteral("2", LineCol.SYNTHETIC)),
+                LineCol.SYNTHETIC
+              ),
+              LineCol.SYNTHETIC
+            )
+          ),
+          LineCol.SYNTHETIC
+        )
+      ),
+      LineCol.SYNTHETIC
+    )
+    assert(v == s)
+  }
+
+  "testClosure" should "nice" in {
+    val statements = parse("(<1)")
+    assert(statements.size == 1)
+    val s = statements.head
+    val p = Procedure(
+      List(Return(NumberLiteral("1", LineCol.SYNTHETIC), LineCol.SYNTHETIC))
+      , LineCol.SYNTHETIC
+    )
+    assert(s == p)
+  }
+
+  "testClosureMultipleLine" should "nice" in {
+    val statements = parse(
+      "(\n" +
+        "    i=1\n" +
+        "    <i\n" +
+        ")"
+    )
+    assert(statements.size == 1)
+    val s = statements.head
+    val p = Procedure(
+      List(
+        VariableDef(
+          "i",
+          Set(),
+          null,
+          NumberLiteral("1", LineCol.SYNTHETIC),
+          Set(),
+          LineCol.SYNTHETIC
+        ),
+        Return(Access(null, "i", LineCol.SYNTHETIC), LineCol.SYNTHETIC))
+      , LineCol.SYNTHETIC
+    )
+    assert(s == p)
+  }
+
+  "testArrayType" should "nice" in {
+    val statements = parse(
+      "i:[]Type"
+    )
+    assert(statements.size == 1)
+    val s = statements.head
+    val v = VariableDef(
+      "i",
+      Set(),
+      Access(
+        Access(null, "Type", LineCol.SYNTHETIC),
+        "[]",
+        LineCol.SYNTHETIC
+      ),
+      null,
+      Set(),
+      LineCol.SYNTHETIC
+    )
+    assert(v == s)
+  }
+
+  "test2ArrayType" should "nice" in {
+    val statements = parse(
+      "i:[][]Type"
+    )
+    assert(statements.size == 1)
+    val s = statements.head
+    val v = VariableDef(
+      "i",
+      Set(),
+      Access(
+        Access(
+          Access(null, "Type", LineCol.SYNTHETIC),
+          "[]",
+          LineCol.SYNTHETIC
+        ),
+        "[]",
+        LineCol.SYNTHETIC),
+      null,
+      Set(),
+      LineCol.SYNTHETIC
+    )
+    assert(v == s)
+  }
+
+  "testTypeOf" should "nice" in {
+    val statements = parse(
+      "type int"
+    )
+    assert(statements.size == 1)
+    val s = statements.head
+
+    val t = TypeOf(
+      Access(null, "int", LineCol.SYNTHETIC),
+      LineCol.SYNTHETIC
+    )
+    assert(s == t)
+  }
+
+  "testIn" should "nice" in {
+    val statements = parse(
+      "1 in [1,2]"
+    )
+    assert(statements.size == 1)
+    val s = statements.head
+
+    val t = TwoVariableOperation(
+      "in",
+      NumberLiteral("1", LineCol.SYNTHETIC),
+      ArrayExp(
+        List(
+          NumberLiteral("1", LineCol.SYNTHETIC),
+          NumberLiteral("2", LineCol.SYNTHETIC)
+        ),
+        LineCol.SYNTHETIC
+      ),
+      LineCol.SYNTHETIC
+    )
+    assert(s == t)
+  }
+
+  "testDataClass" should "nice" in {
+    val statements = parse(
+      "data class Data(id,name)"
+    )
+    assert(statements.size == 1)
+    val s = statements.head
+    val c = ClassStatement(
+      "Data",
+      Set(
+        Modifier(
+          "data",
+          LineCol.SYNTHETIC
+        )
+      ),
+      List(
+        VariableDef("id", Set(), null, null, Set(), LineCol.SYNTHETIC),
+        VariableDef("name", Set(), null, null, Set(), LineCol.SYNTHETIC)
+      ),
+      null,
+      List(),
+      Set(),
+      List(),
+      LineCol.SYNTHETIC
+    )
+    assert(s == c)
+  }
+
+  "testPass" should "nice" in {
+    val statements = parse(
+      "method()\n    ..."
+    )
+    assert(statements.size == 1)
+    val s = statements.head
+
+    val m = MethodStatement(
+      "method",
+      Set(),
+      null,
+      List(),
+      Set(),
+      List(
+        Pass(LineCol.SYNTHETIC)
+      ),
+      LineCol.SYNTHETIC
+    )
+    assert(s == m)
+  }
+
+  "testNull" should "nice" in {
+    val statements = parse(
+      "null"
+    )
+    assert(statements.size == 1)
+    val s = statements.head
+
+    assert(s == Null(LineCol.SYNTHETIC))
+  }
+
+
+  "testAsType" should "nice" in {
+    val statements = parse(
+      "1 as java::lang::List"
+    )
+    assert(statements.size == 1)
+    val s = statements.head
+    val a = AsType(
+      NumberLiteral("1", LineCol.SYNTHETIC),
+      Access(
+        PackageRef("java::lang", LineCol.SYNTHETIC),
+        "List",
+        LineCol.SYNTHETIC
+      ),
+      LineCol.SYNTHETIC
+    )
+    assert(s == a)
+  }
+
+
+  "testUndefined" should "nice" in {
+    val statements = parse(
+      "undefined"
+    )
+    assert(statements.size == 1)
+    val s = statements.head
+    assert(s == UndefinedExp(LineCol.SYNTHETIC))
+  }
+
+  "testUnaryInc" should "nice" in {
+    val statements = parse(
+      "++i"
+    )
+    assert(statements.size == 1)
+    val s = statements.head
+
+    val u = UnaryOneVariableOperation(
+      "++",
+      Access(null, "i", LineCol.SYNTHETIC),
+      LineCol.SYNTHETIC
+    )
+    assert(s == u)
+  }
+
+  "testOperatorLikeInvocation1" should "nice" in {
+    val statements = parse(
+      "a op b\na op"
+    )
+    assert(statements.size == 2)
+    val s = statements.head
+
+    val i = Invocation(
+      Access(
+        Access(
+          null, "a", LineCol.SYNTHETIC
+        ),
+        "op",
+        LineCol.SYNTHETIC
+      ),
+      List(
+        Access(
+          null, "b", LineCol.SYNTHETIC
+        )
+      ),
+      LineCol.SYNTHETIC
+    )
+    assert(s == i)
+
+    val s1 = statements(1)
+    val i1 = Invocation(
+      Access(
+        Access(
+          null, "a", LineCol.SYNTHETIC
+        ),
+        "op",
+        LineCol.SYNTHETIC
+      ),
+      List(),
+      LineCol.SYNTHETIC
+    )
+    assert(s1 == i1)
+  }
+
+
+  "testOperatorLikeInvocation2" should "nice" in {
+    val statements = parse(
+      "db select a, b, c from user"
+    )
+    assert(statements.size == 1)
+    val s = statements.head
+
+    val i = Invocation(
+      Access(
+        Invocation(
+          Access(
+            Access(null, "db", null)
+            , "select", LineCol.SYNTHETIC
+          ),
+          List(
+            Access(null, "a", null),
+            Access(null, "b", null),
+            Access(null, "c", null)
+          ),
+          null
+        ),
+        "from",
+        null
+      ),
+      List(Access(null, "user", null)),
+      null
+    )
+    assert(s == i)
+  }
+
+
 
 
 }
