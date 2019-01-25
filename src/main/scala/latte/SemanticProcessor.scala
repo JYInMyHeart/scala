@@ -1,5 +1,7 @@
 package latte
 
+import java.lang.reflect.{AnnotatedElement, Constructor}
+
 import latte.SModifier.{ABSTRACT, FINAL, PUBLIC}
 
 import scala.collection.mutable
@@ -23,6 +25,8 @@ class SemanticProcessor(mapOfStatements: mutable.HashMap[String, List[Statement]
   private val methodStatements: mutable.HashMap[SMethodDef, ListBuffer[Statement]] = mutable.HashMap()
   private val fileNameToImport: mutable.HashMap[String, ListBuffer[Import]] = mutable.HashMap()
   private val typeDefSet: mutable.HashSet[STypeDef] = mutable.HashSet()
+
+
 
   def parse: mutable.HashSet[STypeDef] = {
     val fileNameToClassDef: mutable.HashMap[String, ListBuffer[ClassStatement]] = mutable.HashMap()
@@ -115,15 +119,15 @@ class SemanticProcessor(mapOfStatements: mutable.HashMap[String, List[Statement]
             case "abs" => Some(ABSTRACT)
             case "val" => Some(FINAL)
             case "pub" => None
-            case "pri" =>None
-            case "pro" =>None
-            case "pkg" =>None
+            case "pri" => None
+            case "pro" => None
+            case "pkg" => None
             case _ =>
               throw UnexpectedTokenException("valid modifier for class (val|abs)", m.toString, m.lineCol)
           }
 
 
-        c.modifiers.map(getModifier).foreach{
+        c.modifiers.map(getModifier).foreach {
           case Some(_) => sClassDef.modifiers += _
           case None =>
         }
@@ -133,10 +137,10 @@ class SemanticProcessor(mapOfStatements: mutable.HashMap[String, List[Statement]
         typeDefSet += sClassDef
       }
 
-      interfaceDefs.foreach{ i =>
+      interfaceDefs.foreach { i =>
         val interfaceName = pkg + i.name
         if (types.contains(interfaceName))
-          throw new SyntaxException(s"duplicate type names $interfaceName", c.lineCol)
+          throw new SyntaxException(s"duplicate type names $interfaceName", i.lineCol)
 
         val sInterfaceDef = SInterfaceDef(i.lineCol)
         sInterfaceDef.fullName = interfaceName
@@ -144,8 +148,8 @@ class SemanticProcessor(mapOfStatements: mutable.HashMap[String, List[Statement]
         sInterfaceDef.modifiers += PUBLIC
         sInterfaceDef.modifiers += ABSTRACT
 
-        if(i.modifiers.exists(_.modifier != "abs"))
-          throw new UnexpectedTokenException(s"valid modifier for interface (abs) ${i.modifiers.toString()}",i.lineCol)
+        if (i.modifiers.exists(_.modifier != "abs"))
+          throw new UnexpectedTokenException(s"valid modifier for interface (abs) ${i.modifiers.toString()}", i.lineCol)
 
         types += interfaceName -> sInterfaceDef
         originalInterfaces += interfaceName -> i
@@ -153,21 +157,35 @@ class SemanticProcessor(mapOfStatements: mutable.HashMap[String, List[Statement]
       }
     }
 
-    mapOfStatements.foreach{ m =>
+    mapOfStatements.foreach { m =>
       val imports: ListBuffer[Import] = fileNameToImport(m._1)
       val classDefs: ListBuffer[ClassStatement] = fileNameToClassDef(m._1)
       val interfaceDefs: ListBuffer[InterfaceStatement] = fileNameToInterfaceDef(m._1)
       var pkg: String = fileNameToPackageName(m._1)
       val loop = new Breaks
       loop.breakable {
-        classDefs.foreach{ c =>
-          val sClassDef = types(pkg + c.name).asInstanceOf[SClassDef].parent = getTypeWithName("java.lang.Object")
-
-          var superWithoutInvocationAccess:Iterator[Access] = null
-          if(c.superWithOutInvocation != null){
-            if(c.superWithOutInvocation.isEmpty){
-              sClassDef.parent
+        classDefs.foreach { c =>
+          val sClassDef = types(pkg + c.name).asInstanceOf[SClassDef]
+          var superWithoutInvocationAccess: Iterator[Access] = null
+          if (c.superWithOutInvocation != null) {
+            if (c.superWithOutInvocation.isEmpty) {
+              sClassDef.parent =  getTypeWithName("java.lang.Object",LineCol.SYNTHETIC).asInstanceOf[SClassDef]
+            }else{
+              superWithoutInvocationAccess = c.superWithOutInvocation.toIterator
+              val mightBeClassAccess = superWithoutInvocationAccess.next()
+              val tmp = getTypeWithAccess(mightBeClassAccess,imports)
+              tmp match {
+                case s:SClassDef =>
+                  sClassDef.parent = s
+                case s:SInterfaceDef =>
+                  sClassDef.superInterfaces += s
+                  sClassDef.parent = getTypeWithName("java.lang.Object",c.lineCol).asInstanceOf[SClassDef]
+                case _ =>
+                  throw new SyntaxException(mightBeClassAccess.toString + " is not class or interface",c.lineCol)
+              }
             }
+          }else{
+
           }
         }
       }
@@ -175,14 +193,22 @@ class SemanticProcessor(mapOfStatements: mutable.HashMap[String, List[Statement]
     }
 
 
-
     null
   }
 
-  def getTypeWithName(str: String,lineCol: LineCol):STypeDef = {
-    if(types.contains(str)){
+  def getTypeWithAccess(mightBeClassAccess: Access, imports: ListBuffer[Import]):STypeDef = {
+    null
+  }
+  def getFieldsAndMethodsFromClass(cls: Class[_], s: STypeDef, fields: ListBuffer[SFieldDef], methods: ListBuffer[SMethodDef]):Unit = ???
+
+  def getParameterFromClassArray(getParameterTypes: Array[Class[_]], constructorDef: SConstructorDef):Unit = ???
+
+  def getModifierFromMember(con: Constructor[_], constructorDef: SConstructorDef):Unit = ???
+
+  def getTypeWithName(str: String, lineCol: LineCol): STypeDef = {
+    if (types.contains(str)) {
       types(str)
-    }else {
+    } else {
       try {
         var cls = Class.forName(str)
         if (cls.isArray) {
@@ -198,31 +224,91 @@ class SemanticProcessor(mapOfStatements: mutable.HashMap[String, List[Statement]
           arrType.dimension = dimension
           arrType.sType = getTypeWithName(cls.getName, lineCol)
           arrType
-        }else{
-          val modifiers:ListBuffer[SModifier] = ListBuffer()
-          var typeDef:STypeDef = null
-          if(cls.isAnnotation){
+        } else {
+          val modifiers: ListBuffer[SModifier] = ListBuffer()
+          var typeDef: STypeDef = null
+          if (cls.isAnnotation) {
             val a = SAnnoDef()
             a.fullName = str
             typeDef = a
-            modifiers  = a.modifiers
+            modifiers ++= a.modifiers
+          } else if (cls.isInterface) {
+            val i = SInterfaceDef(LineCol.SYNTHETIC)
+            i.fullName = str
+            typeDef = i
+            modifiers ++= i.modifiers
+          } else {
+            val c = SClassDef(LineCol.SYNTHETIC)
+            c.fullName = str
+            modifiers ++= c.modifiers
           }
+          if (cls.getPackage != null)
+            typeDef.pkg = cls.getPackage.getName
+          putNameAndTypeDef(typeDef, lineCol)
+          getAnnotationFromAnnotatedElement(cls, typeDef)
+          getModifierFromClass(cls, modifiers)
+
+          typeDef match {
+            case s: SInterfaceDef =>
+              getSuperInterfaceFromClass(cls, s.superInterfaces)
+              getFieldsAndMethodsFromClass(cls, s, s.fields, s.methods)
+            case s: SClassDef =>
+              getSuperInterfaceFromClass(cls, s.superInterfaces)
+              if (cls != classOf[Object]){
+                s.parent = getTypeWithName(cls.getSuperclass.getName, lineCol).asInstanceOf[SClassDef]
+              }
+
+
+
+              getFieldsAndMethodsFromClass(cls, s, s.fields,s.methods)
+
+              for (con <- cls.getDeclaredConstructors) {
+                val constructorDef = SConstructorDef(LineCol.SYNTHETIC)
+                constructorDef.declaringType = s
+                getAnnotationFromAnnotatedElement(con, constructorDef)
+                getParameterFromClassArray(con.getParameterTypes, constructorDef)
+                getModifierFromMember(con, constructorDef)
+                s.constructors += constructorDef
+              }
+            case s: SAnnoDef =>
+              for (m <- cls.getDeclaredMethods) {
+                assert(m.getParameters.isEmpty)
+                val annoField = SAnnoField()
+                annoField.name = m.getName
+                annoField.sType = getTypeWithName(m.getReturnType.getName, lineCol)
+                s.annoFields += annoField
+              }
+            case _ =>
+
+          }
+          typeDef
         }
       }
       catch {
         case e: Exception =>
-          println(e)
-          null
+          throw new SyntaxException("undefined class", lineCol)
       }
     }
-    }
+  }
 
+
+  private def getAnnotationFromAnnotatedElement(elem:AnnotatedElement,presentable:SAnnotationPresentable):Unit = {
+
+  }
+
+  private def getModifierFromClass(cls:Class[_],modifiers:ListBuffer[SModifier]):Unit = {
+
+  }
+
+  private def getSuperInterfaceFromClass(cls: Class[_], superInterfaces: ListBuffer[SInterfaceDef]) = {
+
+  }
 
 
   private def putNameAndTypeDef(sTypeDef: STypeDef,
-                                lineCol: LineCol): Unit ={
-    if(types.contains(sTypeDef.fullName))
-      throw new SyntaxException(s"duplicate type names ${sTypeDef.fullName}",lineCol)
+                                lineCol: LineCol): Unit = {
+    if (types.contains(sTypeDef.fullName))
+      throw new SyntaxException(s"duplicate type names ${sTypeDef.fullName}", lineCol)
     else
       types += sTypeDef.fullName -> sTypeDef
   }
@@ -255,7 +341,7 @@ class SemanticProcessor(mapOfStatements: mutable.HashMap[String, List[Statement]
 }
 
 
-  object SemanticProcessor {
-    val PARSING_CLASS = 0
-    val PARSING_INTERFACE = 1
-  }
+object SemanticProcessor {
+  val PARSING_CLASS = 0
+  val PARSING_INTERFACE = 1
+}
