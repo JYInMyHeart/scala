@@ -128,7 +128,7 @@ class SemanticProcessor(mapOfStatements: mutable.HashMap[String, List[Statement]
 
 
         c.modifiers.map(getModifier).foreach {
-          case Some(_) => sClassDef.modifiers += _
+          case Some(xx) => sClassDef.modifiers += xx
           case None =>
         }
 
@@ -273,7 +273,7 @@ class SemanticProcessor(mapOfStatements: mutable.HashMap[String, List[Statement]
             case s: SAnnoDef =>
               for (m <- cls.getDeclaredMethods) {
                 assert(m.getParameters.isEmpty)
-                val annoField = SAnnoField()
+                val annoField = new SAnnoField()
                 annoField.name = m.getName
                 annoField.sType = getTypeWithName(m.getReturnType.getName, lineCol)
                 s.annoFields += annoField

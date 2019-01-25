@@ -44,8 +44,9 @@ class STypeDef(val lineCol: LineCol,
 case class SArrayTypeDef() extends STypeDef(LineCol.SYNTHETIC) {
   var sType: STypeDef = _
   var dimension: Int = _
-  override var fullName: String =
-    if (super.fullName == null) rebuildFullName() else super.fullName
+  fullName = if(fullName == null) rebuildFullName() else fullName
+
+
 
   private def rebuildFullName(): String = {
     if (null == sType) return ""
@@ -100,7 +101,7 @@ case class SAnnoDef() extends STypeDef(LineCol.SYNTHETIC) {
 }
 
 
-case class SAnnoField() extends SMethodDef(LineCol.SYNTHETIC) {
+ class SAnnoField() extends SMethodDef(LineCol.SYNTHETIC) {
   var sType: STypeDef = _
   var defaultValue: Value = _
 
@@ -119,7 +120,7 @@ abstract class PrimitiveTypeDef() extends STypeDef(LineCol.SYNTHETIC)
   * int
   */
 case class IntTypeDef() extends PrimitiveTypeDef() {
-  override val fullName: String = "int"
+  fullName = "int"
 
   override def isAssignableFrom(cls: STypeDef): Boolean = {
     if (super.isAssignableFrom(cls)) return true
@@ -137,7 +138,7 @@ object IntTypeDef {
   * float
   */
 case class FloatTypeDef() extends PrimitiveTypeDef() {
-  override val fullName: String = "int"
+  fullName = "float"
 
   override def isAssignableFrom(cls: STypeDef): Boolean = {
     if (super.isAssignableFrom(cls)) return true
@@ -155,7 +156,7 @@ object FloatTypeDef {
   * double
   */
 case class DoubleTypeDef() extends PrimitiveTypeDef() {
-  override val fullName: String = "int"
+  fullName = "double"
 
   override def isAssignableFrom(cls: STypeDef): Boolean = {
     if (super.isAssignableFrom(cls)) return true
@@ -173,7 +174,7 @@ object DoubleTypeDef {
   * long
   */
 case class LongTypeDef() extends PrimitiveTypeDef() {
-  override val fullName: String = "int"
+   fullName = "long"
 
   override def isAssignableFrom(cls: STypeDef): Boolean = {
     if (super.isAssignableFrom(cls)) return true
@@ -191,7 +192,7 @@ object LongTypeDef {
   * char
   */
 case class CharTypeDef() extends PrimitiveTypeDef() {
-  override val fullName: String = "char"
+   fullName = "char"
 }
 
 object CharTypeDef {
@@ -204,7 +205,7 @@ object CharTypeDef {
   * short
   */
 case class ShortTypeDef() extends PrimitiveTypeDef() {
-  override val fullName: String = "short"
+  fullName = "short"
 }
 
 object ShortTypeDef {
@@ -217,7 +218,7 @@ object ShortTypeDef {
   * byte
   */
 case class ByteTypeDef() extends PrimitiveTypeDef() {
-  override val fullName: String = "byte"
+  fullName  = "byte"
 }
 
 object ByteTypeDef {
@@ -230,7 +231,7 @@ object ByteTypeDef {
   * boolean
   */
 case class BoolTypeDef() extends PrimitiveTypeDef() {
-  override val fullName: String = "boolean"
+  fullName = "boolean"
 }
 
 object BoolTypeDef {
@@ -243,7 +244,7 @@ object BoolTypeDef {
   * null
   */
 case class NullTypeDef() extends STypeDef(LineCol.SYNTHETIC) {
-  override val fullName: String = "null"
+  fullName = "null"
 }
 
 object NullTypeDef {
@@ -254,7 +255,7 @@ object NullTypeDef {
 
 
 case class VoidType() extends STypeDef(LineCol.SYNTHETIC) {
-  override val fullName: String = "void"
+  fullName = "void"
 }
 
 object VoidType {
@@ -272,7 +273,7 @@ abstract class SMember(lineCol: LineCol) extends SAnnotationPresentable {
 
 abstract class SInvokable(lineCol: LineCol) extends SMember(lineCol) {
   val parameters: ListBuffer[SParameter] = ListBuffer()
-  var returnType: STypeDef = _
+  val returnType: STypeDef = null
   val statements: ListBuffer[Instruction] = ListBuffer()
   val exceptionTables: ListBuffer[ExceptionTable] = ListBuffer()
 }
@@ -324,7 +325,7 @@ case class SFieldDef(lineCol: LineCol) extends SMember(lineCol) with LeftValue {
 }
 
 case class SConstructorDef(lineCol: LineCol) extends SInvokable(lineCol) {
-  override var returnType: VoidType = VoidType.get()
+  override val returnType: VoidType = VoidType.get()
 }
 
 case class SInterfaceDef(override val lineCol: LineCol) extends STypeDef(lineCol) {
