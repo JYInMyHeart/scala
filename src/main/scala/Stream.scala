@@ -1,9 +1,9 @@
 import Stream._
 
 sealed trait Stream[+A] {
-  def headOption: Option[A] = this match {
-    case Empty => None
-    case ConsS(h, _) => Some(h())
+  def headOption: MyOption[A] = this match {
+    case Empty => MyNone
+    case ConsS(h, _) => MySome(h())
   }
 
   def toListRecursive: List[A] = this match {
@@ -79,8 +79,8 @@ sealed trait Stream[+A] {
   def takeWhileByFoldr(p: A => Boolean): Stream[A] =
     foldr(Stream[A]())((a, b) => if (p(a)) cons(a, b) else empty)
 
-  def headByFoldr: Option[A] =
-    foldr(None:Option[A])((a, _) => Some(a))
+  def headByFoldr: MyOption[A] =
+    foldr(MyNone:MyOption[A])((a, _) => MySome(a))
 
 
   def map[B](f: A => B): Stream[B] =
@@ -95,7 +95,7 @@ sealed trait Stream[+A] {
   def flatMap[B](f: A => Stream[B]): Stream[B] =
     foldr(Stream.empty[B])((a, b) => f(a).append(b))
 
-  def find(p: A => Boolean): Option[A] =
+  def find(p: A => Boolean): MyOption[A] =
     filter(p).headByFoldr
 
   def constant[B >: A](a: B): Stream[B] ={
@@ -110,68 +110,68 @@ sealed trait Stream[+A] {
   def fibs(n: Int, m: Int): Stream[Int] =
     cons(n, fibs(m, n + m))
 
-  def unfold[ A, S](z: S)(f: S => Option[(A, S)]): Stream[A] =
+  def unfold[ A, S](z: S)(f: S => MyOption[(A, S)]): Stream[A] =
     f(z) match {
-      case Some((a,b)) => cons(a, unfold(b)(f))
+      case MySome((a,b)) => cons(a, unfold(b)(f))
       case _ => empty
     }
 
   def fibsByUnfold(n: Int, m: Int): Stream[Int] =
-    unfold(n)(n => Some((n + m, m)))
+    unfold(n)(n => MySome((n + m, m)))
 
   def mapByUnfold[B](f: A => B): Stream[B] =
     unfold(this){
-      case ConsS(h, t) => Some((f(h()),t()))
-      case _ => None
+      case ConsS(h, t) => MySome((f(h()),t()))
+      case _ => MyNone
     }
 
   def takeByUnfold(n:Int):Stream[A] =
     unfold(this,n){
       case (ConsS(h, t),n) if n > 0 =>
-        Some((h(),(t(),n - 1)))
-      case _ => None
+        MySome((h(),(t(),n - 1)))
+      case _ => MyNone
     }
 
   def takeWhileByUnfold(p: A => Boolean): Stream[A] =
     unfold(this,p){
-      case (ConsS(h,t),f) if p(h()) => Some((h(),(t(),f)))
-      case _ => None
+      case (ConsS(h,t),f) if p(h()) => MySome((h(),(t(),f)))
+      case _ => MyNone
     }
 
   def zipWith[B,C](s2: Stream[B])(f: (A,B) => C): Stream[C] =
     unfold(this,s2){
       case (ConsS(h,t),ConsS(h1,t1)) =>
-        Some( (f(h(),h1()),(t(),t1())) )
-      case _ => None
+        MySome( (f(h(),h1()),(t(),t1())) )
+      case _ => MyNone
     }
 
   def zip[B](s2: Stream[B]): Stream[(A,B)] =
     zipWith(s2)((_,_))
 
-  def zipWithAll[B,C](s2:Stream[B])(f: (Option[A], Option[B]) => C):Stream[C] =
+  def zipWithAll[B,C](s2:Stream[B])(f: (MyOption[A], MyOption[B]) => C):Stream[C] =
     unfold(this,s2){
-      case (Empty, Empty) => None
+      case (Empty, Empty) => MyNone
       case (ConsS(h, t), Empty) =>
-        Some(f(Some(h()), Option.empty[B]) -> (t(), empty[B]))
+        MySome(f(MySome(h()), MyOption.empty[B]) -> (t(), empty[B]))
       case (Empty, ConsS(h, t)) =>
-        Some(f(Option.empty[A], Some(h())) -> (empty[A] -> t()))
+        MySome(f(MyOption.empty[A], MySome(h())) -> (empty[A] -> t()))
       case (ConsS(h1, t1), ConsS(h2, t2)) =>
-        Some(f(Some(h1()), Some(h2())) -> (t1() -> t2()))
+        MySome(f(MySome(h1()), MySome(h2())) -> (t1() -> t2()))
     }
 
-  def zipAll[B](s2: Stream[B]): Stream[(Option[A],Option[B])] =
+  def zipAll[B](s2: Stream[B]): Stream[(MyOption[A],MyOption[B])] =
     zipWithAll(s2)((_,_))
 
   def startWith[B](s2:Stream[B]):Boolean =
-    zipAll(s2).takeWhile(_._2 != None) forAll{
+    zipAll(s2).takeWhile(_._2 != MyNone) forAll{
       case (h1,h2) => h1 == h2
     }
 
   def tails:Stream[Stream[A]] =
     unfold(this){
       case ConsS(h, t) =>
-        Some((cons[A](h(),t()),t()))
-      case _ => None
+        MySome((cons[A](h(),t()),t()))
+      case _ => MyNone
     } append Stream(empty)
 
   def hasSubsequence[A](s:Stream[A]):Boolean =
@@ -181,8 +181,8 @@ sealed trait Stream[+A] {
   def scanRight1[B](z:B)(f:(A, => B) => B):Stream[B] =
     unfold(this){
       case ConsS(h, t) =>
-        Some((f(h(),z),t()))
-      case _ => Some((z,empty))
+        MySome((f(h(),z),t()))
+      case _ => MySome((z,empty))
     }
 
   def scanRight[B](z: B)(f: (A, => B) => B): Stream[B] =

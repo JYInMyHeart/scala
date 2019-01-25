@@ -1,5 +1,8 @@
 package latte
 
+import java.lang.annotation.{ElementType, Target}
+
+import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 trait SAnnotationPresentable {
@@ -21,10 +24,10 @@ trait Instruction {
 class STypeDef(val lineCol: LineCol,
                val annos: ListBuffer[Anno]) extends SAnnotationPresentable {
   var pkg: String = _
-  val fullName: String = ""
+  var fullName: String = ""
 
   def this(lineCol: LineCol) = {
-    this (lineCol, ListBuffer())
+    this(lineCol, ListBuffer())
   }
 
   def isAssignableFrom(cls: STypeDef): Boolean = {
@@ -34,6 +37,79 @@ class STypeDef(val lineCol: LineCol,
         !this.isInstanceOf[PrimitiveTypeDef]
       case _ => cls == this
     }
+  }
+}
+
+
+case class SArrayTypeDef() extends STypeDef(LineCol.SYNTHETIC) {
+  var sType: STypeDef = _
+  var dimension: Int = _
+  override var fullName: String =
+    if (super.fullName == null) rebuildFullName() else super.fullName
+
+  private def rebuildFullName(): String = {
+    if (null == sType) return ""
+    val sb = new mutable.StringBuilder()
+
+    Range(0, dimension).foreach(sb.append("["))
+    sType match {
+      case t: PrimitiveTypeDef =>
+        t match {
+          case _: ByteTypeDef => sb.append("B")
+          case _: CharTypeDef => sb.append("C")
+          case _: DoubleTypeDef => sb.append("D")
+          case _: FloatTypeDef => sb.append("F")
+          case _: IntTypeDef => sb.append("I")
+          case _: LongTypeDef => sb.append("L")
+          case _: ShortTypeDef => sb.append("S")
+          case _: BoolTypeDef => sb.append("B")
+          case _ =>
+        }
+      case _ =>
+        sb.append("L").append(sType.fullName).append(";")
+    }
+    sb.toString()
+  }
+}
+
+
+case class SAnnoDef() extends STypeDef(LineCol.SYNTHETIC) {
+  val annoFields: ListBuffer[SAnnoField] = ListBuffer()
+  val modifiers: ListBuffer[SModifier] = ListBuffer()
+
+  def canPresentOn(sType: ElementType): Boolean = {
+    val name = fullName
+    try {
+      val cls = Class.forName(name)
+      val annotations = cls.getAnnotations
+      annotations.foreach {
+        case target: Target =>
+          val eTypes = target.value
+          eTypes.foreach { t =>
+            if (t == sType) return true
+          }
+          return false
+        case _ =>
+      }
+      true
+    } catch {
+      case e: ClassNotFoundException =>
+        throw new LtBug(e)
+    }
+  }
+}
+
+
+case class SAnnoField() extends SMethodDef(LineCol.SYNTHETIC) {
+  var sType: STypeDef = _
+  var defaultValue: Value = _
+
+  override def toString: String = {
+    val sb = new StringBuilder()
+    sb.append(sType.fullName).append(" ").append(name).append("()")
+    if (defaultValue != null)
+      sb.append(" default ").append(defaultValue).append(";")
+    sb.toString()
   }
 }
 
@@ -177,6 +253,17 @@ object NullTypeDef {
 }
 
 
+case class VoidType() extends STypeDef(LineCol.SYNTHETIC) {
+  override val fullName: String = "void"
+}
+
+object VoidType {
+  def t: VoidType = VoidType()
+
+  def get(): VoidType = t
+}
+
+
 abstract class SMember(lineCol: LineCol) extends SAnnotationPresentable {
   val modifiers: ListBuffer[SModifier] = ListBuffer()
   var declaringType: STypeDef = _
@@ -203,16 +290,74 @@ case class SParameter() extends LeftValue with SAnnotationPresentable {
     s"${if (!canChange) "final" else ""}${sType.fullName} $name"
 }
 
-case class SMethodDef(lineCol: LineCol) extends SInvokable(lineCol){
-  var name:String = _
-  val overRide:ListBuffer[SMethodDef] = ListBuffer()
-  val overRidden:ListBuffer[SMethodDef] = ListBuffer()
+case class SMethodDef(lineCol: LineCol) extends SInvokable(lineCol) {
+  var name: String = _
+  val overRide: ListBuffer[SMethodDef] = ListBuffer()
+  val overRidden: ListBuffer[SMethodDef] = ListBuffer()
 
   override def toString: String = {
-    val modifiers = this.modifiers.map(_.toString.toLowerCase()).foldLeft("")(_+" "+_)
+    val modifiers = this.modifiers.map(_.toString.toLowerCase()).foldLeft("")(_ + " " + _)
     val temp = returnType.fullName + " " + declaringType.fullName + "." + name + "("
-    val params = parameters.foldLeft("")(_+","+_)
+    val params = parameters.foldLeft("")(_ + "," + _)
     modifiers + temp + params + ")"
+  }
+}
+
+case class SClassDef(override val lineCol: LineCol) extends STypeDef(lineCol) {
+  val modifiers: ListBuffer[SModifier] = ListBuffer()
+  val fields: ListBuffer[SFieldDef] = ListBuffer()
+  val constructors: ListBuffer[SConstructorDef] = ListBuffer()
+  val methods: ListBuffer[SMethodDef] = ListBuffer()
+  val superInterfaces: ListBuffer[SInterfaceDef] = ListBuffer()
+  val staticStatements: ListBuffer[Instruction] = ListBuffer()
+  val staticExceptionTable: ListBuffer[ExceptionTable] = ListBuffer()
+  var parent: SClassDef = _
+}
+
+case class SFieldDef(lineCol: LineCol) extends SMember(lineCol) with LeftValue {
+  var sType: STypeDef = _
+  var name: String = _
+
+  override def canChange(): Boolean = !modifiers.contains(SModifier.FINAL)
+
+  override def typeOf(): STypeDef = sType
+}
+
+case class SConstructorDef(lineCol: LineCol) extends SInvokable(lineCol) {
+  override var returnType: VoidType = VoidType.get()
+}
+
+case class SInterfaceDef(override val lineCol: LineCol) extends STypeDef(lineCol) {
+  val fields: ListBuffer[SFieldDef] = ListBuffer()
+  val methods: ListBuffer[SMethodDef] = ListBuffer()
+  val modifiers: ListBuffer[SModifier] = ListBuffer()
+  val superInterfaces: ListBuffer[SInterfaceDef] = ListBuffer()
+  val staticStatements: ListBuffer[Instruction] = ListBuffer()
+  val staticExceptionTable: ListBuffer[ExceptionTable] = ListBuffer()
+
+  override def isAssignableFrom(cls: STypeDef): Boolean = {
+    if (super.isAssignableFrom(cls)) return true
+    val list: mutable.Stack[SInterfaceDef] = mutable.Stack()
+    cls match {
+      case s: SClassDef =>
+        list.pushAll(s.superInterfaces)
+      case s: SInterfaceDef =>
+        list.pushAll(s.superInterfaces)
+      case _ =>
+    }
+    while (list.nonEmpty) {
+      val i = list.pop()
+      if (isAssignableFrom(i)) return true
+      list.pushAll(i.superInterfaces)
+    }
+    false
+  }
+
+  override def toString: String = {
+    val modifier = modifiers.foldLeft("")(_ + " " + _)
+    val temp = s"interface$fullName${if (superInterfaces.nonEmpty) "extends" else ""}"
+    val interfaces = superInterfaces.foldLeft("")(_ + "," + _)
+    modifier + temp + interfaces
   }
 }
 
@@ -221,21 +366,21 @@ case class ExceptionTable(from: Instruction,
                           target: Instruction,
                           sType: STypeDef)
 
-class SModifier
+case class SModifier(value: Int)
 
 object SModifier {
-  val PUBLIC = 0x0001
-  val PRIVATE = 0x0002
-  val PROTECTED = 0x0004
-  val STATIC = 0x0008
-  val FINAL = 0x0010
-  val VOLATILE = 0x0040
-  val TRANSIENT = 0x0080
-  val ABSTRACT = 0x0400
-  val SYNTHETIC = 0x1000
-  val ENUM = 0x4000
-  val NATIVE = 0x0100
-  val STRUCT = 0x0800
-  val SYNCHRONIZED = 0x0200
+  val PUBLIC = SModifier(0x0001)
+  val PRIVATE = SModifier(0x0002)
+  val PROTECTED = SModifier(0x0004)
+  val STATIC = SModifier(0x0008)
+  val FINAL = SModifier(0x0010)
+  val VOLATILE = SModifier(0x0040)
+  val TRANSIENT = SModifier(0x0080)
+  val ABSTRACT = SModifier(0x0400)
+  val SYNTHETIC = SModifier(0x1000)
+  val ENUM = SModifier(0x4000)
+  val NATIVE = SModifier(0x0100)
+  val STRUCT = SModifier(0x0800)
+  val SYNCHRONIZED = SModifier(0x0200)
 }
 
