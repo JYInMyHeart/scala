@@ -390,6 +390,13 @@ class LexerTest extends UnitSpec {
     assert(root != null)
   }
 
+
+  /*
+  *  step1 create startNode  args   then startNode.args = args   args.stack.push(node)
+  *  step2 parse line   define a as b   detect as  and string
+  *  then  replace a from rest string to b then parse rest string
+  *  step3 split source line by some key words
+  */
   "define" should "be nice" in {
     val processor = new Lexer("test",
       new BufferedReader(

@@ -1,8 +1,8 @@
 
 import java.util.regex.{Pattern, PatternSyntaxException}
 
-import MyList.List
-import MyList.Cons
+import MyList.{Cons, List}
+
 sealed trait MyOption[+A] {
   def map[B](f: A => B): MyOption[B] = this match {
     case MyNone => MyNone
@@ -70,16 +70,15 @@ sealed trait MyOption[+A] {
     bb <- b
   } yield f(aa, bb)
 
-  def pattern(str: String):MyOption[Pattern] =
-    try{
+  def pattern(str: String): MyOption[Pattern] =
+    try {
       MySome(Pattern.compile(str))
-    }catch {
-      case e:PatternSyntaxException => MyNone
+    } catch {
+      case e: PatternSyntaxException => MyNone
     }
 
-  def mkMather(pat:String):MyOption[String => Boolean] =
-    pattern(pat) map (p => (s:String) => p.matcher(s).matches)
-
+  def mkMather(pat: String): MyOption[String => Boolean] =
+    pattern(pat) map (p => (s: String) => p.matcher(s).matches)
 
 
   def getOne[A](a: List[MyOption[A]]): MyOption[A] = a match {
@@ -100,11 +99,10 @@ sealed trait MyOption[+A] {
     Try(List.map(List.filter(a)(_ != MyNone))(i => opTop(f(i))))
 
 
-
 }
 
-object MyOption{
-  def empty[A]:MyOption[A] = MyNone
+object MyOption {
+  def empty[A]: MyOption[A] = MyNone
 }
 
 
