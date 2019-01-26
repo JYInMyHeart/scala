@@ -14,11 +14,17 @@ trait Value {
 }
 
 trait LeftValue extends Value {
-  def canChange(): Boolean
+  def canChange: Boolean
 }
 
 trait Instruction {
   def lineCol(): LineCol
+}
+
+trait PrimitiveValue extends Value
+
+trait ConstantValue extends Value {
+  def getByte: Array[Byte]
 }
 
 class STypeDef(val lineCol: LineCol,
@@ -44,8 +50,7 @@ class STypeDef(val lineCol: LineCol,
 case class SArrayTypeDef() extends STypeDef(LineCol.SYNTHETIC) {
   var sType: STypeDef = _
   var dimension: Int = _
-  fullName = if(fullName == null) rebuildFullName() else fullName
-
+  fullName = if (fullName == null) rebuildFullName() else fullName
 
 
   private def rebuildFullName(): String = {
@@ -101,7 +106,7 @@ case class SAnnoDef() extends STypeDef(LineCol.SYNTHETIC) {
 }
 
 
- class SAnnoField() extends SMethodDef(LineCol.SYNTHETIC) {
+class SAnnoField() extends SMethodDef(LineCol.SYNTHETIC) {
   var sType: STypeDef = _
   var defaultValue: Value = _
 
@@ -174,7 +179,7 @@ object DoubleTypeDef {
   * long
   */
 case class LongTypeDef() extends PrimitiveTypeDef() {
-   fullName = "long"
+  fullName = "long"
 
   override def isAssignableFrom(cls: STypeDef): Boolean = {
     if (super.isAssignableFrom(cls)) return true
@@ -192,7 +197,7 @@ object LongTypeDef {
   * char
   */
 case class CharTypeDef() extends PrimitiveTypeDef() {
-   fullName = "char"
+  fullName = "char"
 }
 
 object CharTypeDef {
@@ -218,7 +223,7 @@ object ShortTypeDef {
   * byte
   */
 case class ByteTypeDef() extends PrimitiveTypeDef() {
-  fullName  = "byte"
+  fullName = "byte"
 }
 
 object ByteTypeDef {
@@ -319,7 +324,7 @@ case class SFieldDef(lineCol: LineCol) extends SMember(lineCol) with LeftValue {
   var sType: STypeDef = _
   var name: String = _
 
-  override def canChange(): Boolean = !modifiers.contains(SModifier.FINAL)
+  override def canChange: Boolean = !modifiers.contains(SModifier.FINAL)
 
   override def typeOf(): STypeDef = sType
 }
@@ -360,6 +365,39 @@ case class SInterfaceDef(override val lineCol: LineCol) extends STypeDef(lineCol
     val interfaces = superInterfaces.foldLeft("")(_ + "," + _)
     modifier + temp + interfaces
   }
+}
+
+case class IntValue(value: Int) extends PrimitiveValue with ConstantValue {
+  override def getByte: Array[Byte] = {
+    Array(
+      (value & 0xff).toByte,
+      ((value & 0xff00) >> 8).toByte,
+      ((value & 0xff0000) >> 16).toByte,
+      ((value & 0xff000000) >> 24).toByte,
+    )
+  }
+
+  override def typeOf(): STypeDef = IntTypeDef.get()
+
+  override def toString: String = value.toString
+
+  override def hashCode(): Int = value
+
+  override def equals(obj: Any): Boolean = {
+    if(obj == null || getClass != obj.getClass)
+      return false
+    obj match {
+      case IntValue(i) =>
+        i == value
+      case _ =>
+        false
+    }
+  }
+}
+
+case class LocalVariable(sType:STypeDef,
+                         canChange:Boolean) extends LeftValue{
+  override def typeOf(): STypeDef = sType
 }
 
 case class ExceptionTable(from: Instruction,

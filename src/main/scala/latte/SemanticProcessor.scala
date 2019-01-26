@@ -1,7 +1,9 @@
 package latte
 
+import java.lang.annotation.ElementType
 import java.lang.reflect.{AnnotatedElement, Constructor}
 
+import latte.Ins.{InvokeSpecial, This}
 import latte.SModifier.{ABSTRACT, FINAL, PUBLIC}
 
 import scala.collection.mutable
@@ -27,6 +29,11 @@ class SemanticProcessor(mapOfStatements: mutable.HashMap[String, List[Statement]
   private val typeDefSet: mutable.HashSet[STypeDef] = mutable.HashSet()
 
 
+  def parseAnnos(annos: Set[Anno], sClassDef: SClassDef, imports: ListBuffer[Import], TYPE: ElementType): Unit = ???
+
+  def parseParameters(params: List[VariableDef], i: Int, constructor: SConstructorDef, imports: ListBuffer[Import], bool: Boolean) = ???
+
+  def parseValueFromExpression(init: Expression, typeDef: STypeDef, value: Null): Value = ???
 
   def parse: mutable.HashSet[STypeDef] = {
     val fileNameToClassDef: mutable.HashMap[String, ListBuffer[ClassStatement]] = mutable.HashMap()
@@ -169,24 +176,98 @@ class SemanticProcessor(mapOfStatements: mutable.HashMap[String, List[Statement]
           var superWithoutInvocationAccess: Iterator[Access] = null
           if (c.superWithOutInvocation != null) {
             if (c.superWithOutInvocation.isEmpty) {
-              sClassDef.parent =  getTypeWithName("java.lang.Object",LineCol.SYNTHETIC).asInstanceOf[SClassDef]
-            }else{
+              sClassDef.parent = getTypeWithName("java.lang.Object", LineCol.SYNTHETIC).asInstanceOf[SClassDef]
+            } else {
               superWithoutInvocationAccess = c.superWithOutInvocation.toIterator
               val mightBeClassAccess = superWithoutInvocationAccess.next()
-              val tmp = getTypeWithAccess(mightBeClassAccess,imports)
+              val tmp = getTypeWithAccess(mightBeClassAccess, imports)
               tmp match {
-                case s:SClassDef =>
+                case s: SClassDef =>
                   sClassDef.parent = s
-                case s:SInterfaceDef =>
+                case s: SInterfaceDef =>
                   sClassDef.superInterfaces += s
-                  sClassDef.parent = getTypeWithName("java.lang.Object",c.lineCol).asInstanceOf[SClassDef]
+                  sClassDef.parent = getTypeWithName("java.lang.Object", c.lineCol).asInstanceOf[SClassDef]
                 case _ =>
-                  throw new SyntaxException(mightBeClassAccess.toString + " is not class or interface",c.lineCol)
+                  throw new SyntaxException(mightBeClassAccess.toString + " is not class or interface", mightBeClassAccess.lineCol)
               }
             }
-          }else{
+          } else {
+            val access = c.superWithInvocation.access
+            val tmp = getTypeWithAccess(access, imports)
+            tmp match {
+              case s: SClassDef =>
+                sClassDef.parent = s
+              case _ =>
+                throw new SyntaxException(access.toString + "is not class or interface", access.lineCol)
+            }
+            superWithoutInvocationAccess = c.superWithOutInvocation.iterator
+          }
+
+          while (superWithoutInvocationAccess != null && superWithoutInvocationAccess.hasNext) {
+            val interfaceAccess = superWithoutInvocationAccess.next()
+            val tmp = getTypeWithAccess(interfaceAccess, imports)
+            tmp match {
+              case s: SInterfaceDef =>
+                sClassDef.superInterfaces += s
+              case _ =>
+                throw new SyntaxException(interfaceAccess.toString + "is not interface", interfaceAccess.lineCol)
+            }
+          }
+
+          parseAnnos(c.annos, sClassDef, imports, ElementType.TYPE)
+
+          var generateIndex = -1
+          generateIndex = c.params.takeWhile(_.init == null).length
+
+          var lastConstructor: SConstructorDef = null
+          for (i <- c.params.size until generateIndex by -1) {
+            val constructor = SConstructorDef(c.lineCol)
+
+            constructor.declaringType = sClassDef
+
+            var hasAccessModifier = false
+            if (c.modifiers.exists(x => x.modifier == "pub"
+              || x.modifier == "pri"
+              || x.modifier == "pro"
+              || x.modifier == "pkg"))
+              hasAccessModifier = true
+            if(!hasAccessModifier)
+              constructor.modifiers += SModifier.PUBLIC
+            def getModifier(m: Modifier): Option[SModifier] =
+              m.modifier match {
+                case "abs" => None
+                case "val" => None
+                case "pub" => Some(PUBLIC)
+                case "pri" => Some(SModifier.PRIVATE)
+                case "pro" => Some(SModifier.PROTECTED)
+                case "pkg" => None
+                case _ =>
+                  throw UnexpectedTokenException("valid modifier for class (val|abs)", m.toString, m.lineCol)
+              }
+
+            c.modifiers.foreach{ mm =>
+              getModifier(mm) match{
+                case Some(x) => constructor.modifiers += x
+                case None =>
+              }
+            }
+
+            parseParameters(c.params,i,constructor,imports,true)
+
+            constructor.declaringType = sClassDef
+            sClassDef.constructors += constructor
+            if(lastConstructor != null){
+              val invoke = InvokeSpecial(This(sClassDef),lastConstructor,LineCol.SYNTHETIC)
+              constructor.parameters.foreach(invoke.arguments += _)
+              val paramOfLast = lastConstructor.parameters
+              invoke.arguments += parseValueFromExpression(c.params(i).init,paramOfLast.last.typeOf(),null)
+              constructor.statements += invoke
+            }
+            lastConstructor = constructor
 
           }
+
+//          c.params.foreach(parseField(_,sClassDef,imports,PARSING_CLASS,false))
         }
       }
 
@@ -196,14 +277,15 @@ class SemanticProcessor(mapOfStatements: mutable.HashMap[String, List[Statement]
     null
   }
 
-  def getTypeWithAccess(mightBeClassAccess: Access, imports: ListBuffer[Import]):STypeDef = {
+  def getTypeWithAccess(mightBeClassAccess: Access, imports: ListBuffer[Import]): STypeDef = {
     null
   }
-  def getFieldsAndMethodsFromClass(cls: Class[_], s: STypeDef, fields: ListBuffer[SFieldDef], methods: ListBuffer[SMethodDef]):Unit = ???
 
-  def getParameterFromClassArray(getParameterTypes: Array[Class[_]], constructorDef: SConstructorDef):Unit = ???
+  def getFieldsAndMethodsFromClass(cls: Class[_], s: STypeDef, fields: ListBuffer[SFieldDef], methods: ListBuffer[SMethodDef]): Unit = ???
 
-  def getModifierFromMember(con: Constructor[_], constructorDef: SConstructorDef):Unit = ???
+  def getParameterFromClassArray(getParameterTypes: Array[Class[_]], constructorDef: SConstructorDef): Unit = ???
+
+  def getModifierFromMember(con: Constructor[_], constructorDef: SConstructorDef): Unit = ???
 
   def getTypeWithName(str: String, lineCol: LineCol): STypeDef = {
     if (types.contains(str)) {
@@ -254,13 +336,12 @@ class SemanticProcessor(mapOfStatements: mutable.HashMap[String, List[Statement]
               getFieldsAndMethodsFromClass(cls, s, s.fields, s.methods)
             case s: SClassDef =>
               getSuperInterfaceFromClass(cls, s.superInterfaces)
-              if (cls != classOf[Object]){
+              if (cls != classOf[Object]) {
                 s.parent = getTypeWithName(cls.getSuperclass.getName, lineCol).asInstanceOf[SClassDef]
               }
 
 
-
-              getFieldsAndMethodsFromClass(cls, s, s.fields,s.methods)
+              getFieldsAndMethodsFromClass(cls, s, s.fields, s.methods)
 
               for (con <- cls.getDeclaredConstructors) {
                 val constructorDef = SConstructorDef(LineCol.SYNTHETIC)
@@ -292,11 +373,11 @@ class SemanticProcessor(mapOfStatements: mutable.HashMap[String, List[Statement]
   }
 
 
-  private def getAnnotationFromAnnotatedElement(elem:AnnotatedElement,presentable:SAnnotationPresentable):Unit = {
+  private def getAnnotationFromAnnotatedElement(elem: AnnotatedElement, presentable: SAnnotationPresentable): Unit = {
 
   }
 
-  private def getModifierFromClass(cls:Class[_],modifiers:ListBuffer[SModifier]):Unit = {
+  private def getModifierFromClass(cls: Class[_], modifiers: ListBuffer[SModifier]): Unit = {
 
   }
 
