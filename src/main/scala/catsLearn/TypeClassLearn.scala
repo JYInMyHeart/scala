@@ -2,6 +2,8 @@ package catsLearn
 
 import javafx.scene.paint.Color
 
+import scala.collection.mutable
+
 class TypeClassLearn {
   def combineAll[A] (list:List[A],A:Monoid[A]):A = list.foldRight(A.empty)(A.combine)
 
@@ -66,9 +68,14 @@ object Dog{
 object Pet extends App {
 
 //  def esquire[A <: Pet[A]](a:A):A = a.renamed(a.name + ", Esq")
-  val a1 = Fish("Jimmy",2)
-  val v = a1.renamed("Bob")
-//  val a = Dog("J",4)
-//  val b = a.renamed("s")
-  println(v)
+//  val a1 = Fish("Jimmy",2)
+//  val v = a1.renamed("Bob")
+////  val a = Dog("J",4)
+////  val b = a.renamed("s")
+//  println(v)
+
+  val q = mutable.Queue[Int]()
+  val a = List(1,2,3)
+  q ++= a
+  println(q)
 }
