@@ -3,7 +3,7 @@ package latte
 import java.lang.annotation.ElementType
 import java.lang.reflect.{AnnotatedElement, Constructor}
 
-import latte.Ins.{InvokeSpecial, This}
+import latte.Ins.{InvokeSpecial, PutField, TLoad, This}
 import latte.SModifier.{ABSTRACT, FINAL, PUBLIC}
 
 import scala.collection.mutable
@@ -24,7 +24,7 @@ class SemanticProcessor(mapOfStatements: mutable.HashMap[String, List[Statement]
   )
   private val originalClasses: mutable.HashMap[String, ClassStatement] = mutable.HashMap()
   private val originalInterfaces: mutable.HashMap[String, InterfaceStatement] = mutable.HashMap()
-  private val methodStatements: mutable.HashMap[SMethodDef, ListBuffer[Statement]] = mutable.HashMap()
+  private val methodToStatements: mutable.HashMap[SMethodDef, ListBuffer[Statement]] = mutable.HashMap()
   private val fileNameToImport: mutable.HashMap[String, ListBuffer[Import]] = mutable.HashMap()
   private val typeDefSet: mutable.HashSet[STypeDef] = mutable.HashSet()
 
@@ -46,6 +46,10 @@ class SemanticProcessor(mapOfStatements: mutable.HashMap[String, List[Statement]
   def parseValueFromObject(o: AnyRef) = ???
 
   def parseAnnoValues(annos: ListBuffer[Anno]): Unit = ???
+
+  def parseStatement(statement: Statement, voidType: VoidType, constructorScope: SemanticScope, statements: ListBuffer[Instruction], exceptionTables: ListBuffer[ExceptionTable], dontParseMethod: Boolean): Unit = ???
+
+  def parseMethod1(m: SMethodDef, statements: ListBuffer[Statement], scope: SemanticScope) = ???
 
   def parse: mutable.HashSet[STypeDef] = {
     val fileNameToClassDef: mutable.HashMap[String, ListBuffer[ClassStatement]] = mutable.HashMap()
@@ -243,8 +247,9 @@ class SemanticProcessor(mapOfStatements: mutable.HashMap[String, List[Statement]
               || x.modifier == "pro"
               || x.modifier == "pkg"))
               hasAccessModifier = true
-            if(!hasAccessModifier)
+            if (!hasAccessModifier)
               constructor.modifiers += SModifier.PUBLIC
+
             def getModifier(m: Modifier): Option[SModifier] =
               m.modifier match {
                 case "abs" => None
@@ -257,285 +262,335 @@ class SemanticProcessor(mapOfStatements: mutable.HashMap[String, List[Statement]
                   throw UnexpectedTokenException("valid modifier for class (val|abs)", m.toString, m.lineCol)
               }
 
-            c.modifiers.foreach{ mm =>
-              getModifier(mm) match{
+            c.modifiers.foreach { mm =>
+              getModifier(mm) match {
                 case Some(x) => constructor.modifiers += x
                 case None =>
               }
             }
 
-            parseParameters(c.params,i,constructor,imports,true)
+            parseParameters(c.params, i, constructor, imports, true)
 
             constructor.declaringType = sClassDef
             sClassDef.constructors += constructor
-            if(lastConstructor != null){
-              val invoke = InvokeSpecial(This(sClassDef),lastConstructor,LineCol.SYNTHETIC)
+            if (lastConstructor != null) {
+              val invoke = InvokeSpecial(This(sClassDef), lastConstructor, LineCol.SYNTHETIC)
               constructor.parameters.foreach(invoke.arguments += _)
               val paramOfLast = lastConstructor.parameters
-              invoke.arguments += parseValueFromExpression(c.params(i).init,paramOfLast.last.typeOf(),null)
+              invoke.arguments += parseValueFromExpression(c.params(i).init, paramOfLast.last.typeOf(), null)
               constructor.statements += invoke
             }
             lastConstructor = constructor
 
           }
 
-          c.params.foreach(parseField(_,sClassDef,imports,SemanticProcessor.PARSING_CLASS,false))
+          c.params.foreach(parseField(_, sClassDef, imports, SemanticProcessor.PARSING_CLASS, false))
 
-          val staticScopes:ListBuffer[StaticScope] = ListBuffer()
-          c.statements.foreach{
-            case stmt:StaticScope =>
+          val staticScopes: ListBuffer[StaticScope] = ListBuffer()
+          c.statements.foreach {
+            case stmt: StaticScope =>
               staticScopes += stmt
-            case stmt:VariableDef =>
-              parseField(stmt,sClassDef,imports,SemanticProcessor.PARSING_CLASS,false)
-            case stmt:MethodStatement =>
+            case stmt: VariableDef =>
+              parseField(stmt, sClassDef, imports, SemanticProcessor.PARSING_CLASS, false)
+            case stmt: MethodStatement =>
               generateIndex = -1
               generateIndex = stmt.params.takeWhile(_.init == null).length
-              var lastMethod:SMethodDef = null
-              for(i <- stmt.params.size until generateIndex by -1){
-                parseMethod(stmt,i,sClassDef,lastMethod,imports,SemanticProcessor.PARSING_CLASS,false)
+              var lastMethod: SMethodDef = null
+              for (i <- stmt.params.size until generateIndex by -1) {
+                parseMethod(stmt, i, sClassDef, lastMethod, imports, SemanticProcessor.PARSING_CLASS, false)
                 lastMethod = sClassDef.methods.last
-                methodStatements += lastMethod -> ListBuffer(stmt.body:_*)
+                methodToStatements += lastMethod -> ListBuffer(stmt.body: _*)
               }
             case _ =>
           }
 
-          for(scope <- staticScopes){
-            scope.statements.foreach{
-              case stmt:VariableDef =>
-                parseField(stmt,sClassDef,imports,SemanticProcessor.PARSING_CLASS,true)
-              case stmt:MethodStatement =>
+          for (scope <- staticScopes) {
+            scope.statements.foreach {
+              case stmt: VariableDef =>
+                parseField(stmt, sClassDef, imports, SemanticProcessor.PARSING_CLASS, true)
+              case stmt: MethodStatement =>
                 generateIndex = -1
                 generateIndex = stmt.params.takeWhile(_.init == null).length
-                var lastMethod:SMethodDef = null
-                for(i <- stmt.params.size until generateIndex by -1){
-                  parseMethod(stmt,i,sClassDef,lastMethod,imports,SemanticProcessor.PARSING_CLASS,true)
+                var lastMethod: SMethodDef = null
+                for (i <- stmt.params.size until generateIndex by -1) {
+                  parseMethod(stmt, i, sClassDef, lastMethod, imports, SemanticProcessor.PARSING_CLASS, true)
                   lastMethod = sClassDef.methods.last
-                  methodStatements += lastMethod -> ListBuffer(stmt.body:_*)
+                  methodToStatements += lastMethod -> ListBuffer(stmt.body: _*)
                 }
-                case _ =>
+              case _ =>
             }
           }
-
         }
 
-        for(interfaceDef <- interfaceDefs){
-          val sInterfaceDef:SInterfaceDef = types(pkg + interfaceDef.name).asInstanceOf[SInterfaceDef]
-          for(access <- interfaceDef.superInterfaces){
-            val superInterface = getTypeWithAccess(access,imports).asInstanceOf[SInterfaceDef]
+        for (interfaceDef <- interfaceDefs) {
+          val sInterfaceDef: SInterfaceDef = types(pkg + interfaceDef.name).asInstanceOf[SInterfaceDef]
+          for (access <- interfaceDef.superInterfaces) {
+            val superInterface = getTypeWithAccess(access, imports).asInstanceOf[SInterfaceDef]
             sInterfaceDef.superInterfaces += superInterface
           }
 
-          parseAnnos(interfaceDef.annos,sInterfaceDef,imports,ElementType.TYPE)
+          parseAnnos(interfaceDef.annos, sInterfaceDef, imports, ElementType.TYPE)
 
 
-          val staticScopes:ListBuffer[StaticScope] = ListBuffer()
-          interfaceDef.statements.foreach{
-            case stmt:StaticScope =>
+          val staticScopes: ListBuffer[StaticScope] = ListBuffer()
+          interfaceDef.statements.foreach {
+            case stmt: StaticScope =>
               staticScopes += stmt
-            case stmt:VariableDef =>
-              parseField(stmt,sInterfaceDef,imports,SemanticProcessor.PARSING_INTERFACE,false)
-            case stmt:MethodStatement =>
+            case stmt: VariableDef =>
+              parseField(stmt, sInterfaceDef, imports, SemanticProcessor.PARSING_INTERFACE, false)
+            case stmt: MethodStatement =>
               var generateIndex = -1
               generateIndex = stmt.params.takeWhile(_.init == null).length
-              var lastMethod:SMethodDef = null
-              for(i <- stmt.params.size until generateIndex by -1){
-                parseMethod(stmt,i,sInterfaceDef,lastMethod,imports,SemanticProcessor.PARSING_INTERFACE,false)
+              var lastMethod: SMethodDef = null
+              for (i <- stmt.params.size until generateIndex by -1) {
+                parseMethod(stmt, i, sInterfaceDef, lastMethod, imports, SemanticProcessor.PARSING_INTERFACE, false)
                 lastMethod = sInterfaceDef.methods.last
-                methodStatements += lastMethod -> ListBuffer(stmt.body:_*)
+                methodToStatements += lastMethod -> ListBuffer(stmt.body: _*)
               }
             case stmt@_ =>
-              throw new SyntaxException("interfaces don't have initiators",stmt.lineCol)
+              throw new SyntaxException("interfaces don't have initiators", stmt.lineCol)
           }
 
-          for(scope <- staticScopes){
-            scope.statements.foreach{
-              case stmt:VariableDef =>
-                parseField(stmt,sInterfaceDef,imports,SemanticProcessor.PARSING_INTERFACE,true)
-              case stmt:MethodStatement =>
+          for (scope <- staticScopes) {
+            scope.statements.foreach {
+              case stmt: VariableDef =>
+                parseField(stmt, sInterfaceDef, imports, SemanticProcessor.PARSING_INTERFACE, true)
+              case stmt: MethodStatement =>
                 var generateIndex = -1
                 generateIndex = stmt.params.takeWhile(_.init == null).length
-                var lastMethod:SMethodDef = null
-                for(i <- stmt.params.size until generateIndex by -1){
-                  parseMethod(stmt,i,sInterfaceDef,lastMethod,imports,SemanticProcessor.PARSING_INTERFACE,true)
+                var lastMethod: SMethodDef = null
+                for (i <- stmt.params.size until generateIndex by -1) {
+                  parseMethod(stmt, i, sInterfaceDef, lastMethod, imports, SemanticProcessor.PARSING_INTERFACE, true)
                   lastMethod = sInterfaceDef.methods.last
-                  methodStatements += lastMethod -> ListBuffer(stmt.body:_*)
+                  methodToStatements += lastMethod -> ListBuffer(stmt.body: _*)
                 }
               case _ =>
             }
           }
 
         }
-        
-        typeDefSet.foreach{
-          case sTypeDef:SClassDef =>
-            val circularRecorder:ListBuffer[STypeDef] = ListBuffer()
-            var parent = sTypeDef.parent
-            while(parent != null){
-              circularRecorder += parent
-              if(parent == sTypeDef)
-                throw new SyntaxException("circular inheritance " + circularRecorder,LineCol.SYNTHETIC)
+      }
+    }
+    typeDefSet.foreach {
+      case sTypeDef: SClassDef =>
+        val circularRecorder: ListBuffer[STypeDef] = ListBuffer()
+        var parent = sTypeDef.parent
+        while (parent != null) {
+          circularRecorder += parent
+          if (parent == sTypeDef)
+            throw new SyntaxException("circular inheritance " + circularRecorder, LineCol.SYNTHETIC)
+          parent = parent.parent
+        }
+      case i: SInterfaceDef =>
+        checkInterfaceCircularInheritance(i, i.superInterfaces, ListBuffer())
+      case t@_ =>
+        throw new IllegalArgumentException("wrong STypeDefType " + t.getClass)
+    }
+
+    for (s <- typeDefSet) {
+      checkOverride(s)
+      val loop = new Breaks
+      loop.breakable {
+        s match {
+          case sc: SClassDef => {
+            if (sc.modifiers.contains(SModifier.ABSTRACT))
+              loop.break()
+            var parent = sc.parent
+            while (parent != null && parent.modifiers.contains(SModifier.ABSTRACT)) {
+              if (parent.parent != null && parent.parent.modifiers.contains(SModifier.ABSTRACT))
+                checkOverride(parent)
               parent = parent.parent
             }
-          case i:SInterfaceDef =>
-            checkInterfaceCircularInheritance(i,i.superInterfaces,ListBuffer())
-          case t@_ =>
-            throw new IllegalArgumentException("wrong STypeDefType " + t.getClass)
+
+            val queue = mutable.Queue[SInterfaceDef]()
+            queue ++= sc.superInterfaces
+            while (queue.nonEmpty) {
+              val i = queue.dequeue()
+              checkOverride(i)
+              queue ++= i.superInterfaces
+            }
+
+            parent = sc.parent
+            while (parent != null && parent.modifiers.contains(SModifier.ABSTRACT)) {
+              for (m <- parent.methods) {
+                if (m.modifiers.contains(SModifier.ABSTRACT)) {
+                  if (m.overRidden.isEmpty)
+                    throw new SyntaxException(m + s" is not overridden in $sc", sc.lineCol)
+                }
+              }
+              parent = parent.parent
+            }
+            queue.clear()
+            queue ++= sc.superInterfaces
+            while (queue.nonEmpty) {
+              val i = queue.dequeue()
+              for (m <- i.methods) {
+                if (m.modifiers.contains(SModifier.ABSTRACT)) {
+                  if (m.overRidden.isEmpty)
+                    throw new SyntaxException(m + s" is not overridden in $sc", sc.lineCol)
+                }
+              }
+              queue ++= i.superInterfaces
+            }
+
+          }
+          case _ =>
+
+        }
+      }
+    }
+    types.values.foreach {
+      case annoDef: SAnnoDef => {
+        var cls: Class[_] = null
+        try {
+          cls = Class.forName(annoDef.fullName)
+        } catch {
+          case e: ClassNotFoundException =>
+            throw new LtBug(e)
         }
 
-        for(s <- typeDefSet){
-          checkOverride(s)
-          val loop = new Breaks
-          loop.breakable{
-            s match {
-              case sc:SClassDef => {
-                if(sc.modifiers.contains(SModifier.ABSTRACT))
-                  loop.break()
-                var parent = sc.parent
-                while(parent != null && parent.modifiers.contains(SModifier.ABSTRACT)){
-                  if(parent.parent != null && parent.parent.modifiers.contains(SModifier.ABSTRACT))
-                    checkOverride(parent)
-                  parent = parent.parent
-                }
-
-                val queue = mutable.Queue[SInterfaceDef]()
-                queue ++= sc.superInterfaces
-                while(queue.nonEmpty){
-                  val i = queue.dequeue()
-                  checkOverride(i)
-                  queue ++= i.superInterfaces
-                }
-
-                parent = sc.parent
-                while(parent != null && parent.modifiers.contains(SModifier.ABSTRACT)){
-                  for(m <- parent.methods){
-                    if(m.modifiers.contains(SModifier.ABSTRACT)){
-                      if(m.overRidden.isEmpty)
-                        throw new SyntaxException(m + s" is not overridden in $sc",sc.lineCol)
-                    }
-                  }
-                  parent = parent.parent
-                }
-                queue.clear()
-                queue ++= sc.superInterfaces
-                while(queue.nonEmpty){
-                  val i = queue.dequeue()
-                  for(m <- i.methods){
-                    if(m.modifiers.contains(SModifier.ABSTRACT)){
-                      if(m.overRidden.isEmpty)
-                        throw new SyntaxException(m + s" is not overridden in $sc",sc.lineCol)
-                    }
-                  }
-                  queue ++= i.superInterfaces
-                }
-
+        annoDef.annoFields.foreach { a =>
+          try {
+            val annoM = cls.getDeclaredMethod(a.name)
+            try {
+              val o = annoM.getDefaultValue
+              if (o != null) {
+                val value = parseValueFromObject(o)
+                a.defaultValue = value
               }
-              case _ =>
-
+            } catch {
+              case _: TypeNotPresentException =>
             }
-
-            types.values.foreach{
-              case annoDef: SAnnoDef => {
-                var cls:Class[_] = null
-                try{
-                  cls = Class.forName(annoDef.fullName)
-                }catch {
-                  case e:ClassNotFoundException =>
-                    throw new LtBug(e)
-                }
-
-                annoDef.annoFields.foreach{ a =>
-                  try{
-                    val annoM = cls.getDeclaredMethod(a.name)
-                    try{
-                      val o = annoM.getDefaultValue
-                      if(o != null){
-                        val value = parseValueFromObject(o)
-                        a.defaultValue = value
-                      }
-                    }catch {
-                      case _:TypeNotPresentException =>
-                    }
-                  }catch {
-                    case e:NoSuchMethodException =>
-                      throw new LtBug(e)
-                  }
-
-                }
-                parseAnnoValues(annoDef.annos)
-              }
-            }
-
-            for(sTypeDef <- typeDefSet){
-              sTypeDef match {
-                case sClassDef: SClassDef => {
-                  val astClass = originalClasses(sClassDef.fullName)
-                  parseAnnoValues(sClassDef.annos)
-                  val scope = new SemanticScope(sTypeDef)
-
-                  var constructorToFillStatements:SConstructorDef = null
-                  sClassDef.constructors.foreach{ cons =>
-                    if(cons.statements.isEmpty) constructorToFillStatements = cons
-                  }
-                  assert(constructorToFillStatements != null)
-                  val constructorScope = new SemanticScope(scope)
-                  constructorScope.aThis = This(sTypeDef)
-                  constructorToFillStatements.parameters.foreach(x => constructorScope.putLeftValue(x.name,x))
-                  var parent = sClassDef.parent
-                  var invokeSpecial:InvokeSpecial = null
-                  if(astClass.superWithInvocation == null){
-                    val loop = new Breaks
-                    loop.breakable{
-                      for(con <- parent.constructors){
-                        if(con.parameters.isEmpty){
-                          invokeSpecial = InvokeSpecial(This(sClassDef),con,sClassDef.lineCol)
-                          loop.break()
-                        }
-                      }
-                    }
-
-                  }else{
-                    for(cons <- parent.constructors) {
-                      val innerLoop = new Breaks
-                      innerLoop.breakable {
-                        if (cons.parameters.size == astClass.superWithInvocation.args.size) {
-                          invokeSpecial = InvokeSpecial(This(sClassDef), cons, astClass.superWithInvocation.lineCol)
-                          val parameters = cons.parameters
-                          val args = astClass.superWithInvocation.args
-                          parameters.indices.foreach { i =>
-                            val v = parseValueFromExpression(args(i), parameters(i).sType, constructorScope)
-                            invokeSpecial.arguments += v
-
-                          }
-                          innerLoop.break()
-                        }
-                      }
-                    }
-                  }
-
-                  if(invokeSpecial == null)
-                    throw new SyntaxException(s"no suitable super constructor to invoke in $sClassDef",sClassDef.lineCol)
-                  constructorToFillStatements.statements += invokeSpecial
-
-
-
-                }
-                case sInterfaceDef: SInterfaceDef => {
-
-                }
-                case _ =>
-                  throw new IllegalArgumentException("wrong STypeDefType " + sTypeDef.getClass)
-              }
-            }
-
-
-
+          } catch {
+            case e: NoSuchMethodException =>
+              throw new LtBug(e)
           }
 
         }
-
-
+        parseAnnoValues(annoDef.annos)
       }
+    }
 
+    for (sTypeDef <- typeDefSet) {
+      sTypeDef match {
+        case sClassDef: SClassDef => {
+          val astClass = originalClasses(sClassDef.fullName)
+          parseAnnoValues(sClassDef.annos)
+          val scope = new SemanticScope(sTypeDef)
+
+          var constructorToFillStatements: SConstructorDef = null
+          sClassDef.constructors.foreach { cons =>
+            if (cons.statements.isEmpty) constructorToFillStatements = cons
+          }
+          assert(constructorToFillStatements != null)
+          val constructorScope = new SemanticScope(scope)
+          constructorScope.aThis = This(sTypeDef)
+          constructorToFillStatements.parameters.foreach(x => constructorScope.putLeftValue(x.name, x))
+          var parent = sClassDef.parent
+          var invokeSpecial: InvokeSpecial = null
+          if (astClass.superWithInvocation == null) {
+            val loop = new Breaks
+            loop.breakable {
+              for (con <- parent.constructors) {
+                if (con.parameters.isEmpty) {
+                  invokeSpecial = InvokeSpecial(This(sClassDef), con, sClassDef.lineCol)
+                  loop.break()
+                }
+              }
+            }
+
+          } else {
+            for (cons <- parent.constructors) {
+              val innerLoop = new Breaks
+              innerLoop.breakable {
+                if (cons.parameters.size == astClass.superWithInvocation.args.size) {
+                  invokeSpecial = InvokeSpecial(This(sClassDef), cons, astClass.superWithInvocation.lineCol)
+                  val parameters = cons.parameters
+                  val args = astClass.superWithInvocation.args
+                  parameters.indices.foreach { i =>
+                    val v = parseValueFromExpression(args(i), parameters(i).sType, constructorScope)
+                    invokeSpecial.arguments += v
+
+                  }
+                  innerLoop.break()
+                }
+              }
+            }
+          }
+
+          if (invokeSpecial == null)
+            throw new SyntaxException(s"no suitable super constructor to invoke in $sClassDef", sClassDef.lineCol)
+          constructorToFillStatements.statements += invokeSpecial
+
+          val fieldLoop = new Breaks
+          fieldLoop.breakable {
+            for (param <- constructorToFillStatements.parameters) {
+              val f: SFieldDef = sClassDef.fields.find(_.name == param.name).orNull
+              if (f == null)
+                throw new LtBug("f shouldn't be null")
+
+              val putField = PutField(f, constructorScope.aThis,
+                new TLoad(param, constructorScope, LineCol.SYNTHETIC), LineCol.SYNTHETIC)
+              constructorToFillStatements.statements += putField
+            }
+          }
+
+          astClass.statements.foreach(
+            parseStatement(
+              _,
+              VoidType.get(),
+              constructorScope,
+              constructorToFillStatements.statements,
+              constructorToFillStatements.exceptionTables,
+              dontParseMethod = true
+            )
+          )
+
+          for (m <- sClassDef.methods) {
+            parseAnnoValues(m.annos)
+            parseMethod1(m, methodToStatements(m), scope)
+          }
+
+          val staticScope = new SemanticScope(scope)
+
+          for (statement <- astClass.statements) {
+            if (statement.isInstanceOf[StaticScope]) {
+              statement.asInstanceOf[StaticScope].statements.foreach(
+                parseStatement(
+                  _,
+                  VoidType.get(),
+                  staticScope,
+                  sClassDef.staticStatements,
+                  sClassDef.staticExceptionTable,
+                  dontParseMethod = true
+                )
+              )
+            }
+          }
+        }
+        case sInterfaceDef: SInterfaceDef => {
+          val astInterface = originalInterfaces(sInterfaceDef.fullName)
+          parseAnnoValues(sInterfaceDef.annos)
+          val scope = new SemanticScope(sInterfaceDef)
+          sInterfaceDef.methods.foreach(x =>
+            parseMethod1(x, methodToStatements(x), scope)
+          )
+
+          val staticScope = new SemanticScope(scope)
+          astInterface.statements.foreach(
+            parseStatement(
+              _,
+              VoidType.get(),
+              staticScope,
+              sInterfaceDef.staticStatements,
+              sInterfaceDef.staticExceptionTable,
+              dontParseMethod = true
+            )
+          )
+        }
+        case _ =>
+          throw new IllegalArgumentException("wrong STypeDefType " + sTypeDef.getClass)
+      }
     }
 
 

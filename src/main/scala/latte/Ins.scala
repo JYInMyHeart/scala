@@ -285,6 +285,38 @@ object Ins {
   }
 
 
+  case  class TLoad(value:LeftValue,
+                    var mode:Int,
+                    var index:Int,
+                    lineCol: LineCol) extends Value with Instruction{
+    def this(value:LeftValue,
+             scope:SemanticScope,
+             lineCol: LineCol) = {
+      this(value,0,0,lineCol)
+      import TLoad._
+      mode = value.typeOf() match {
+        case x:IntTypeDef => Iload
+        case x if IntTypeDef.get().isAssignableFrom(x) => Iload
+        case x:FloatTypeDef => Fload
+        case x:LongTypeDef => Lload
+        case x:DoubleTypeDef => Dload
+        case x:BoolTypeDef => Iload
+        case _ => Aload
+      }
+      index = scope.getIndex(value).getOrElse(0)
+    }
+
+    override def typeOf(): STypeDef = value.typeOf()
+  }
+
+  object TLoad{
+    var Iload = 0x15
+    var Lload = 0x16
+    var Fload = 0x17
+    var Dload = 0x18
+    var Aload = 0x19
+  }
+
 
 
 

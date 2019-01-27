@@ -74,8 +74,11 @@ object Pet extends App {
 ////  val b = a.renamed("s")
 //  println(v)
 
-  val q = mutable.Queue[Int]()
-  val a = List(1,2,3)
+  val q = mutable.Queue[P]()
+  case class P(name:String,age:Int)
+  val a = List(P("a",1),P("b",2),P("c",3),P("d",2))
   q ++= a
+  val d = q.find(_.age == 2).get
   println(q)
+  println(d)
 }
