@@ -4,9 +4,7 @@ import java.io.{BufferedReader, StringReader}
 
 import latte.Lexer._
 
-case class Lexer(fileName: String,
-                 reader: BufferedReader,
-                 indent: Int) {
+case class Lexer(fileName: String, reader: BufferedReader, indent: Int) {
   def parse: ElementStartNode = {
     val args: Args = Args()
     args.fileName = fileName
@@ -17,7 +15,6 @@ case class Lexer(fileName: String,
     elementStartNode
   }
 
-
   def redirectToStartNodeByIndent(args: Args, i: Int): Unit = {
     val startNode = args.startNodeStack.pop()
 
@@ -26,11 +23,11 @@ case class Lexer(fileName: String,
       if (startNode.hasNext)
         throw new Exception(s"Unexpected Token ${startNode.next}")
       args.previous = startNode
-    }
-    else {
+    } else {
       if (startNode.indent < i || args.startNodeStack.empty())
-        throw new NoSuchElementException(s"position = " +
-          s"${args.currentLine}:${args.currentCol},indent=$i")
+        throw new NoSuchElementException(
+          s"position = " +
+            s"${args.currentLine}:${args.currentCol},indent=$i")
       redirectToStartNodeByIndent(args, i)
     }
   }
@@ -51,24 +48,27 @@ case class Lexer(fileName: String,
       line match {
         case l if l.startsWith("define") =>
           if (!line.equals("define")
-            && SPLIT.contains(l.substring("define".length, "define".length + 1))) {
+              && SPLIT.contains(
+                l.substring("define".length, "define".length + 1))) {
             args.currentCol += 1
 
             val originalString = l
             line = l.substring("define".length)
             args.currentCol += "define".length
 
-            val las1 = getStringFroProcessing(line, args, originalString, "define")
+            val las1 =
+              getStringFroProcessing(line, args, originalString, "define")
             line = las1.line
             val target = las1.str.substring(1, las1.str.length - 1)
             target match {
               case x if x.isEmpty =>
-                throw new Exception(s"define <target> length cannot be 0 at ${las1.lineCol}")
-              case x if x.contains(ESCAPE) =>
-                throw new Exception(s"define <target> cannot contain escape char at ${las1.lineCol}")
-              case _ if !line.trim.startsWith("as") =>
                 throw new Exception(
-                  s"""illegal define command
+                  s"define <target> length cannot be 0 at ${las1.lineCol}")
+              case x if x.contains(ESCAPE) =>
+                throw new Exception(
+                  s"define <target> cannot contain escape char at ${las1.lineCol}")
+              case _ if !line.trim.startsWith("as") =>
+                throw new Exception(s"""illegal define command
                      |(there should be an `as` between <target> and <replacement>)
                      | at ${args.generateLineCol}""".stripMargin)
               case _ =>
@@ -77,25 +77,26 @@ case class Lexer(fileName: String,
             line = line.substring(asPos + 2)
             line match {
               case x if x.isEmpty =>
-                throw new Exception(s"illegal define command $originalString at ${args.generateLineCol}")
-              case x if !x.contains(x.charAt(0).toString) =>
                 throw new Exception(
-                  s"""illegal define command
+                  s"illegal define command $originalString at ${args.generateLineCol}")
+              case x if !x.contains(x.charAt(0).toString) =>
+                throw new Exception(s"""illegal define command
                      |(there should be an `as` between <target> and <replacement>)
                      | at ${args.generateLineCol}""".stripMargin)
               case _ =>
             }
 
             args.currentCol += asPos + 2
-            val las2 = getStringFroProcessing(line, args, originalString, "define")
+            val las2 =
+              getStringFroProcessing(line, args, originalString, "define")
             line = las2.line
             val replacement = las2.str.substring(1, las2.str.length - 1)
 
             if (replacement.contains(ESCAPE))
-              throw new Exception(s"define <replacement> cannot contain escape char at ${las1.lineCol}")
-            if (!line.trim.isEmpty)
               throw new Exception(
-                s"""illegal define command
+                s"define <replacement> cannot contain escape char at ${las1.lineCol}")
+            if (!line.trim.isEmpty)
+              throw new Exception(s"""illegal define command
                    |(there should not be any characters between after <replacement>)
                    | at ${args.generateLineCol}""".stripMargin)
 
@@ -105,24 +106,27 @@ case class Lexer(fileName: String,
           }
         case x if x.startsWith("undef") =>
           if (x != "undef"
-            && SPLIT.contains(x.substring("undef".length, "undef".length + 1))) {
+              && SPLIT.contains(
+                x.substring("undef".length, "undef".length + 1))) {
             args.currentCol += 1
             val lineStart: LineCol = args.generateLineCol
             val originalString = x
             line = x.substring("undef".length)
             args.currentCol += "undef".length
-            val las1 = getStringFroProcessing(line, args, originalString, "undef")
+            val las1 =
+              getStringFroProcessing(line, args, originalString, "undef")
             line = las1.line
             val target = las1.str.substring(1, las1.str.length - 1)
             target match {
               case l if l.isEmpty =>
-                throw new Exception(s"undef <target> length cannot be 0 at ${las1.lineCol}")
+                throw new Exception(
+                  s"undef <target> length cannot be 0 at ${las1.lineCol}")
               case l if l.contains(ESCAPE) =>
-                throw new Exception(s"undef <target> cannot contain escape char at ${las1.lineCol}")
+                throw new Exception(
+                  s"undef <target> cannot contain escape char at ${las1.lineCol}")
               case _ =>
                 if (line.trim.nonEmpty)
-                  throw new Exception(
-                    s"""illegal undef command
+                  throw new Exception(s"""illegal undef command
                        |(there should be any characters after <target>)
                        | at ${args.generateLineCol}""".stripMargin)
                 if (!args.defined.contains(target))
@@ -152,7 +156,6 @@ case class Lexer(fileName: String,
         var spaces = 0
         spaces = line.takeWhile(_ == ' ').length
 
-
         if (rootIndent == -1) {
           rootIndent = spaces
           spaces = 0
@@ -171,7 +174,9 @@ case class Lexer(fileName: String,
           if (args.startNodeStack.lastElement().indent != spaces) {
             if (args.startNodeStack.lastElement().indent > spaces)
               redirectToStartNodeByIndent(args, spaces + indent)
-            else if (args.startNodeStack.lastElement().indent == spaces - indent)
+            else if (args.startNodeStack
+                       .lastElement()
+                       .indent == spaces - indent)
               createStartNode(args)
             else
               throw new Exception("indent error")
@@ -247,7 +252,8 @@ case class Lexer(fileName: String,
         case t if PAIR.contains(t) =>
           args.previous = Element(token, args)
           createStartNode(args)
-          args.pairEntryStack.push(PairEntry(token, args.startNodeStack.lastElement()))
+          args.pairEntryStack.push(
+            PairEntry(token, args.startNodeStack.lastElement()))
         case t if PAIR.values.exists(_ == t) =>
           val entry = args.pairEntryStack.pop()
           val start = entry.key
@@ -255,10 +261,13 @@ case class Lexer(fileName: String,
             throw new Exception(s"${PAIR(start)}$token${args.generateLineCol}")
           val startNode = entry.startNode
           if (startNode.hasNext)
-            throw new Exception(s"null${startNode.next.toString()}${args.generateLineCol}")
+            throw new Exception(
+              s"null${startNode.next.toString()}${args.generateLineCol}")
           if (args.startNodeStack.lastElement().indent >= startNode.indent)
             redirectToStartNodeByIndent(args, startNode.indent)
-          else if (args.startNodeStack.lastElement().indent == startNode.indent - indent)
+          else if (args.startNodeStack
+                     .lastElement()
+                     .indent == startNode.indent - indent)
             args.previous = startNode
           else
             throw new Exception(s"indentation of $token should >= " +
@@ -275,17 +284,18 @@ case class Lexer(fileName: String,
     }
   }
 
-
   private def getStringFroProcessing(line: String,
                                      args: Args,
                                      originalString: String,
                                      command: String): LineAndString = {
     val str = line.trim
     if (str.isEmpty)
-      throw new Exception(s"illegal $command command $originalString at ${args.generateLineCol}")
+      throw new Exception(
+        s"illegal $command command $originalString at ${args.generateLineCol}")
     var token = str.charAt(0).toString
     if (!STRING.contains(token))
-      throw new Exception(s"illegal $command command $originalString at ${args.generateLineCol}")
+      throw new Exception(
+        s"illegal $command command $originalString at ${args.generateLineCol}")
     args.currentCol += line.indexOf(token)
     var newLine = str
     var lastIndex = 0
@@ -327,15 +337,15 @@ case class Lexer(fileName: String,
           case x: Element =>
             x.checkWhetherIsValidName()
             if (x.content == "."
-              && n.hasNext
-              && n.hasPrevious
-              && n.previous.isInstanceOf[Element]
-              && n.next.isInstanceOf[Element]
-              && CompilerUtil.isNumber(n.previous.asInstanceOf[Element].content)
-              && CompilerUtil.isNumber(n.next.asInstanceOf[Element].content)
-              && !n.previous.asInstanceOf[Element].content.contains(".")
-              && !n.next.asInstanceOf[Element].content.contains(".")
-            ) {
+                && n.hasNext
+                && n.hasPrevious
+                && n.previous.isInstanceOf[Element]
+                && n.next.isInstanceOf[Element]
+                && CompilerUtil.isNumber(
+                  n.previous.asInstanceOf[Element].content)
+                && CompilerUtil.isNumber(n.next.asInstanceOf[Element].content)
+                && !n.previous.asInstanceOf[Element].content.contains(".")
+                && !n.next.asInstanceOf[Element].content.contains(".")) {
               val pre = x.previous.asInstanceOf[Element]
               val nextElement = x.next.asInstanceOf[Element]
               val s = pre.content + "." + nextElement.content
@@ -385,7 +395,6 @@ private case class LineAndString() {
   var lineCol: LineCol = _
 }
 
-
 object Lexer {
   val LAYER: Set[String] = Set("#>", "#", "->")
   val STRING: Set[String] = Set("\"", "'", "`")
@@ -402,30 +411,59 @@ object Lexer {
     ".",
     ":",
     "::",
-    "=", "+=", "-=", "*=", "/=", "%=",
-    ">>", "<<", ">>>",
-    "&", "^", "|", "~",
+    "=",
+    "+=",
+    "-=",
+    "*=",
+    "/=",
+    "%=",
+    ">>",
+    "<<",
+    ">>>",
+    "&",
+    "^",
+    "|",
+    "~",
     "^^",
-    "!", "&&", "||",
-    "!=", "==", "!==", "===",
-    "<", ">", "<=", ">=",
-    "+", "-", "*", "/", "%",
-    "++", "--",
+    "!",
+    "&&",
+    "||",
+    "!=",
+    "==",
+    "!==",
+    "===",
+    "<",
+    ">",
+    "<=",
+    ">=",
+    "+",
+    "-",
+    "*",
+    "/",
+    "%",
+    "++",
+    "--",
     "@",
-    "=:=", "!:=",
-    "..", ".:",
+    "=:=",
+    "!:=",
+    "..",
+    ".:",
     "..."
   ) ++ NO_RECORD
   var SPLIT: List[String] = STRING.toList ++
     (LAYER ++ SPLITS ++
       Set(ENDING, COMMENT) ++
       PAIR.keySet ++
-      PAIR.values.toSet
-      ).toList.sortBy(_.length).reverse
+      PAIR.values.toSet).toList.sortBy(_.length).reverse
 }
 
 object Main extends App {
-  val processor = new Lexer("test", new BufferedReader(new StringReader("" + "#> package::name::*\n" + "    package::name::Test")), 4)
+  val processor = new Lexer(
+    "test",
+    new BufferedReader(
+      new StringReader(
+        "" + "#> package::name::*\n" + "    package::name::Test")),
+    4)
   val root = processor.parse
   println(root.linkNode)
 }
