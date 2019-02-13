@@ -1,6 +1,7 @@
 package c89
 import org.scalatest.FunSuite
 
+import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.util.control.Breaks
 
@@ -23,7 +24,12 @@ object LexerTest extends App{
 //  }
 //  println(a)
   val l = ListBuffer[Int](0)
+  val m = mutable.HashMap[String,ListBuffer[Int]]("a" -> l)
+  println(m)
+  l += 4
+
 
 
   println(l)
+  println(m)
 }
