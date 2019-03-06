@@ -16,11 +16,12 @@ public class Interpreter2 {
         Interpreter2 in = new Interpreter2();
         Interpreter2 in1 = new Interpreter2();
         Interpreter2 in2 = new Interpreter2();
-        System.out.println(in.input("x=7"));
-        System.out.println(in1.input("x"));
+        System.out.println(in2.input("x=7"));
+        System.out.println(in2.input("x"));
         System.out.println(in2.input("x+3"));
+        System.out.println(in2.input("y"));
         System.out.println(in2.input("y=x+5"));
-        System.out.println(in2.input("1 2"));
+        System.out.println(in2.input("y"));
 
     }
 

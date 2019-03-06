@@ -7,6 +7,20 @@ import java.util.stream.Collectors;
 
 public class Interpreter3 {
 
+
+    public static void main(String[] args) {
+        Interpreter3 in2 = new Interpreter3();
+
+
+            System.out.println(in2.input("x=7"));
+            System.out.println(in2.input("x"));
+            System.out.println(in2.input("x+3"));
+            System.out.println(in2.input("y"));
+
+            System.out.println(in2.input("y=x+5"));
+            System.out.println(in2.input("y"));
+
+    }
     class Variable {
         Double value=null;
 
@@ -258,8 +272,5 @@ public class Interpreter3 {
         return tokens;
     }
 
-    public static void main(String[] args) {
-        Interpreter3 in3 = new Interpreter3();
-        System.out.println(in3.input("1+(x=y=3)"));
-    }
+
 }
