@@ -10,14 +10,14 @@ object FF extends App {
   def sumOf[F[_]](ns:F[Int])(implicit ff:Foldable[F]) =
     ff.foldl(ns,0,(x:Int,y:Int) => x + y)
 
-  implicit val listFoldable = new Foldable[List] {
+  implicit val listFoldable: Foldable[List] = new Foldable[List] {
     override def foldl[A, B](as: List[A], z: B, f: (B, A) => B): B = as.foldLeft(z)(f)
   }
 
   val sumOfOneTwo = sumOf(List(1,2,3))
   println(sumOfOneTwo)
 
-  implicit val sumMonoid = new Monoid[Sum]{
+  implicit val sumMonoid: Monoid[Sum] = new Monoid[Sum]{
     def zero = Sum(0)
     def add(a:Sum,b:Sum) = Sum(a.value + b.value)
   }
@@ -33,6 +33,8 @@ object FF extends App {
 
   val sumOf123 = mapReduce(List(1,2,3),Sum)
   val product123 = mapReduce(List(4,5,6),Product)
+  println(sumOf123.value)
+  println(product123)
 }
 
 trait Monoid[M]{
