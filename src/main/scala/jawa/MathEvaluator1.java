@@ -1,4 +1,4 @@
-package java;
+package jawa;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;

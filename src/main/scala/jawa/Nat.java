@@ -1,4 +1,4 @@
-package java;
+package jawa;
 
 public abstract class Nat {
     abstract class Exp {
