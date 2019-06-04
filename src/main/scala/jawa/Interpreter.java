@@ -13,6 +13,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Interpreter {
+    public static void main(String[] args) {
+        Interpreter interpreter = new Interpreter();
+        System.out.println(interpreter.input("fn f a b => a + b "));
+        System.out.println(interpreter.input("f 2 1"));
+        System.out.println(interpreter.input("a = 2"));
+        System.out.println(interpreter.input("f a a"));
+
+    }
 
     private static final Pattern VALID_TOKENS = Pattern.compile("=>|[-+*/%=()]|[A-Za-z_][A-Za-z0-9_]*|[0-9]*(\\.?[0-9]+)");
     private static final Pattern NUMBER = Pattern.compile("[0-9]*(\\.?[0-9]+)");
