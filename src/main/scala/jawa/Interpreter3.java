@@ -1,5 +1,6 @@
 package jawa;
 
+import java.beans.Introspector;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -32,7 +33,7 @@ public class Interpreter3 {
         }
     }
 
-    private Map<String, Variable> variables = new HashMap<>();
+    private final Map<String, Variable> variables = new HashMap<>();
 
     interface ASTNode {
         double eval();

@@ -58,5 +58,7 @@ public class Test12 {
             x.stream().forEach(System.out::println);
             System.out.println("------------------------");
         });
+
+
     }
 }

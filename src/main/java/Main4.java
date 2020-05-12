@@ -1,3 +1,5 @@
+import java.util.function.Function;
+
 public class Main4 {
     int count = 1;
     public static void main(String[] args) throws InterruptedException {
@@ -11,7 +13,36 @@ public class Main4 {
         new Thread(w3).start();
         new Thread(w4).start();
 
+
+
+
     }
+
+    public String f(String a){
+        return a;
+    }
+
+    public int f(int a){
+        return a;
+    }
+
+
+    public <T> T f(T a){
+        return a;
+    }
+
+
+    public <T>T f1(Function<T,T> function,T t1,T t2){
+        if(true){
+            return function.apply(t1);
+        }else{
+            return function.apply(t2);
+        }
+    }
+
+
+
+
     void print() {
         synchronized (this) {
             System.out.println(Thread.currentThread().getName() + ": " + count);

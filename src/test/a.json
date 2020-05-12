@@ -1,0 +1,22 @@
+delete from c_service_external_links where service_id=83;
+delete from c_service_integration where service_id=83;
+delete from c_component_config_cluster where component_id in (select component_id from c_component where service_id = 83);
+delete from c_component_configs_roles_dynamic where template_id in (select template_id from c_config_template where service_id = 83);
+delete from c_component_constraint where component_id in (select component_id from c_component where service_id = 83);
+delete from c_component_control where component_id in (select component_id from c_component where service_id = 83);
+delete from c_component_depends where component_id in (select component_id from c_component where service_id = 83);
+
+delete from c_component_dynamic_conf where template_id in (select template_id from c_config_template where service_id = 83);
+delete from c_custom_command where component_id in (select component_id from c_component where service_id = 83);
+delete from c_kerberos_principal where component_id in (select component_id from c_component where service_id = 83);
+delete from c_re_component_template where template_id in (select template_id from c_config_template where service_id = 83);
+delete from c_re_config_template_parameter  where template_id in (select template_id from c_config_template where service_id = 83);
+delete from c_re_template_group  where template_id in (select template_id from c_config_template where service_id = 83);
+delete from c_config_template where service_id = 83;
+delete from c_config_mould  where service_id = 83;
+delete from c_component_global_config_history where component_id in (select component_id from c_component where service_id = 83);
+delete from c_component_global_config_instance where component_id in (select component_id from c_component where service_id = 83);
+delete from c_collect_strategy where  component_id in (select component_id from c_component where service_id = 83);
+delete from c_config_parameter where service_id = 83;
+delete from c_component  where service_id = 83;
+delete from c_service  where service_id = 83;

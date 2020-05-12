@@ -1,4 +1,5 @@
 package MyList
+import scala.annotation.tailrec
 
 sealed trait List[+A]
 
@@ -8,14 +9,14 @@ case class Cons[+A](head: A, tail: List[A]) extends List[A]
 
 object List {
   def sum(ints: List[Int]): Int = ints match {
-    case Nil => 0
+    case Nil         => 0
     case Cons(x, xs) => x + sum(xs)
   }
 
   def product(ds: List[Double]): Double = ds match {
-    case Nil => 1.0
+    case Nil          => 1.0
     case Cons(0.0, _) => 0.0
-    case Cons(x, xs) => x * product(xs)
+    case Cons(x, xs)  => x * product(xs)
   }
 
   def apply[A](as: A*): List[A] = {
@@ -24,15 +25,16 @@ object List {
   }
 
   def tail[A](list: List[A]): List[A] = list match {
-    case Nil => Nil
+    case Nil         => Nil
     case Cons(_, xs) => xs
   }
 
   def setHead[A](value: A, list: List[A]): List[A] = list match {
-    case Nil => Nil
-    case Cons(x, xs) => Cons(value, xs)
+    case Nil         => Nil
+    case Cons(_, xs) => Cons(value, xs)
   }
 
+  @tailrec
   def drop[A](list: List[A], n: Int): List[A] = {
     if (n > 0) drop(tail(list), n - 1)
     else if (n == 0) list
@@ -41,61 +43,85 @@ object List {
 
   def dropWhile[A](list: List[A], f: A => Boolean): List[A] = list match {
     case Nil => Nil
-    case Cons(x, xs) => if (f(x)) Cons(x, dropWhile(xs, f)) else dropWhile(xs, f)
+    case Cons(x, xs) =>
+      if (f(x)) Cons(x, dropWhile(xs, f)) else dropWhile(xs, f)
   }
 
   def init[A](list: List[A]): List[A] = list match {
     case Nil => Nil
-    case Cons(x, xs) => if (xs != Nil && tail(xs) == Nil) Cons(x, Nil) else Cons(x, init(xs))
+    case Cons(x, xs) =>
+      if (xs != Nil && tail(xs) == Nil) Cons(x, Nil) else Cons(x, init(xs))
   }
 
   def foldRight[A, B](as: List[A], z: B)(f: (A, B) => B): B = as match {
-    case Nil => z
+    case Nil         => z
     case Cons(x, xs) => f(x, foldRight(xs, z)(f))
   }
 
+  @tailrec
   def foldLeft[A, B](as: List[A], z: B)(f: (B, A) => B): B = as match {
-    case Nil => z
+    case Nil         => z
     case Cons(x, xs) => foldLeft(xs, f(z, x))(f)
   }
 
   def fold[A, B](as: List[A], z: B)(f: (B, A) => B): B = foldLeft(as, z)(f)
 
-  def reserve[A](as: List[A]): List[A] = foldLeft(as, List[A]())((x, y) => Cons(y, x))
+  def reserve[A](as: List[A]): List[A] =
+    foldLeft(as, List[A]())((x, y) => Cons(y, x))
 
   //  def fistElement[A](as: List[A]): Option[A] = as match {
   //    case Cons(x, xs) => Option(x)
   //    case Nil => None
   //  }
 
-  def append[A](as: List[A], a: A): List[A] = nFoldRight(as, List(a))((x, y) => Cons(x, y))
+  def append[A](as: List[A], a: A): List[A] =
+    nFoldRight(as, List(a))((x, y) => Cons(x, y))
 
-  def appendList[A](as: List[A], bs: List[A]): List[A] = foldLeft(bs, as)((x, y) => append(x, y))
+  def appendList[A](as: List[A], bs: List[A]): List[A] =
+    foldLeft(bs, as)((x, y) => append(x, y))
 
-  def nFoldRight[A, B](as: List[A], z: B)(f: (A, B) => B): B = foldLeft(foldLeft(as, List[A]())((x, y) => Cons(y, x)), z)((b, a) => f(a, b))
+  def nFoldRight[A, B](as: List[A], z: B)(f: (A, B) => B): B =
+    foldLeft(foldLeft(as, List[A]())((x, y) => Cons(y, x)), z)(
+      (b, a) => f(a, b)
+    )
 
-  def nFoldLeft[A, B](as: List[A], z: B)(f: (B, A) => B): B = foldRight(reserve(as), z)((b, a) => f(a, b))
+  def nFoldLeft[A, B](as: List[A], z: B)(f: (B, A) => B): B =
+    foldRight(reserve(as), z)((b, a) => f(a, b))
 
-  def nFoldLeft1[A, B](as: List[A], z: B)(f: (B, A) => B): B = foldRight(as, (b: B) => b)((a, g) => b => g(f(b, a)))(z)
+  def nFoldLeft1[A, B](as: List[A], z: B)(f: (B, A) => B): B =
+    foldRight(as, (b: B) => b)((a, g) => b => g(f(b, a)))(z)
 
-  def ince(ints: List[Int]): List[Int] = reserve(foldLeft(ints, List[Int]())((x, y) => Cons(y + 1, x)))
+  def ince(ints: List[Int]): List[Int] =
+    reserve(foldLeft(ints, List[Int]())((x, y) => Cons(y + 1, x)))
 
-  def doubleToString(strings: List[Double]): List[String] = foldLeft(reserve(strings), List[String]())((x, y) => Cons(y.toString.concat("s"), x))
+  def doubleToString(strings: List[Double]): List[String] =
+    foldLeft(reserve(strings), List[String]())(
+      (x, y) => Cons(y.toString.concat("s"), x)
+    )
 
-  def map[A, B](as: List[A])(f: A => B): List[B] = foldLeft(reserve(as), List[B]())((x, y) => Cons(f(y), x))
+  def map[A, B](as: List[A])(f: A => B): List[B] =
+    foldLeft(reserve(as), List[B]())((x, y) => Cons(f(y), x))
 
-  def flatMap[A, B](as: List[A])(f: A => List[B]): List[B] = foldLeft(reserve(as), List[B]())((x, y) => appendList(f(y), x))
+  def flatMap[A, B](as: List[A])(f: A => List[B]): List[B] =
+    foldLeft(reserve(as), List[B]())((x, y) => appendList(f(y), x))
 
-  def filter[A](as: List[A])(f: A => Boolean): List[A] = foldLeft(reserve(as), List[A]())((x, y) => if (f(y)) Cons(y, x) else x)
+  def filter[A](as: List[A])(f: A => Boolean): List[A] =
+    foldLeft(reserve(as), List[A]())((x, y) => if (f(y)) Cons(y, x) else x)
 
-  def filterByFlatMap[A](as: List[A])(f: A => Boolean): List[A] = flatMap(as)(x => if (f(x)) List(x) else List())
+  def filterByFlatMap[A](as: List[A])(f: A => Boolean): List[A] =
+    flatMap(as)(x => if (f(x)) List(x) else List())
 
-  def zipWith[A, B, C](a: List[A], b: List[B])(f: (A, B) => C): List[C] = (a, b) match {
-    case (Nil, _) => Nil
-    case (_, Nil) => Nil
-    case (Cons(h1, t1), Cons(h2, t2)) => Cons(f(h1, h2), zipWith(t1, t2)(f))
+  def zipWith[A, B, C](a: List[A], b: List[B])(f: (A, B) => C): List[C] =
+    (a, b) match {
+      case (Nil, _)                     => Nil
+      case (_, Nil)                     => Nil
+      case (Cons(h1, t1), Cons(h2, t2)) => Cons(f(h1, h2), zipWith(t1, t2)(f))
+    }
+
+  def length(a: List[_]): Int = a match {
+    case Nil         => 0
+    case Cons(_, xs) => 1 + length(xs)
   }
-
 
   def main(args: Array[String]): Unit = {
     //    val ex1: List[Double] = Nil
@@ -115,23 +141,11 @@ object List {
     //    println(appendList(List(1, 2), List(3, 4)))
     //    println(ince(List(1, 2, 3)))
     //    println(doubleToString(List(0.1, 0.2, 0.3)))
-    //    println(map(filter(List(1, 2, 3))(x => x > 1))(x => x + 1))
-    //    println(map(filterByFlatMap(List(1, 2, 3))(x => x > 1))(x => x + 1))
-    println(zipWith(List(1, 2), List(4, 5))((x, y) => x + y))
-
-    def f(n: Int): Int = {
-      assert(n >= 0)
-      n match {
-        case 0 => 1
-        case x => x * f(n - 1)
-      }
-    }
-
-    println(f(3))
-
+    println(map(filter(List(1, 2, 3))(x => x > 1))(x => x + 1))
+    println(map(filterByFlatMap(List(1, 2, 3))(x => x > 1))(x => x + 1))
+    println(zipWith(List(1, 2, 3), List(4, 5, 4))((x, y) => x + y))
+    println(length(List(1, 2, 3, 4)))
+    println(length(List("1", "2", "3")))
   }
 
-
 }
-
-

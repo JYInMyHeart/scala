@@ -1,35 +1,15 @@
-java.nio.file.FileSystemException: E:\Program Files\Java\jdk1.8.0_151: �豸δ������
-
-	at java.base/sun.nio.fs.WindowsException.translateToIOException(Unknown Source)
-	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(Unknown Source)
-	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(Unknown Source)
-	at java.base/sun.nio.fs.WindowsFileAttributeViews$Basic.readAttributes(Unknown Source)
-	at java.base/sun.nio.fs.WindowsFileAttributeViews$Basic.readAttributes(Unknown Source)
-	at java.base/sun.nio.fs.WindowsFileSystemProvider.readAttributes(Unknown Source)
-	at java.base/java.nio.file.Files.readAttributes(Unknown Source)
-	at java.base/java.nio.file.FileTreeWalker.getAttributes(Unknown Source)
-	at java.base/java.nio.file.FileTreeWalker.visit(Unknown Source)
-	at java.base/java.nio.file.FileTreeWalker.walk(Unknown Source)
-	at java.base/java.nio.file.FileTreeIterator.<init>(Unknown Source)
-	at java.base/java.nio.file.Files.walk(Unknown Source)
-	at java.base/java.nio.file.Files.walk(Unknown Source)
-	at org.ensime.util.file.package$RichFile$.tree$extension(file.scala:95)
-	at org.ensime.config.EnsimeConfigProtocol$.javaRunTime(EnsimeConfigProtocol.scala:63)
-	at org.ensime.config.EnsimeConfigProtocol$.validated(EnsimeConfigProtocol.scala:52)
-	at org.ensime.config.EnsimeConfigProtocol$.parse(EnsimeConfigProtocol.scala:44)
-	at org.github.dragos.vscode.EnsimeLanguageServer.$anonfun$initializeEnsime$1(EnsimeLanguageServer.scala:101)
-	at scala.util.Try$.apply(Try.scala:209)
-	at org.github.dragos.vscode.EnsimeLanguageServer.initializeEnsime(EnsimeLanguageServer.scala:97)
-	at org.github.dragos.vscode.EnsimeLanguageServer.initialize(EnsimeLanguageServer.scala:76)
-	at langserver.core.LanguageServer.$anonfun$connection$1(LanguageServer.scala:19)
-	at langserver.core.Connection.$anonfun$handleCommand$1(Connection.scala:163)
-	at scala.concurrent.Future$.$anonfun$apply$1(Future.scala:654)
-	at scala.util.Success.$anonfun$map$1(Try.scala:251)
-	at scala.util.Success.map(Try.scala:209)
-	at scala.concurrent.Future.$anonfun$map$1(Future.scala:288)
-	at scala.concurrent.impl.Promise.liftedTree1$1(Promise.scala:29)
-	at scala.concurrent.impl.Promise.$anonfun$transform$1(Promise.scala:29)
-	at scala.concurrent.impl.CallbackRunnable.run(Promise.scala:60)
-	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source)
-	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source)
-	at java.base/java.lang.Thread.run(Unknown Source)
+教她打字
+就行了我
+就这样打字啊
+随便啊
+反正
+确定位置的
+不然你怎么知道你是在哪打字呢
+你总是会把手放错位置
+这样的话你就不会放错位置饿了
+对吧
+反正大概就是这样子
+你笑啥
+为啥要笑
+没有你可爱
+宝宝最可爱

@@ -12,7 +12,7 @@ class WebClient {
     var socketChannel: SocketChannel = null
     try {
       socketChannel = SocketChannel.open()
-      socketChannel.connect(new InetSocketAddress("localhost", 8000))
+      socketChannel.connect(new InetSocketAddress("localhost", 10000))
       while (true) {
         val scanner = StdIn.readLine()
         scanner match {
